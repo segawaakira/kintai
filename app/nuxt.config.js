@@ -45,6 +45,7 @@ const nuxtConfig = {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    '@nuxtjs/dotenv',
     // https://go.nuxtjs.dev/pwa
     '@nuxtjs/pwa'
   ],
