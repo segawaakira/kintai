@@ -60,6 +60,7 @@
     <v-main>
       <v-container>
         <Nuxt />
+        <Calendar />
         <Location />
       </v-container>
     </v-main>
@@ -91,8 +92,10 @@
 
 <script>
 import { defineComponent } from '@nuxtjs/composition-api'
+import Calendar from '../components/Calendar.vue'
 
 export default defineComponent({
+  components: { Calendar },
   setup (_props, _context) {
     return {
       clipped: false,
