@@ -13,7 +13,7 @@
     <p>{{ end }}</p>
     <p>{{ currentMonthData }}</p>
 
-    <v-list three-line>
+    <v-list three-line class="calendar">
       <v-list-item>
         <v-list-item-content class="d-flex flex-column">
           稼働時間
@@ -32,7 +32,15 @@
             <div
               v-if="data.startDate === index + 1"
               class="timeline-item"
-              :style="calcPositionWidth(data.startTime - data.dateTime, data.endTime - data.dateTime)"
+              :style="calcPositionWidth(data.startTime - data.startDateTime, data.endTime - data.startDateTime)"
+            />
+            <!-- ▽ 日付を跨いだ時 ▽ -->
+            <div
+              v-else-if="data.startDate === index && data.endDate === index + 1"
+              class="timeline-item"
+              :data-end-time="data.endTime"
+              :data-end-date-time="data.endDateTime"
+              :style="calcPositionWidth(0, data.endTime - data.endDateTime)"
             />
           </div>
           <div>あああ</div>
@@ -84,15 +92,16 @@ export default defineComponent({
     }
 
     // TODO:ダミーデータなので、FireBaseから取得するようにする。
-    const end = new Date()
     const start = new Date()
-    start.setHours(end.getHours() - 1)
+    const end = new Date()
+    end.setHours(start.getHours() + 5)
 
     const currentMonthData = [
       {
-        dateTime: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0).getTime(), // startした日の0時0分0秒のタイムスタンプ
+        startDateTime: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0).getTime(), // startした日の0時0分0秒のタイムスタンプ
         startDate: start.getDate(),
         startTime: start.getTime(),
+        endDateTime: new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0).getTime(), // endした日の0時0分0秒のタイムスタンプ
         endDate: end.getDate(),
         endTime: end.getTime()
       }
@@ -127,19 +136,22 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-  .timeline {
-    width: 100%;
-    height: 100%;
-    position: relative;
+.calendar {
+  overflow: hidden;
+}
+.timeline {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: block;
+  height: 20px;
+  &-item {
+    position: absolute;
+    top: 0;
+    z-index: 1;
+    background: #CCF;
     display: block;
     height: 20px;
-    &-item {
-      position: absolute;
-      top: 0;
-      z-index: 1;
-      background: #CCF;
-      display: block;
-      height: 20px;
-    }
   }
+}
 </style>
