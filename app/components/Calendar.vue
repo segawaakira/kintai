@@ -9,15 +9,33 @@
         次
       </v-btn>
     </v-flex>
+    <p>{{ start }}</p>
+    <p>{{ end }}</p>
+    <p>{{ currentMonthData }}</p>
 
     <v-list three-line>
+      <v-list-item>
+        <v-list-item-content class="d-flex flex-column">
+          稼働時間
+        </v-list-item-content>
+      </v-list-item>
       <template v-for="(item, index) in lastDay">
         <v-list-item
           :key="index"
+          class="timeline"
         >
-          <v-list-item-content>
-            <v-list-item-title>{{ index + 1 }}</v-list-item-title>
-          </v-list-item-content>
+          <div>{{ index + 1 }}</div>
+          <div
+            v-for="(data, dataIndex) in currentMonthData"
+            :key="dataIndex"
+          >
+            <div
+              v-if="data.startDate === index + 1"
+              class="timeline-item"
+              :style="calcPositionWidth(data.startTime - data.dateTime, data.endTime - data.dateTime)"
+            />
+          </div>
+          <div>あああ</div>
         </v-list-item>
       </template>
     </v-list>
@@ -65,16 +83,63 @@ export default defineComponent({
       lastDay.value = getLastDay(currentYear.value, currentMonth.value)
     }
 
+    // TODO:ダミーデータなので、FireBaseから取得するようにする。
+    const end = new Date()
+    const start = new Date()
+    start.setHours(end.getHours() - 1)
+
+    const currentMonthData = [
+      {
+        dateTime: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0).getTime(), // startした日の0時0分0秒のタイムスタンプ
+        startDate: start.getDate(),
+        startTime: start.getTime(),
+        endDate: end.getDate(),
+        endTime: end.getTime()
+      }
+    ]
+
+    const msDay = 86400000 // 1日何ミリ秒か
+    /**
+     * 稼働時間からスタイル（leftからの位置とwidth）を適用
+     * @param  {number} start スタート時間
+     * @param  {number} end 終了時間
+     * @return {string} インラインスタイルに適用するCSS
+     */
+    const calcPositionWidth = (start: number, end: number) => {
+      const startPosition = start / msDay * 100
+      const width = (end - start) / msDay * 100
+      return `left: ${startPosition}%; width: ${width}%;`
+    }
+
     return {
       currentYear,
       currentMonth,
       lastDay,
       nextMonth,
-      prevMonth
+      prevMonth,
+      start,
+      end,
+      currentMonthData,
+      calcPositionWidth
     }
   }
 })
 </script>
 
-<style>
+<style lang="scss">
+  .timeline {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: block;
+    height: 20px;
+    &-item {
+      position: absolute;
+      top: 0;
+      z-index: 1;
+      background: #CCF;
+      display: block;
+      height: 20px;
+    }
+  }
 </style>
