@@ -60,6 +60,7 @@
     <v-main>
       <v-container>
         <Nuxt />
+        <Location />
       </v-container>
     </v-main>
     <v-navigation-drawer
