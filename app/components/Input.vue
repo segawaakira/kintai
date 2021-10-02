@@ -1,42 +1,6 @@
 <template>
   <div>
     <v-btn
-      color="primary"
-      nuxt
-      to="/signup"
-    >
-      signup
-    </v-btn>
-    <v-btn
-      color="primary"
-      nuxt
-      to="/login"
-    >
-      login
-    </v-btn>
-    <v-btn
-      color="primary"
-      nuxt
-      to="/input"
-    >
-      input
-    </v-btn>
-    <v-btn
-      color="primary"
-      nuxt
-      to="/calendar"
-    >
-      calendar
-    </v-btn>
-    <v-btn
-      color="primary"
-      nuxt
-      to="/detail"
-    >
-      detail
-    </v-btn>
-    <hr>
-    <v-btn
       type="button"
       @click="submit()"
     >

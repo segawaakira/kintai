@@ -59,11 +59,43 @@
     </v-app-bar>
     <v-main>
       <v-container>
+        <v-btn
+          color="primary"
+          nuxt
+          to="/signup"
+        >
+          signup
+        </v-btn>
+        <v-btn
+          color="primary"
+          nuxt
+          to="/login"
+        >
+          login
+        </v-btn>
+        <v-btn
+          color="primary"
+          nuxt
+          to="/input"
+        >
+          input
+        </v-btn>
+        <v-btn
+          color="primary"
+          nuxt
+          to="/calendar"
+        >
+          calendar
+        </v-btn>
+        <v-btn
+          color="primary"
+          nuxt
+          to="/detail"
+        >
+          detail
+        </v-btn>
+        <hr>
         <Nuxt />
-        <Input />
-        <Login />
-        <Calendar />
-        <Location />
       </v-container>
     </v-main>
     <v-navigation-drawer
@@ -95,11 +127,8 @@
 <script>
 import { defineComponent, onMounted } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
-import Calendar from '../components/Calendar.vue'
-import Input from '../components/Input.vue'
 
 export default defineComponent({
-  components: { Calendar, Input },
   setup (_props, _context) {
     onMounted(() => {
       console.log('default.vueのonMounted')

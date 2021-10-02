@@ -1,28 +1,18 @@
 <template>
-  <v-row>
-    <v-col class="text-center">
-      <img
-        src="/v.png"
-        alt="Vuetify.js"
-        class="mb-5"
-      >
-      <blockquote class="blockquote">
-        &#8220;First, solve the problem. Then, write the code.&#8221;
-        <footer>
-          <small>
-            <em>input</em>
-          </small>
-        </footer>
-      </blockquote>
-    </v-col>
-  </v-row>
+  <div>
+    <Input />
+    <Location />
+  </div>
 </template>
 
 <script>
 import { defineComponent, onMounted } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
+import Input from '../components/Input.vue'
+import Location from '../components/Location.vue'
 
 export default defineComponent({
+  components: { Input, Location },
   setup (_props, _context) {
     onMounted(() => {
       // Todo:処理一元化する。
