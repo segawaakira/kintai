@@ -93,13 +93,23 @@
 </template>
 
 <script>
-import { defineComponent } from '@nuxtjs/composition-api'
+import { defineComponent, onMounted } from '@nuxtjs/composition-api'
+import firebase from 'firebase'
 import Calendar from '../components/Calendar.vue'
 import Input from '../components/Input.vue'
 
 export default defineComponent({
   components: { Calendar, Input },
   setup (_props, _context) {
+    onMounted(() => {
+      console.log('default.vueのonMounted')
+      firebase.auth().onAuthStateChanged((data) => {
+        if (data) {
+          console.log('default.vue')
+        }
+      })
+    })
+
     return {
       clipped: false,
       drawer: false,
