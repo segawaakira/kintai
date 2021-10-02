@@ -1,6 +1,42 @@
 <template>
   <div>
     <v-btn
+      color="primary"
+      nuxt
+      to="/signup"
+    >
+      signup
+    </v-btn>
+    <v-btn
+      color="primary"
+      nuxt
+      to="/login"
+    >
+      login
+    </v-btn>
+    <v-btn
+      color="primary"
+      nuxt
+      to="/input"
+    >
+      input
+    </v-btn>
+    <v-btn
+      color="primary"
+      nuxt
+      to="/calendar"
+    >
+      calendar
+    </v-btn>
+    <v-btn
+      color="primary"
+      nuxt
+      to="/detail"
+    >
+      detail
+    </v-btn>
+    <hr>
+    <v-btn
       type="button"
       @click="submit()"
     >
@@ -21,14 +57,17 @@ export default defineComponent({
       const end = new Date()
       end.setHours(start.getHours() + 5)
 
-      const dbUsers = db.collection(`users/${currentUser.value.uid}/item`)
+      const dbUsers = db.collection(`users/${currentUser.value.uid}/project/project_a/item`)
       dbUsers
         .add({
           start,
+          start_place_name: '京都',
+          start_place_lat: 35.0181617,
+          start_place_lng: 135.7466834,
           end,
-          place: '京都',
-          place_lat: 35.0181617,
-          place_lng: 135.7466834,
+          end_place_name: '京都',
+          end_place_lat: 35.0181617,
+          end_place_lng: 135.7466834,
           description: '何やってたかを記入します。'
         })
         .then((ref) => {
