@@ -60,6 +60,7 @@
     <v-main>
       <v-container>
         <Nuxt />
+        <Login />
         <Calendar />
         <Location />
       </v-container>
