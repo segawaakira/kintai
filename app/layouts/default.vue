@@ -60,6 +60,10 @@
     <v-main>
       <v-container>
         <Nuxt />
+        <Input />
+        <Login />
+        <Calendar />
+        <Location />
       </v-container>
     </v-main>
     <v-navigation-drawer
@@ -89,8 +93,13 @@
 </template>
 
 <script>
-export default {
-  data () {
+import { defineComponent } from '@nuxtjs/composition-api'
+import Calendar from '../components/Calendar.vue'
+import Input from '../components/Input.vue'
+
+export default defineComponent({
+  components: { Calendar, Input },
+  setup (_props, _context) {
     return {
       clipped: false,
       drawer: false,
@@ -113,5 +122,5 @@ export default {
       title: 'Vuetify.js'
     }
   }
-}
+})
 </script>

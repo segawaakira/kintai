@@ -13,15 +13,16 @@
 </template>
 
 <script>
-export default {
-  layout: 'empty',
+import { defineComponent } from '@nuxtjs/composition-api'
+
+export default defineComponent({
   props: {
     error: {
       type: Object,
       default: null
     }
   },
-  data () {
+  setup (_props, _context) {
     return {
       pageNotFound: '404 Not Found',
       otherError: 'An error occurred'
@@ -34,7 +35,8 @@ export default {
       title
     }
   }
-}
+})
+
 </script>
 
 <style scoped>
