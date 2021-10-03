@@ -94,6 +94,13 @@
         >
           detail
         </v-btn>
+        <v-btn
+          color="primary"
+          nuxt
+          to="/projects"
+        >
+          projects
+        </v-btn>
         <hr>
         <Nuxt />
       </v-container>
@@ -124,17 +131,31 @@
   </v-app>
 </template>
 
-<script>
-import { defineComponent, onMounted } from '@nuxtjs/composition-api'
+<script lang="ts">
+import { defineComponent, onMounted, Ref, ref } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
+    const projects: Ref<any> = ref([])
+    const currentUser: Ref<any> = ref(null)
+
     onMounted(() => {
-      console.log('default.vueのonMounted')
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
-          console.log('default.vue')
+          currentUser.value = firebase.auth().currentUser
+          const db = firebase.firestore()
+
+          db.collection(`users/${currentUser.value.uid}/projects`).get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+              projects.value.push({
+                ...doc.data(),
+                id: doc.id
+              })
+            })
+          })
+        } else {
+          currentUser.value = {}
         }
       })
     })
@@ -158,7 +179,9 @@ export default defineComponent({
       miniVariant: false,
       right: true,
       rightDrawer: false,
-      title: 'Vuetify.js'
+      title: 'Vuetify.js',
+      projects,
+      currentUser
     }
   }
 })

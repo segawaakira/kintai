@@ -6,6 +6,25 @@
     >
       submit
     </v-btn>
+    <hr>
+    <v-select
+      :items="projects"
+      filled
+      label="Select project"
+      item-text="name"
+    />
+    <hr>
+
+    <v-list three-line>
+      <template v-for="(item, index) in projects">
+        <v-list-item
+          :key="index"
+          class="timeline"
+        >
+          {{ item.name }}
+        </v-list-item>
+      </template>
+    </v-list>
   </div>
 </template>
 <script lang="ts">
@@ -15,25 +34,13 @@ import firebase from 'firebase'
 export default defineComponent({
   setup (_props, _context) {
     const currentUser: Ref<any> = ref(null)
-    const currentProject: Ref<any> = ref('WVrUQcyD3lxBQl8bkKKr')
+    const projects: Ref<any> = ref([])
     const db = firebase.firestore()
     const submit = () => {
-      const start = new Date()
-      const end = new Date()
-      end.setHours(start.getHours() + 5)
-
-      const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/item`)
+      const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/`)
       dbUsers
         .add({
-          start,
-          start_place_name: '京都',
-          start_place_lat: 35.0181617,
-          start_place_lng: 135.7466834,
-          end,
-          end_place_name: '京都',
-          end_place_lat: 35.0181617,
-          end_place_lng: 135.7466834,
-          description: '何やってたかを記入します。'
+          name: 'project_a'
         })
         .then((ref) => {
           console.log('Add ID: ', ref.id)
@@ -44,6 +51,15 @@ export default defineComponent({
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           currentUser.value = firebase.auth().currentUser
+          db.collection(`users/${currentUser.value.uid}/projects`).get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+              console.log('ああああ')
+              projects.value.push({
+                ...doc.data(),
+                id: doc.id
+              })
+            })
+          })
         } else {
           currentUser.value = {}
         }
@@ -53,7 +69,7 @@ export default defineComponent({
     return {
       submit,
       currentUser,
-      currentProject
+      projects
     }
   }
 })
