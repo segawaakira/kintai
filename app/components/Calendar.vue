@@ -43,7 +43,6 @@
               :style="calcPositionWidth(0, data.endTime - data.endDateTime)"
             />
           </div>
-          <div>あああ</div>
         </v-list-item>
       </template>
     </v-list>

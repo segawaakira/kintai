@@ -21,7 +21,30 @@
           :key="index"
           class="timeline"
         >
-          {{ item.name }}
+          <div v-if="editProjectId === item.id">
+            <v-text-field v-model="item.name"></v-text-field>
+            <v-btn
+              type="button"
+              @click="saveProject(item.id, item.name)"
+            >
+              saveProject
+            </v-btn>
+          </div>
+          <div v-else>
+            {{ item.name }}
+            <v-btn
+              type="button"
+              @click="editProject(item.id)"
+            >
+              editProject
+            </v-btn>
+            <v-btn
+              type="button"
+              @click="deleteProject(item.id)"
+            >
+              deleteProject
+            </v-btn>
+          </div>
         </v-list-item>
       </template>
     </v-list>
@@ -46,14 +69,34 @@ export default defineComponent({
           console.log('Add ID: ', ref.id)
         })
     }
+    const deleteProject = (id: string) => {
+      db.collection(`users/${currentUser.value.uid}/projects/`).doc(id)
+        .delete()
+        .then((ref) => {
+          console.log('del: ', ref)
+        })
+    }
+    const editProjectId: Ref<string | null> = ref(null)
+    const editProject = (id: string) => {
+      editProjectId.value = id
+    }
+    const saveProject = (id: string, name: string) => {
+      db.collection(`users/${currentUser.value.uid}/projects/`).doc(id)
+        .update({
+          name
+        })
+        .then((ref) => {
+          console.log('del: ', ref)
+        })
+    }
 
     onMounted(() => {
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           currentUser.value = firebase.auth().currentUser
-          db.collection(`users/${currentUser.value.uid}/projects`).get().then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-              console.log('ああああ')
+          db.collection(`users/${currentUser.value.uid}/projects`).onSnapshot((docs) => {
+            projects.value = []
+            docs.forEach((doc) => {
               projects.value.push({
                 ...doc.data(),
                 id: doc.id
@@ -68,6 +111,10 @@ export default defineComponent({
 
     return {
       submit,
+      deleteProject,
+      editProject,
+      saveProject,
+      editProjectId,
       currentUser,
       projects
     }

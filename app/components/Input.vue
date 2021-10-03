@@ -15,7 +15,7 @@ import firebase from 'firebase'
 export default defineComponent({
   setup (_props, _context) {
     const currentUser: Ref<any> = ref(null)
-    const currentProject: Ref<any> = ref('WVrUQcyD3lxBQl8bkKKr')
+    const currentProject: Ref<any> = ref('1jfBSj8AEMokZ1mBFnSu')
     const db = firebase.firestore()
     const submit = () => {
       const start = new Date()
