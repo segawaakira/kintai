@@ -23,7 +23,7 @@
           :key="index"
           class="timeline"
         >
-          <div>{{ index + 1 }}</div>
+          <div>{{ index + 1 }} {{ getDayOfWeek(currentYear, currentMonth, index + 1) }}</div>
           <div
             v-for="(data, dataIndex) in currentMonthData"
             :key="dataIndex"
@@ -74,6 +74,12 @@ export default defineComponent({
      */
     const getLastDay = (year: number, month: number) => {
       return new Date(year, month, 0).getDate()
+    }
+
+    const getDayOfWeek = (year: number, month: number, day: number) => {
+      const date = new Date(year, month - 1, day)
+      const dayOfWeek = date.getDay()
+      return ['日', '月', '火', '水', '木', '金', '土'][dayOfWeek]
     }
 
     const lastDay: Ref<number> = ref(getLastDay(currentYear.value, currentMonth.value))
@@ -190,7 +196,8 @@ export default defineComponent({
       end,
       currentMonthData,
       calcPositionWidth,
-      items
+      items,
+      getDayOfWeek
     }
   }
 })
