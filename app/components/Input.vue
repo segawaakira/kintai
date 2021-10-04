@@ -15,14 +15,14 @@ import firebase from 'firebase'
 export default defineComponent({
   setup (_props, _context) {
     const currentUser: Ref<any> = ref(null)
-    const currentProject: Ref<any> = ref('1jfBSj8AEMokZ1mBFnSu')
+    const currentProject: Ref<any> = ref('o2biYTudLBLoxoRxcCV8')
     const db = firebase.firestore()
     const submit = () => {
       const start = new Date()
       const end = new Date()
       end.setHours(start.getHours() + 5)
 
-      const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/item`)
+      const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`)
       dbUsers
         .add({
           start,

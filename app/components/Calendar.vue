@@ -9,9 +9,10 @@
         次
       </v-btn>
     </v-flex>
-    <p>{{ start }}</p>
+    <!-- <p>{{ start }}</p>
     <p>{{ end }}</p>
-    <p>{{ currentMonthData }}</p>
+    <pre>{{ currentMonthData }}</pre>
+    <pre>{{ items }}</pre> -->
 
     <v-list three-line class="calendar">
       <v-list-item>
@@ -49,14 +50,16 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, Ref } from '@nuxtjs/composition-api'
-// import axios from 'axios'
-// import { Client } from '@googlemaps/google-maps-services-js'
+import { defineComponent, ref, Ref, onMounted } from '@nuxtjs/composition-api'
+import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
+    const currentUser: Ref<any> = ref(null)
     const currentYear: Ref<number> = ref(new Date().getFullYear())
     const currentMonth: Ref<number> = ref(new Date().getMonth() + 1)
+    const db = firebase.firestore()
+    const items: Ref<any> = ref([])
 
     /**
      * 指定月の日数を取得
@@ -78,6 +81,7 @@ export default defineComponent({
         currentYear.value += 1
       }
       lastDay.value = getLastDay(currentYear.value, currentMonth.value)
+      getItems()
     }
 
     const prevMonth = () => {
@@ -88,6 +92,7 @@ export default defineComponent({
         currentYear.value -= 1
       }
       lastDay.value = getLastDay(currentYear.value, currentMonth.value)
+      getItems()
     }
 
     // TODO:ダミーデータなので、FireBaseから取得するようにする。
@@ -95,16 +100,7 @@ export default defineComponent({
     const end = new Date()
     end.setHours(start.getHours() + 5)
 
-    const currentMonthData = [
-      {
-        startDateTime: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0).getTime(), // startした日の0時0分0秒のタイムスタンプ
-        startDate: start.getDate(),
-        startTime: start.getTime(),
-        endDateTime: new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0).getTime(), // endした日の0時0分0秒のタイムスタンプ
-        endDate: end.getDate(),
-        endTime: end.getTime()
-      }
-    ]
+    const currentMonthData: Ref<any> = ref([])
 
     const msDay = 86400000 // 1日何ミリ秒か
     /**
@@ -119,6 +115,55 @@ export default defineComponent({
       return `left: ${startPosition}%; width: ${width}%;`
     }
 
+    const checkCurrentMonthData = (items: any) => {
+      currentMonthData.value = []
+      items.forEach((item: any) => {
+        const start = new Date(item.start.seconds * 1000)
+        const end = new Date(item.end.seconds * 1000)
+        if (
+          (start.getFullYear() === currentYear.value && start.getMonth() + 1 === currentMonth.value) ||
+          (end.getFullYear() === currentYear.value && end.getMonth() + 1 === currentMonth.value)
+        ) {
+          // 選択中の年月に一致するデータのみ出力する
+          currentMonthData.value.push(
+            {
+              startDateTime: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0).getTime(), // startした日の0時0分0秒のタイムスタンプ
+              startDate: start.getDate(),
+              startTime: start.getTime(),
+              endDateTime: new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0).getTime(), // endした日の0時0分0秒のタイムスタンプ
+              endDate: end.getDate(),
+              endTime: end.getTime()
+            }
+          )
+        }
+      })
+    }
+
+    const getItems = () => {
+      // TODO:プロジェクトid直打ちを、vuexから取得する
+      db.collection(`users/${currentUser.value.uid}/projects/o2biYTudLBLoxoRxcCV8/items`).onSnapshot((docs) => {
+        items.value = []
+        docs.forEach((doc) => {
+          items.value.push({
+            ...doc.data(),
+            id: doc.id
+          })
+        })
+        checkCurrentMonthData(items.value)
+      })
+    }
+
+    onMounted(() => {
+      firebase.auth().onAuthStateChanged((data) => {
+        if (data) {
+          currentUser.value = firebase.auth().currentUser
+          getItems()
+        } else {
+          currentUser.value = {}
+        }
+      })
+    })
+
     return {
       currentYear,
       currentMonth,
@@ -128,7 +173,8 @@ export default defineComponent({
       start,
       end,
       currentMonthData,
-      calcPositionWidth
+      calcPositionWidth,
+      items
     }
   }
 })
