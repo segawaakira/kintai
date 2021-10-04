@@ -32,6 +32,7 @@
               v-if="data.startDate === index + 1"
               class="timeline-item"
               :style="calcPositionWidth(data.startTime - data.startDateTime, data.endTime - data.startDateTime)"
+              @click="onClickDetail(data.id)"
             />
             <!-- ▽ 日付を跨いだ時 ▽ -->
             <div
@@ -40,6 +41,7 @@
               :data-end-time="data.endTime"
               :data-end-date-time="data.endDateTime"
               :style="calcPositionWidth(0, data.endTime - data.endDateTime)"
+              @click="onClickDetail(data.id)"
             />
             <!-- ▽ 稼働時間 ▽ -->
             <div v-if="data.startDate === index + 1">
@@ -154,7 +156,8 @@ export default defineComponent({
               endDate: end.getDate(),
               endTime: end.getTime(),
               startWorkTime,
-              endWorkTime
+              endWorkTime,
+              id: item.id
             }
           )
         }
@@ -173,6 +176,11 @@ export default defineComponent({
         })
         checkCurrentMonthData(items.value)
       })
+    }
+
+    const onClickDetail = (id: string) => {
+      // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
+      location.href = '/detail?id=' + id
     }
 
     onMounted(() => {
@@ -197,7 +205,8 @@ export default defineComponent({
       currentMonthData,
       calcPositionWidth,
       items,
-      getDayOfWeek
+      getDayOfWeek,
+      onClickDetail
     }
   }
 })
