@@ -9,10 +9,8 @@
         次
       </v-btn>
     </v-flex>
-    <!-- <p>{{ start }}</p>
-    <p>{{ end }}</p>
     <pre>{{ currentMonthData }}</pre>
-    <pre>{{ items }}</pre> -->
+    <pre>{{ items }}</pre>
 
     <v-list three-line class="calendar">
       <v-list-item>
@@ -43,6 +41,13 @@
               :data-end-date-time="data.endDateTime"
               :style="calcPositionWidth(0, data.endTime - data.endDateTime)"
             />
+            <!-- ▽ 稼働時間 ▽ -->
+            <div v-if="data.startDate === index + 1">
+              <div>{{ Math.round(data.startWorkTime / 3600000 * 10) / 10 }}</div>
+            </div>
+            <div v-else-if="data.startDate === index && data.endDate === index + 1">
+              <div>{{ Math.round(data.endWorkTime / 3600000 * 10) / 10 }}</div>
+            </div>
           </div>
         </v-list-item>
       </template>
@@ -124,15 +129,26 @@ export default defineComponent({
           (start.getFullYear() === currentYear.value && start.getMonth() + 1 === currentMonth.value) ||
           (end.getFullYear() === currentYear.value && end.getMonth() + 1 === currentMonth.value)
         ) {
+          let startWorkTime = end.getTime() - start.getTime()
+          let endWorkTime = end.getTime() - start.getTime()
+          // 日を跨いで稼働した場合の処理
+          if (start.getDate() !== end.getDate()) {
+            // 開始した日の稼働時間は、開始〜その翌日の0時0分0秒まで
+            startWorkTime = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1, 0, 0, 0).getTime() - start.getTime()
+            // 終了した日の稼働時間は、その日の0時0分0秒〜終了まで
+            endWorkTime = end.getTime() - new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0).getTime()
+          }
           // 選択中の年月に一致するデータのみ出力する
           currentMonthData.value.push(
             {
-              startDateTime: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0).getTime(), // startした日の0時0分0秒のタイムスタンプ
+              startDateTime: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0).getTime(), // 開始した日の0時0分0秒のタイムスタンプ
               startDate: start.getDate(),
               startTime: start.getTime(),
-              endDateTime: new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0).getTime(), // endした日の0時0分0秒のタイムスタンプ
+              endDateTime: new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0).getTime(), // 終了した日の0時0分0秒のタイムスタンプ
               endDate: end.getDate(),
-              endTime: end.getTime()
+              endTime: end.getTime(),
+              startWorkTime,
+              endWorkTime
             }
           )
         }
