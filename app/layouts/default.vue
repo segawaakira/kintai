@@ -22,6 +22,14 @@
             <v-list-item-title v-text="item.title" />
           </v-list-item-content>
         </v-list-item>
+        <v-list-item>
+          <v-list-item-content>
+            <v-switch
+              v-model="theme"
+              :prepend-icon="themeIcon"
+            />
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar
@@ -144,14 +152,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
+import { defineComponent, onMounted, Ref, ref, useStore, watch } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 
 export default defineComponent({
-  setup (_props, _context) {
+  setup (_props, context: any) {
     const projects: Ref<any> = ref([])
     const currentUser: Ref<any> = ref(null)
     const store = useStore()
+    const theme: Ref<boolean> = ref(true)
+    const themeIcon: Ref<string> = ref('mdi-weather-night')
 
     // @ts-ignore
     // console.log(store.state.project)
@@ -182,6 +192,14 @@ export default defineComponent({
       })
     })
 
+    watch(
+      () => theme.value,
+      (n, _) => {
+        context.root.$vuetify.theme.dark = theme.value
+        themeIcon.value = n ? 'mdi-weather-night' : 'mdi-weather-sunny'
+      }
+    )
+
     return {
       clipped: false,
       drawer: false,
@@ -205,7 +223,9 @@ export default defineComponent({
       projects,
       currentUser,
       onChangeProject,
-      store
+      store,
+      theme,
+      themeIcon
     }
   }
 })
