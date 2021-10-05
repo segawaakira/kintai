@@ -57,11 +57,12 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, Ref, onMounted } from '@nuxtjs/composition-api'
+import { defineComponent, ref, Ref, onMounted, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
+    const store = useStore()
     const currentUser: Ref<any> = ref(null)
     const currentYear: Ref<number> = ref(new Date().getFullYear())
     const currentMonth: Ref<number> = ref(new Date().getMonth() + 1)
@@ -166,7 +167,8 @@ export default defineComponent({
 
     const getItems = () => {
       // TODO:プロジェクトid直打ちを、vuexから取得する
-      db.collection(`users/${currentUser.value.uid}/projects/o2biYTudLBLoxoRxcCV8/items`).onSnapshot((docs) => {
+      // @ts-ignore
+      db.collection(`users/${currentUser.value.uid}/projects/${store.state.project.id}/items`).onSnapshot((docs) => {
         items.value = []
         docs.forEach((doc) => {
           items.value.push({

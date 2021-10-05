@@ -9,13 +9,15 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref } from '@nuxtjs/composition-api'
+import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
+    const store = useStore()
     const currentUser: Ref<any> = ref(null)
-    const currentProject: Ref<any> = ref('o2biYTudLBLoxoRxcCV8')
+    // @ts-ignore
+    const currentProject: Ref<any> = ref(store.state.project.id)
     const db = firebase.firestore()
     const submit = () => {
       const start = new Date()

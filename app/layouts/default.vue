@@ -58,6 +58,18 @@
       </v-btn>
     </v-app-bar>
     <v-main>
+      {{ store.state.project }}
+      <v-select
+        :items="projects"
+        filled
+        label="Select project"
+        item-text="name"
+        item-value="id"
+        return-object
+        @change="onChangeProject"
+      />
+      <hr>
+
       <v-container>
         <v-btn
           color="primary"
@@ -132,13 +144,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref } from '@nuxtjs/composition-api'
+import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
     const projects: Ref<any> = ref([])
     const currentUser: Ref<any> = ref(null)
+    const store = useStore()
+
+    // @ts-ignore
+    // console.log(store.state.project)
+
+    const onChangeProject = (e: any) => {
+      store.dispatch('writeProject', e)
+      // @ts-ignore
+      // console.log(store.state.project)
+    }
 
     onMounted(() => {
       firebase.auth().onAuthStateChanged((data) => {
@@ -181,7 +203,9 @@ export default defineComponent({
       rightDrawer: false,
       title: 'Vuetify.js',
       projects,
-      currentUser
+      currentUser,
+      onChangeProject,
+      store
     }
   }
 })

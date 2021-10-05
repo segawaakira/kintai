@@ -7,13 +7,6 @@
       submit
     </v-btn>
     <hr>
-    <v-select
-      :items="projects"
-      filled
-      label="Select project"
-      item-text="name"
-    />
-    <hr>
 
     <v-list three-line>
       <template v-for="(item, index) in projects">
