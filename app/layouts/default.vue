@@ -173,6 +173,8 @@ export default defineComponent({
     }
 
     onMounted(() => {
+      // @ts-ignore
+      theme.value = store.state.dark
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           currentUser.value = firebase.auth().currentUser
@@ -197,6 +199,7 @@ export default defineComponent({
       (n, _) => {
         context.root.$vuetify.theme.dark = theme.value
         themeIcon.value = n ? 'mdi-weather-night' : 'mdi-weather-sunny'
+        store.dispatch('writeDark', n)
       }
     )
 
