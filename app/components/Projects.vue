@@ -1,11 +1,30 @@
 <template>
   <div>
-    <v-btn
-      type="button"
-      @click="submit()"
-    >
-      submit
-    </v-btn>
+    <v-form v-model="valid" ref="myForm" lazy-validation>
+      <v-container>
+        <v-row>
+          <v-col
+            cols="12"
+            sm="12"
+            md="12"
+          >
+            <v-text-field
+              v-model="projectName"
+              :rules="projectNameRules"
+              label="プロジェクト名"
+              required
+            />
+          </v-col>
+        </v-row>
+        <v-btn
+          type="button"
+          @click="submit()"
+        >
+          submit
+        </v-btn>
+      </v-container>
+    </v-form>
+
     <hr>
 
     <v-list three-line>
@@ -52,11 +71,15 @@ export default defineComponent({
     const currentUser: Ref<any> = ref(null)
     const projects: Ref<any> = ref([])
     const db = firebase.firestore()
+    const projectNameRules = [
+      v => !!v || 'projectName is required'
+    ]
+    const projectName: Ref<string> = ref('')
     const submit = () => {
       const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/`)
       dbUsers
         .add({
-          name: 'project_a'
+          name: projectName.value
         })
         .then((ref) => {
           console.log('Add ID: ', ref.id)
@@ -80,6 +103,7 @@ export default defineComponent({
         })
         .then((ref) => {
           console.log('del: ', ref)
+          editProjectId.value = null
         })
     }
 
@@ -109,7 +133,9 @@ export default defineComponent({
       saveProject,
       editProjectId,
       currentUser,
-      projects
+      projects,
+      projectName,
+      projectNameRules
     }
   }
 })
