@@ -9,6 +9,7 @@
         次
       </v-btn>
     </v-flex>
+    <!-- <pre>{{ totalWorkedHourOfDay }}</pre> -->
     <pre>{{ currentMonthData }}</pre>
     <pre>{{ items }}</pre>
 
@@ -44,13 +45,16 @@
               @click="onClickDetail(data.id)"
             />
             <!-- ▽ 稼働時間 ▽ -->
-            <div v-if="data.startDate === index + 1">
-              <div>{{ Math.round(data.startWorkTime / 3600000 * 10) / 10 }}</div>
-            </div>
-            <div v-else-if="data.startDate === index && data.endDate === index + 1">
-              <div>{{ Math.round(data.endWorkTime / 3600000 * 10) / 10 }}</div>
+            <div style="display: none;">
+              <div v-if="data.startDate === index + 1">
+                <div class="js-work-hour">{{ Math.round(data.startWorkTime / 3600000 * 10) / 10 }}</div>
+              </div>
+              <div v-else-if="data.startDate === index && data.endDate === index + 1">
+                <div class="js-work-hour">{{ Math.round(data.endWorkTime / 3600000 * 10) / 10 }}</div>
+              </div>
             </div>
           </div>
+          <div>{{ totalWorkedHourOfDay[index] }}</div>
         </v-list-item>
       </template>
     </v-list>
@@ -61,11 +65,12 @@ import { defineComponent, ref, Ref, onMounted, useStore } from '@nuxtjs/composit
 import firebase from 'firebase'
 
 export default defineComponent({
-  setup (_props, _context) {
+  setup (_props, context) {
     const store = useStore()
     const currentUser: Ref<any> = ref(null)
     const currentYear: Ref<number> = ref(new Date().getFullYear())
     const currentMonth: Ref<number> = ref(new Date().getMonth() + 1)
+    const totalWorkedHourOfDay: Ref<any> = ref([])
     const db = firebase.firestore()
     const items: Ref<any> = ref([])
 
@@ -166,7 +171,6 @@ export default defineComponent({
     }
 
     const getItems = () => {
-      // TODO:プロジェクトid直打ちを、vuexから取得する
       // @ts-ignore
       db.collection(`users/${currentUser.value.uid}/projects/${store.state.project.id}/items`).onSnapshot((docs) => {
         items.value = []
@@ -177,6 +181,21 @@ export default defineComponent({
           })
         })
         checkCurrentMonthData(items.value)
+        // 日別の合計稼働時間
+        totalWorkedHourOfDay.value = []
+        const timelines = document.getElementsByClassName('timeline')
+        context.root.$nextTick(() => {
+          for (let i = 0; i < timelines.length; i++) {
+            const workHour = timelines[i].getElementsByClassName('js-work-hour')
+            let workHourTotal: number = 0
+            for (let j = 0; j < workHour.length; j++) {
+              workHourTotal += Number(workHour[j].innerHTML)
+            }
+            totalWorkedHourOfDay.value.push(
+              workHourTotal
+            )
+          }
+        })
       })
     }
 
@@ -208,7 +227,8 @@ export default defineComponent({
       calcPositionWidth,
       items,
       getDayOfWeek,
-      onClickDetail
+      onClickDetail,
+      totalWorkedHourOfDay
     }
   }
 })
