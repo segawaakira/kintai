@@ -25,8 +25,10 @@
             <v-text-field
               v-model="password"
               :rules="passwordRules"
-              type="password"
+              :type="show ? 'text' : 'password'"
               label="パスワード"
+              :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+              @click:append="show = !show"
             />
           </v-col>
         </v-row>
@@ -76,6 +78,7 @@ export default defineComponent({
       v => !!v || 'E-mail is required',
       v => /.+@.+\..+/.test(v) || 'E-mail must be valid'
     ]
+    const show: Ref<boolean> = ref(false)
     const passwordRules = [
       v => !!v || 'password is required'
     ]
@@ -131,6 +134,7 @@ export default defineComponent({
       valid,
       email,
       emailRules,
+      show,
       passwordRules,
       password,
       myForm,
