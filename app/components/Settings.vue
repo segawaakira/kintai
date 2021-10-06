@@ -27,7 +27,7 @@
               :rules="passwordRules"
               :type="show ? 'text' : 'password'"
               label="パスワード"
-              :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+              :append-icon="show ? 'visibility' : 'visibility_off'"
               @click:append="show = !show"
             />
           </v-col>

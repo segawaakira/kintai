@@ -27,7 +27,7 @@
               :rules="passwordRules"
               :type="show ? 'text' : 'password'"
               label="パスワード"
-              :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+              :append-icon="show ? 'visibility' : 'visibility_off'"
               @click:append="show = !show"
             />
           </v-col>
@@ -40,18 +40,13 @@
       </v-container>
     </v-form>
 
+    <hr>
+
     <v-btn
       type="button"
       @click="loginGoogle()"
     >
       loginGoogle
-    </v-btn>
-    <hr>
-    <v-btn
-      type="button"
-      @click="signOut()"
-    >
-      signOut
     </v-btn>
   </div>
 </template>
@@ -94,15 +89,6 @@ export default defineComponent({
       location.href = '/projects'
     }
 
-    const signOut = () => {
-      firebase.auth().signOut().then(() => {
-        console.log('ログアウトしました')
-        user.value = {}
-      }).catch((error) => {
-        console.log('ログアウト失敗', error)
-      })
-    }
-
     onMounted(() => {
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
@@ -120,7 +106,6 @@ export default defineComponent({
     return {
       loginGoogle,
       createUserByEmail,
-      signOut,
       user,
       isSignedIn,
       valid,
