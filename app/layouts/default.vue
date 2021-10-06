@@ -33,6 +33,17 @@
             <v-list-item-title>設定</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item
+          exact
+          @click="signOut"
+        >
+          <v-list-item-action>
+            <v-icon>logout</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>ログアウト</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item>
           <v-list-item-content>
             <v-switch
@@ -125,6 +136,16 @@ export default defineComponent({
       // console.log(store.state.project)
     }
 
+    const signOut = () => {
+      firebase.auth().signOut().then(() => {
+        console.log('ログアウトしました')
+        // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
+        location.href = '/login'
+      }).catch((error) => {
+        console.log('ログアウト失敗', error)
+      })
+    }
+
     onMounted(() => {
       // @ts-ignore
       theme.value = store.state.dark
@@ -199,7 +220,8 @@ export default defineComponent({
       onChangeProject,
       store,
       theme,
-      themeIcon
+      themeIcon,
+      signOut
     }
   }
 })
