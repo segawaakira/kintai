@@ -82,6 +82,9 @@ const nuxtConfig = {
           success: colors.green.accent3
         }
       }
+    },
+    defaultAssets: {
+      icons: 'md'
     }
   },
 

@@ -2,14 +2,50 @@
   <v-app dark>
     <v-navigation-drawer
       v-model="drawer"
-      :mini-variant="miniVariant"
-      :clipped="clipped"
       fixed
       app
     >
-      <v-list>
+      <!-- ログイン中のメニュー -->
+      <v-list v-if="isSignedIn">
         <v-list-item
-          v-for="(item, i) in items"
+          v-for="(item, i) in isLoginItems"
+          :key="i"
+          :to="item.to"
+          router
+          exact
+        >
+          <v-list-item-action>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title v-text="item.title" />
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item
+          to="/settings"
+          router
+          exact
+        >
+          <v-list-item-action>
+            <v-icon>settings</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>設定</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-content>
+            <v-switch
+              v-model="theme"
+              :prepend-icon="themeIcon"
+            />
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+      <!-- 未ログイン中のメニュー -->
+      <v-list v-else>
+        <v-list-item
+          v-for="(item, i) in isLogoutItems"
           :key="i"
           :to="item.to"
           router
@@ -33,7 +69,6 @@
       </v-list>
     </v-navigation-drawer>
     <v-app-bar
-      :clipped-left="clipped"
       fixed
       app
     >
@@ -79,7 +114,7 @@ export default defineComponent({
     const currentUser: Ref<any> = ref(null)
     const store = useStore()
     const theme: Ref<boolean> = ref(true)
-    const themeIcon: Ref<string> = ref('mdi-weather-night')
+    const themeIcon: Ref<string> = ref('dark_mode')
 
     // @ts-ignore
     // console.log(store.state.project)
@@ -119,7 +154,7 @@ export default defineComponent({
       () => theme.value,
       (n, _) => {
         context.root.$vuetify.theme.dark = theme.value
-        themeIcon.value = n ? 'mdi-weather-night' : 'mdi-weather-sunny'
+        themeIcon.value = n ? 'dark_mode' : 'light_mode'
         store.dispatch('writeDark', n)
       }
     )
@@ -127,36 +162,33 @@ export default defineComponent({
     return {
       drawer: false,
       fixed: false,
-      items: [
+      isLogoutItems: [
         {
-          icon: 'mdi-apps',
-          title: 'signup',
-          to: '/signup',
-          isLogin: false
+          icon: 'login',
+          title: 'ログイン',
+          to: '/login'
         },
         {
-          icon: 'mdi-chart-bubble',
-          title: 'login',
-          to: '/login',
-          isLogin: false
+          icon: 'person',
+          title: '会員登録',
+          to: '/signup'
+        }
+      ],
+      isLoginItems: [
+        {
+          icon: 'timer',
+          title: '出退勤入力',
+          to: '/input'
         },
         {
-          icon: 'mdi-chart-bubble',
-          title: 'input',
-          to: '/input',
-          isLogin: true
+          icon: 'event_note',
+          title: 'カレンダー',
+          to: '/calendar'
         },
         {
-          icon: 'mdi-chart-bubble',
-          title: 'calendar',
-          to: '/calendar',
-          isLogin: true
-        },
-        {
-          icon: 'mdi-chart-bubble',
-          title: 'projects',
-          to: '/projects',
-          isLogin: true
+          icon: 'view_list',
+          title: 'プロジェクト',
+          to: '/projects'
         }
       ],
       title: 'Vuetify.js',
