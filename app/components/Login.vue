@@ -44,6 +44,15 @@
 
     <v-btn
       type="button"
+      to="/reset"
+    >
+      パスワードをお忘れの方はこちら
+    </v-btn>
+
+    <hr>
+
+    <v-btn
+      type="button"
       @click="loginGoogle()"
     >
       loginGoogle
