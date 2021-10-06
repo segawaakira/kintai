@@ -1,7 +1,6 @@
 <template>
   <div>
     <Input />
-    <Location />
   </div>
 </template>
 
@@ -9,10 +8,9 @@
 import { defineComponent, onMounted } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 import Input from '../components/Input.vue'
-import Location from '../components/Location.vue'
 
 export default defineComponent({
-  components: { Input, Location },
+  components: { Input },
   setup (_props, _context) {
     onMounted(() => {
       // Todo:処理一元化する。

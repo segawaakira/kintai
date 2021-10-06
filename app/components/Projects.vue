@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-form v-model="valid" ref="myForm" lazy-validation>
+    <v-form ref="myForm" lazy-validation>
       <v-container>
         <v-row>
           <v-col
@@ -34,7 +34,7 @@
           class="timeline"
         >
           <div v-if="editProjectId === item.id">
-            <v-text-field v-model="item.name"></v-text-field>
+            <v-text-field v-model="item.name" />
             <v-btn
               type="button"
               @click="saveProject(item.id, item.name)"
