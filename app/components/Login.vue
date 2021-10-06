@@ -69,12 +69,12 @@ export default defineComponent({
     const myForm = ref(null)
     const email: Ref<string> = ref('')
     const emailRules = [
-      v => !!v || 'E-mail is required',
-      v => /.+@.+\..+/.test(v) || 'E-mail must be valid'
+      (v: any) => !!v || 'E-mail is required',
+      (v: any) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
     ]
     const show: Ref<boolean> = ref(false)
     const passwordRules = [
-      v => !!v || 'password is required'
+      (v: any) => !!v || 'password is required'
     ]
     const password: Ref<string> = ref('')
 
@@ -131,10 +131,7 @@ export default defineComponent({
       show,
       passwordRules,
       password,
-      myForm,
-      validate () {
-        myForm.value.validate()
-      }
+      myForm
     }
   }
 })

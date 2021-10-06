@@ -72,7 +72,7 @@ export default defineComponent({
     const projects: Ref<any> = ref([])
     const db = firebase.firestore()
     const projectNameRules = [
-      v => !!v || 'projectName is required'
+      (v: any) => !!v || 'projectName is required'
     ]
     const projectName: Ref<string> = ref('')
     const submit = () => {
