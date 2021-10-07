@@ -27,7 +27,7 @@
           >
             <v-text-field
               v-model="description"
-              label="すること・やったことなど"
+              label="やること・やったことなど"
               required
             />
           </v-col>
@@ -149,6 +149,7 @@ export default defineComponent({
               .then((ref) => {
                 console.log('del: ', ref)
               })
+            description.value = ''
           })
       })
     }
