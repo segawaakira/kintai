@@ -69,6 +69,15 @@
       >
         更新する
       </v-btn>
+
+      <hr>
+
+      <v-btn
+        type="button"
+        @click="onDelete()"
+      >
+        削除する
+      </v-btn>
     </v-form>
 
     <hr>
@@ -126,6 +135,17 @@ export default defineComponent({
         })
     }
 
+    // 削除
+    const onDelete = () => {
+      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`).doc(context.root.$route.query.id as string)
+        .delete()
+        .then(() => {
+          console.log('削除した')
+          // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
+          location.href = '/calendar'
+        })
+    }
+
     onMounted(() => {
       // 今登録されている稼働情報を取得
       firebase.auth().onAuthStateChanged((data) => {
@@ -163,6 +183,7 @@ export default defineComponent({
 
     return {
       update,
+      onDelete,
       currentUser,
       currentProject,
       startTime,
