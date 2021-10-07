@@ -164,11 +164,11 @@ export default defineComponent({
           // データの整理
           const lat = data.latitude
           const lng = data.longitude
-          const alt = data.altitude
-          const accLatlng = data.accuracy
-          const accAlt = data.altitudeAccuracy
-          const heading = data.heading
-          const speed = data.speed
+          // const alt = data.altitude
+          // const accLatlng = data.accuracy
+          // const accAlt = data.altitudeAccuracy
+          // const heading = data.heading
+          // const speed = data.speed
 
           // HTMLへの書き出し
           // document.getElementById('result').innerHTML = '<dl><dt>緯度</dt><dd>' + lat + '</dd><dt>経度</dt><dd>' + lng + '</dd><dt>高度</dt><dd>' + alt + '</dd><dt>緯度、経度の精度</dt><dd>' + accLatlng + '</dd><dt>高度の精度</dt><dd>' + accAlt + '</dd><dt>方角</dt><dd>' + heading + '</dd><dt>速度</dt><dd>' + speed + '</dd></dl>'
