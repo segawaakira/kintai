@@ -46,8 +46,8 @@ export default defineComponent({
     const db = firebase.firestore()
 
     const placeName: Ref<string> = ref('')
-    const placeLat: Ref<number> = ref()
-    const placeLng: Ref<number> = ref()
+    const placeLat: Ref<number | null> = ref(null)
+    const placeLng: Ref<number | null> = ref(null)
     const description: Ref<string> = ref('')
 
     // 出勤
@@ -69,32 +69,67 @@ export default defineComponent({
           description: '何やってたかを記入します。'
         })
         .then((ref) => {
+          // 稼働中の出勤情報をin_attendanceに記録する。
           console.log('Add ID: ', ref.id)
+          const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/in_attendance`)
+          dbUsers
+            .add({
+              item_id: ref.id,
+              start,
+              start_place_name: placeName.value,
+              start_place_lat: placeLat.value,
+              start_place_lng: placeLng.value,
+              end,
+              end_place_name: placeName.value,
+              end_place_lat: placeLat.value,
+              end_place_lng: placeLng.value,
+              description: '何やってたかを記入します。'
+            })
+            .then((ref) => {
+              console.log('Add ID: ', ref.id)
+            })
         })
     }
 
     // 退勤
     const departure = () => {
-      const start = new Date()
-      const end = new Date()
-      end.setHours(start.getHours() + 5)
+      // in_attendanceから稼働情報を取得する
+      const inAttendanceArray: any = []
+      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/in_attendance`).onSnapshot((docs) => {
+        docs.forEach((doc) => {
+          inAttendanceArray.push({
+            ...doc.data(),
+            id: doc.id
+          })
+        })
+        console.log(inAttendanceArray[0])
 
-      const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`)
-      dbUsers
-        .add({
-          start,
-          start_place_name: '京都',
-          start_place_lat: 35.0181617,
-          start_place_lng: 135.7466834,
-          end,
-          end_place_name: '京都',
-          end_place_lat: 35.0181617,
-          end_place_lng: 135.7466834,
-          description: '何やってたかを記入します。'
-        })
-        .then((ref) => {
-          console.log('Add ID: ', ref.id)
-        })
+        // 退勤情報をupdateで記録する
+        const inAttendance: any = inAttendanceArray[0]
+        const end = new Date()
+        // const description = inAttendance.description ? inAttendance.description : '何やってたかを記入します。（退勤）'
+        const description = '何やってたかを記入します。（退勤）'
+        db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`).doc(inAttendance.item_id)
+          .update({
+            start: inAttendance.start,
+            start_place_name: inAttendance.start_place_name,
+            start_place_lat: inAttendance.start_place_lat,
+            start_place_lng: inAttendance.start_place_lng,
+            end,
+            end_place_name: placeName.value,
+            end_place_lat: placeLat.value,
+            end_place_lng: placeLng.value,
+            description
+          })
+          .then(() => {
+            // in_attendanceを削除する。
+            db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/in_attendance`).doc(inAttendance.id)
+              .delete()
+              .then((ref) => {
+                console.log('del: ', ref)
+              })
+          })
+      })
     }
 
     const submit = () => {
@@ -137,34 +172,40 @@ export default defineComponent({
           const speed = data.speed
 
           // HTMLへの書き出し
-          document.getElementById('result').innerHTML = '<dl><dt>緯度</dt><dd>' + lat + '</dd><dt>経度</dt><dd>' + lng + '</dd><dt>高度</dt><dd>' + alt + '</dd><dt>緯度、経度の精度</dt><dd>' + accLatlng + '</dd><dt>高度の精度</dt><dd>' + accAlt + '</dd><dt>方角</dt><dd>' + heading + '</dd><dt>速度</dt><dd>' + speed + '</dd></dl>'
+          // document.getElementById('result').innerHTML = '<dl><dt>緯度</dt><dd>' + lat + '</dd><dt>経度</dt><dd>' + lng + '</dd><dt>高度</dt><dd>' + alt + '</dd><dt>緯度、経度の精度</dt><dd>' + accLatlng + '</dd><dt>高度の精度</dt><dd>' + accAlt + '</dd><dt>方角</dt><dd>' + heading + '</dd><dt>速度</dt><dd>' + speed + '</dd></dl>'
 
           // 位置情報
+          // @ts-ignore
           const latlng = new google.maps.LatLng(lat, lng)
 
           // Google Mapsに書き出し
+          // @ts-ignore
           const map = new google.maps.Map(document.getElementById('map-canvas'), {
             zoom: 15, // ズーム値
             center: latlng // 中心座標 [latlng]
           })
 
           // マーカーの新規出力
+          // @ts-ignore
           new google.maps.Marker({
             map,
             position: latlng
           })
 
+          // @ts-ignore
           const currentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude)
           map.setCenter(currentLocation)
 
+          // @ts-ignore
           const geocoder = new google.maps.Geocoder()
-          geocoder.geocode({ latLng: currentLocation }, function (results, status) {
+          geocoder.geocode({ latLng: currentLocation }, function (results: any, status: any) {
+            // @ts-ignore
             if (status === google.maps.GeocoderStatus.OK) {
               placeName.value = results[0].formatted_address // 一番最初の住所を登録する。
-              for (const i in results) {
-                console.log(results[i].formatted_address)
-                document.getElementById('address').innerHTML += (results[i].formatted_address + '<br />')
-              }
+              // for (const i in results) {
+              //   console.log(results[i].formatted_address)
+              //   document.getElementById('address').innerHTML += (results[i].formatted_address + '<br />')
+              // }
             } else {
               window.alert('google.maps.GeocoderStatus is not OK. due to ' + status)
             }
@@ -201,7 +242,7 @@ export default defineComponent({
           alert(errorMessage)
 
           // HTMLに書き出し
-          document.getElementById('result').innerHTML = errorMessage
+          // document.getElementById('result').innerHTML = errorMessage
         },
 
         // [第3引数] オプション
