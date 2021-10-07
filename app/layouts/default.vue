@@ -4,9 +4,18 @@
       v-model="drawer"
       fixed
       app
+      width="320"
     >
       <!-- ログイン中のメニュー -->
       <v-list v-if="isSignedIn">
+        <v-list-item>
+          <v-list-item-action>
+            <v-icon>account_circle</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>{{ currentUser.email }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item
           v-for="(item, i) in isLoginItems"
           :key="i"
@@ -155,6 +164,7 @@ export default defineComponent({
         if (data) {
           isSignedIn.value = true
           currentUser.value = firebase.auth().currentUser
+          console.log(currentUser.value)
           const db = firebase.firestore()
 
           db.collection(`users/${currentUser.value.uid}/projects`).get().then((querySnapshot) => {

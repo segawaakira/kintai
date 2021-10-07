@@ -60,7 +60,7 @@ export default defineComponent({
     const save = () => {
       currentUser.value.updateEmail(email.value).then(() => {
         console.log('メアドを変更しました')
-      }).catch((error) => {
+      }).catch((error: any) => {
         console.log('メアドを変更失敗しました', error)
       })
     }
@@ -68,7 +68,7 @@ export default defineComponent({
     const leave = () => {
       currentUser.value.delete().then(() => {
         console.log('退会しました')
-      }).catch((error) => {
+      }).catch((error: any) => {
         console.log('退会失敗しました', error)
       })
     }
@@ -79,7 +79,7 @@ export default defineComponent({
           isSignedIn.value = true
           currentUser.value = firebase.auth().currentUser
           user.value = data
-          email.value = data.email
+          email.value = data.email as string
         } else {
           isSignedIn.value = false
           user.value = {}
