@@ -17,6 +17,26 @@
 
     <hr>
 
+    <v-form ref="myForm" lazy-validation>
+      <v-container>
+        <v-row>
+          <v-col
+            cols="12"
+            sm="12"
+            md="12"
+          >
+            <v-text-field
+              v-model="description"
+              label="すること・やったことなど"
+              required
+            />
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-form>
+
+    <hr>
+
     <div>
       <v-btn
         type="button"
@@ -69,7 +89,7 @@ export default defineComponent({
           end_place_name: placeName.value,
           end_place_lat: placeLat.value,
           end_place_lng: placeLng.value,
-          description: '何やってたかを記入します。'
+          description: description.value
         })
         .then((ref) => {
           // 稼働中の出勤情報をin_attendanceに記録する。
@@ -86,7 +106,7 @@ export default defineComponent({
               end_place_name: placeName.value,
               end_place_lat: placeLat.value,
               end_place_lng: placeLng.value,
-              description: '何やってたかを記入します。'
+              description: description.value
             })
             .then((ref) => {
               console.log('Add ID: ', ref.id)
@@ -110,8 +130,6 @@ export default defineComponent({
         // 退勤情報をupdateで記録する
         const inAttendance: any = inAttendanceArray[0]
         const end = new Date()
-        // const description = inAttendance.description ? inAttendance.description : '何やってたかを記入します。（退勤）'
-        const description = '何やってたかを記入します。（退勤）'
         db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`).doc(inAttendance.item_id)
           .update({
             start: inAttendance.start,
@@ -122,7 +140,7 @@ export default defineComponent({
             end_place_name: placeName.value,
             end_place_lat: placeLat.value,
             end_place_lng: placeLng.value,
-            description
+            description: description.value
           })
           .then(() => {
             // in_attendanceを削除する。
@@ -133,29 +151,6 @@ export default defineComponent({
               })
           })
       })
-    }
-
-    const submit = () => {
-      const start = new Date()
-      const end = new Date()
-      end.setHours(start.getHours() + 5)
-
-      const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`)
-      dbUsers
-        .add({
-          start,
-          start_place_name: '京都',
-          start_place_lat: 35.0181617,
-          start_place_lng: 135.7466834,
-          end,
-          end_place_name: '京都',
-          end_place_lat: 35.0181617,
-          end_place_lng: 135.7466834,
-          description: '何やってたかを記入します。'
-        })
-        .then((ref) => {
-          console.log('Add ID: ', ref.id)
-        })
     }
 
     const getLocation = () => {
@@ -263,10 +258,18 @@ export default defineComponent({
         if (data) {
           currentUser.value = firebase.auth().currentUser
           db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/in_attendance`).onSnapshot((docs) => {
+            const inAttendanceArray: any = []
             isInAttendance.value = false
-            docs.forEach(() => {
+            docs.forEach((doc) => {
               isInAttendance.value = true
+              inAttendanceArray.push({
+                ...doc.data(),
+                id: doc.id
+              })
             })
+            if (inAttendanceArray.length) {
+              description.value = inAttendanceArray[0].description
+            }
           })
         } else {
           currentUser.value = {}
@@ -276,7 +279,6 @@ export default defineComponent({
     })
 
     return {
-      submit,
       attendance,
       departure,
       currentUser,
