@@ -157,12 +157,12 @@ export default defineComponent({
             if (doc.exists) {
               console.log('Document data:', doc.data())
               const data: any = doc.data()
-              startTime.value = dayjs(new Date(data.start.seconds * 1000)).format('YYYY-MM-DDThh:mm')
+              startTime.value = dayjs(new Date(data.start.seconds * 1000)).format('YYYY-MM-DDTHH:MM')
               start.value = data.start
               startPlaceName.value = data.start_place_name
               startPlaceLat.value = data.start_place_lat
               startPlaceLng.value = data.start_place_lng
-              endTime.value = dayjs(new Date(data.end.seconds * 1000)).format('YYYY-MM-DDThh:mm')
+              endTime.value = dayjs(new Date(data.end.seconds * 1000)).format('YYYY-MM-DDTHH:MM')
               end.value = data.end
               endPlaceName.value = data.end_place_name
               endPlaceLat.value = data.end_place_lat
