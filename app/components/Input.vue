@@ -3,12 +3,14 @@
     <v-btn
       type="button"
       @click="attendance()"
+      :disabled="isInAttendance"
     >
       出勤
     </v-btn>
     <v-btn
       type="button"
       @click="departure()"
+      :disabled="!isInAttendance"
     >
       退勤
     </v-btn>
@@ -49,6 +51,7 @@ export default defineComponent({
     const placeLat: Ref<number | null> = ref(null)
     const placeLng: Ref<number | null> = ref(null)
     const description: Ref<string> = ref('')
+    const isInAttendance: Ref<boolean> = ref(false)
 
     // 出勤
     const attendance = () => {
@@ -259,6 +262,12 @@ export default defineComponent({
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           currentUser.value = firebase.auth().currentUser
+          db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/in_attendance`).onSnapshot((docs) => {
+            isInAttendance.value = false
+            docs.forEach(() => {
+              isInAttendance.value = true
+            })
+          })
         } else {
           currentUser.value = {}
         }
@@ -276,7 +285,8 @@ export default defineComponent({
       placeName,
       placeLat,
       placeLng,
-      description
+      description,
+      isInAttendance
     }
   }
 })
