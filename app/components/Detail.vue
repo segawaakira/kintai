@@ -1,17 +1,52 @@
 <template>
   <div>
-    <v-btn
-      type="button"
-      @click="update()"
-    >
-      退勤
-    </v-btn>
-
-    <hr>
-
     <v-form ref="myForm" lazy-validation>
       <v-container>
         <v-row>
+          <v-col
+            cols="12"
+            sm="12"
+            md="12"
+          >
+            <v-text-field
+              v-model="startTime"
+              label="開始時間"
+              type="datetime-local"
+            />
+          </v-col>
+          <v-col
+            cols="12"
+            sm="12"
+            md="12"
+          >
+            <v-text-field
+              v-model="startPlaceName"
+              label="開始場所"
+              required
+            />
+          </v-col>
+          <v-col
+            cols="12"
+            sm="12"
+            md="12"
+          >
+            <v-text-field
+              v-model="endTime"
+              label="終了時間"
+              type="datetime-local"
+            />
+          </v-col>
+          <v-col
+            cols="12"
+            sm="12"
+            md="12"
+          >
+            <v-text-field
+              v-model="endPlaceName"
+              label="終了場所"
+              required
+            />
+          </v-col>
           <v-col
             cols="12"
             sm="12"
@@ -25,6 +60,15 @@
           </v-col>
         </v-row>
       </v-container>
+
+      <hr>
+
+      <v-btn
+        type="button"
+        @click="update()"
+      >
+        更新する
+      </v-btn>
     </v-form>
 
     <hr>
@@ -40,6 +84,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
+import dayjs from 'dayjs'
 
 export default defineComponent({
   setup (_props, context) {
@@ -49,39 +94,40 @@ export default defineComponent({
     const currentProject: Ref<any> = ref(store.state.project.id)
     const db = firebase.firestore()
 
-    const placeName: Ref<string> = ref('')
-    const placeLat: Ref<number | null> = ref(null)
-    const placeLng: Ref<number | null> = ref(null)
+    const startTime: Ref<any> = ref()
+    const start: Ref<any> = ref()
+    const startPlaceName: Ref<string> = ref('')
+    const startPlaceLat: Ref<number | null> = ref(null)
+    const startPlaceLng: Ref<number | null> = ref(null)
+    const endTime: Ref<any> = ref()
+    const end: Ref<any> = ref()
+    const endPlaceName: Ref<string> = ref('')
+    const endPlaceLat: Ref<number | null> = ref(null)
+    const endPlaceLng: Ref<number | null> = ref(null)
     const description: Ref<string> = ref('')
 
     // 更新
     const update = () => {
       // 退勤情報をupdateで記録する
-      // const end = new Date()
-      // db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`).doc(inAttendance.item_id)
-      //   .update({
-      //     start: inAttendance.start,
-      //     start_place_name: inAttendance.start_place_name,
-      //     start_place_lat: inAttendance.start_place_lat,
-      //     start_place_lng: inAttendance.start_place_lng,
-      //     end,
-      //     end_place_name: placeName.value,
-      //     end_place_lat: placeLat.value,
-      //     end_place_lng: placeLng.value,
-      //     description: description.value
-      //   })
-      //   .then(() => {
-      //     // in_attendanceを削除する。
-      //     db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/in_attendance`).doc(inAttendance.id)
-      //       .delete()
-      //       .then((ref) => {
-      //         console.log('del: ', ref)
-      //       })
-      //     description.value = ''
-      //   })
+      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`).doc(context.root.$route.query.id as string)
+        .update({
+          start: new Date(startTime.value),
+          start_place_name: startPlaceName.value,
+          start_place_lat: startPlaceLat.value,
+          start_place_lng: startPlaceLng.value,
+          end: new Date(endTime.value),
+          end_place_name: endPlaceName.value,
+          end_place_lat: endPlaceLat.value,
+          end_place_lng: endPlaceLng.value,
+          description: description.value
+        })
+        .then(() => {
+          console.log('更新した')
+        })
     }
 
     onMounted(() => {
+      // 今登録されている稼働情報を取得
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           currentUser.value = firebase.auth().currentUser
@@ -90,6 +136,18 @@ export default defineComponent({
           docRef.get().then((doc) => {
             if (doc.exists) {
               console.log('Document data:', doc.data())
+              const data: any = doc.data()
+              startTime.value = dayjs(new Date(data.start.seconds * 1000)).format('YYYY-MM-DDThh:mm')
+              start.value = data.start
+              startPlaceName.value = data.start_place_name
+              startPlaceLat.value = data.start_place_lat
+              startPlaceLng.value = data.start_place_lng
+              endTime.value = dayjs(new Date(data.end.seconds * 1000)).format('YYYY-MM-DDThh:mm')
+              end.value = data.end
+              endPlaceName.value = data.end_place_name
+              endPlaceLat.value = data.end_place_lat
+              endPlaceLng.value = data.end_place_lng
+              description.value = data.description
             } else {
               // doc.data() will be undefined in this case
               console.log('No such document!')
@@ -107,9 +165,16 @@ export default defineComponent({
       update,
       currentUser,
       currentProject,
-      placeName,
-      placeLat,
-      placeLng,
+      startTime,
+      start,
+      startPlaceName,
+      startPlaceLat,
+      startPlaceLng,
+      endTime,
+      end,
+      endPlaceName,
+      endPlaceLat,
+      endPlaceLng,
       description
     }
   }
