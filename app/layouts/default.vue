@@ -92,7 +92,7 @@
       fixed
       app
     >
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+      <v-app-bar-nav-icon v-if="!isPC" @click.stop="drawer = !drawer" />
       <v-toolbar-title v-text="title" />
       <v-spacer />
     </v-app-bar>
@@ -129,6 +129,7 @@ import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, context: any) {
+    const drawer: Ref<Boolean> = ref(false)
     const isSignedIn: Ref<Boolean> = ref(false)
     const projects: Ref<any> = ref([])
     const selectedProject: Ref<any> = ref({})
@@ -137,6 +138,7 @@ export default defineComponent({
     const theme: Ref<boolean> = ref(true)
     const themeIcon: Ref<string> = ref('dark_mode')
     const isShowSelectedProject: Ref<boolean> = ref(true)
+    const isPC: Ref<boolean> = ref(true)
 
     // @ts-ignore
     // console.log(store.state.project)
@@ -155,6 +157,21 @@ export default defineComponent({
       }).catch((error) => {
         console.log('ログアウト失敗', error)
       })
+    }
+
+    const onCheckIsPC = () => {
+      if (window.innerWidth < 768) {
+        isPC.value = false
+      } else {
+        isPC.value = true
+        drawer.value = true
+      }
+    }
+
+    const onResize = () => {
+      window.onresize = () => {
+        onCheckIsPC()
+      }
     }
 
     onMounted(() => {
@@ -181,6 +198,8 @@ export default defineComponent({
           currentUser.value = {}
         }
       })
+      onCheckIsPC()
+      onResize()
     })
 
     watch(
@@ -204,7 +223,7 @@ export default defineComponent({
     )
 
     return {
-      drawer: false,
+      drawer,
       fixed: false,
       isLogoutItems: [
         {
@@ -245,7 +264,8 @@ export default defineComponent({
       theme,
       themeIcon,
       signOut,
-      isShowSelectedProject
+      isShowSelectedProject,
+      isPC
     }
   }
 })
