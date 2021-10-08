@@ -97,19 +97,20 @@
       <v-spacer />
     </v-app-bar>
     <v-main>
-      <v-select
-        v-model="selectedProject"
-        :items="projects"
-        filled
-        label="Select project"
-        item-text="name"
-        item-value="id"
-        return-object
-        @change="onChangeProject"
-      />
-      <hr>
-
       <v-container>
+        <!-- プロジェクト選択メニュー -->
+        <v-select
+          v-if="isSignedIn && isShowSelectedProject"
+          v-model="selectedProject"
+          :items="projects"
+          filled
+          label="Select project"
+          item-text="name"
+          item-value="id"
+          return-object
+          @change="onChangeProject"
+        />
+        <hr>
         <Nuxt />
       </v-container>
     </v-main>
@@ -135,6 +136,7 @@ export default defineComponent({
     const store = useStore()
     const theme: Ref<boolean> = ref(true)
     const themeIcon: Ref<string> = ref('dark_mode')
+    const isShowSelectedProject: Ref<boolean> = ref(true)
 
     // @ts-ignore
     // console.log(store.state.project)
@@ -190,6 +192,17 @@ export default defineComponent({
       }
     )
 
+    watch(
+      () => context.root.$route.path,
+      (n, _) => {
+        if (n === '/settings') {
+          isShowSelectedProject.value = false
+        } else {
+          isShowSelectedProject.value = true
+        }
+      }
+    )
+
     return {
       drawer: false,
       fixed: false,
@@ -231,7 +244,8 @@ export default defineComponent({
       store,
       theme,
       themeIcon,
-      signOut
+      signOut,
+      isShowSelectedProject
     }
   }
 })
