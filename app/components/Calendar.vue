@@ -70,6 +70,7 @@
 <script lang="ts">
 import { defineComponent, ref, Ref, onMounted, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
+import dayjs from 'dayjs'
 const excelJs = require('exceljs')
 
 export default defineComponent({
@@ -82,8 +83,6 @@ export default defineComponent({
     const totalWorkedHourOfMonth: Ref<number> = ref(0)
     const db = firebase.firestore()
     const items: Ref<any> = ref([])
-    // エクセルエクスポート用の変数定義
-    // const itemsExcel: Ref<any> = ref([])
 
     /**
      * 指定月の日数を取得
@@ -251,7 +250,23 @@ export default defineComponent({
     }
 
     const onCreateExcel = async () => {
-      const title = '2020年10月稼働実績'
+      const itemsExcel: any[] = []
+      items.value.forEach((item: any) => {
+        const start = new Date(item.start.seconds * 1000)
+        const end = new Date(item.end.seconds * 1000)
+        itemsExcel.push(
+          {
+            start: dayjs(start).format('MM月DD日 HH:MM'),
+            end: dayjs(end).format('MM月DD日 HH:MM'),
+            hour: Math.round((item.end.seconds - item.start.seconds) / 3600 * 10) / 10,
+            start_place_name: item.start_place_name,
+            end_place_name: item.end_place_name,
+            description: item.description
+          }
+        )
+      })
+
+      const title = currentYear.value + '年' + currentMonth.value + '月稼働実績'
       // Workbookの作成
       const workbook = new excelJs.Workbook()
       // Workbookに新しいWorksheetを追加
@@ -259,26 +274,13 @@ export default defineComponent({
       // ↑で追加したWorksheetを参照し変数に代入
       const worksheet = workbook.getWorksheet(title)
 
-      worksheet.addRow(
-        {
-          date: '10月1日',
-          start: '10:00',
-          end: '12:00',
-          hour: 2,
-          start_place: '大阪',
-          end_place: '大阪',
-          description: '適当'
-        }
-      )
-
       // 列を定義
       worksheet.columns = [
-        { header: '日付', key: 'date' },
-        { header: '開始時間', key: 'start' },
-        { header: '終了時間', key: 'end' },
+        { header: '開始日時', key: 'start' },
+        { header: '終了日時', key: 'end' },
         { header: '稼働時間', key: 'hour' },
-        { header: '開始場所', key: 'start_place' },
-        { header: '終了場所', key: 'end_place' },
+        { header: '開始場所', key: 'start_place_name' },
+        { header: '終了場所', key: 'end_place_name' },
         { header: '業務内容', key: 'description' }
       ]
 
@@ -305,36 +307,25 @@ export default defineComponent({
       })
 
       // 行を定義
+      itemsExcel.forEach((item: any) => {
+        worksheet.addRow(
+          {
+            start: item.start,
+            end: item.end,
+            hour: item.hour,
+            start_place_name: item.start_place_name,
+            end_place_name: item.end_place_name,
+            description: item.description
+          }
+        )
+      })
       worksheet.addRow(
         {
-          date: '10月1日',
-          start: '10:00',
-          end: '12:00',
-          hour: 2,
-          start_place: '大阪',
-          end_place: '大阪',
-          description: '適当'
-        }
-      )
-      worksheet.addRow(
-        {
-          date: '10月2日',
-          start: '10:00',
-          end: '12:00',
-          hour: 2,
-          start_place: '大阪',
-          end_place: '大阪',
-          description: '適当'
-        }
-      )
-      worksheet.addRow(
-        {
-          date: '合計',
-          start: '-',
+          start: '合計',
           end: '-',
-          hour: 4,
-          start_place: '-',
-          end_place: '-',
+          hour: totalWorkedHourOfMonth.value,
+          start_place_name: '-',
+          end_place_name: '-',
           description: '-'
         }
       )
