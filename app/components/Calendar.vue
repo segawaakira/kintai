@@ -58,6 +58,8 @@
         </v-list-item>
       </template>
     </v-list>
+    <!-- ▽ 月別稼働合計時間 ▽ -->
+    <div>{{ totalWorkedHourOfMonth }}</div>
   </div>
 </template>
 <script lang="ts">
@@ -71,6 +73,7 @@ export default defineComponent({
     const currentYear: Ref<number> = ref(new Date().getFullYear())
     const currentMonth: Ref<number> = ref(new Date().getMonth() + 1)
     const totalWorkedHourOfDay: Ref<any> = ref([])
+    const totalWorkedHourOfMonth: Ref<number> = ref(0)
     const db = firebase.firestore()
     const items: Ref<any> = ref([])
 
@@ -196,6 +199,16 @@ export default defineComponent({
             )
           }
         })
+        // 月別の合計稼働時間
+        totalWorkedHourOfMonth.value = 0
+        context.root.$nextTick(() => {
+          const workHour = document.getElementsByClassName('js-work-hour')
+          let workHourTotal: number = 0
+          for (let j = 0; j < workHour.length; j++) {
+            workHourTotal += Number(workHour[j].innerHTML)
+          }
+          totalWorkedHourOfMonth.value += workHourTotal
+        })
       })
     }
 
@@ -228,7 +241,8 @@ export default defineComponent({
       items,
       getDayOfWeek,
       onClickDetail,
-      totalWorkedHourOfDay
+      totalWorkedHourOfDay,
+      totalWorkedHourOfMonth
     }
   }
 })
