@@ -82,6 +82,8 @@ export default defineComponent({
     const totalWorkedHourOfMonth: Ref<number> = ref(0)
     const db = firebase.firestore()
     const items: Ref<any> = ref([])
+    // エクセルエクスポート用の変数定義
+    // const itemsExcel: Ref<any> = ref([])
 
     /**
      * 指定月の日数を取得
@@ -122,11 +124,6 @@ export default defineComponent({
       lastDay.value = getLastDay(currentYear.value, currentMonth.value)
       getItems()
     }
-
-    // TODO:ダミーデータなので、FireBaseから取得するようにする。
-    const start = new Date()
-    const end = new Date()
-    end.setHours(start.getHours() + 5)
 
     const currentMonthData: Ref<any> = ref([])
 
@@ -254,18 +251,35 @@ export default defineComponent({
     }
 
     const onCreateExcel = async () => {
+      const title = '2020年10月稼働実績'
       // Workbookの作成
       const workbook = new excelJs.Workbook()
       // Workbookに新しいWorksheetを追加
-      workbook.addWorksheet('My Sheet')
+      workbook.addWorksheet(title)
       // ↑で追加したWorksheetを参照し変数に代入
-      const worksheet = workbook.getWorksheet('My Sheet')
+      const worksheet = workbook.getWorksheet(title)
+
+      worksheet.addRow(
+        {
+          date: '10月1日',
+          start: '10:00',
+          end: '12:00',
+          hour: 2,
+          start_place: '大阪',
+          end_place: '大阪',
+          description: '適当'
+        }
+      )
 
       // 列を定義
       worksheet.columns = [
-        { header: 'ID', key: 'id' },
-        { header: '氏名', key: 'name' },
-        { header: '価格', key: 'price' }
+        { header: '日付', key: 'date' },
+        { header: '開始時間', key: 'start' },
+        { header: '終了時間', key: 'end' },
+        { header: '稼働時間', key: 'hour' },
+        { header: '開始場所', key: 'start_place' },
+        { header: '終了場所', key: 'end_place' },
+        { header: '業務内容', key: 'description' }
       ]
 
       // すべての行を走査
@@ -276,14 +290,12 @@ export default defineComponent({
             // ヘッダ行のスタイルを設定
             cell.fill = headerFillStyle
             cell.font = headerFontStyle
+          } else if (rowNumber % 2 === 0) {
+            // ボディ行（偶数行）のスタイルを設定
+            cell.fill = bodyEvenFillStyle
           } else {
-            if (rowNumber % 2 === 0) {
-              // ボディ行（偶数行）のスタイルを設定
-              cell.fill = bodyEvenFillStyle
-            } else {
-              // ボディ行（奇数行）のスタイルを設定
-              cell.fill = bodyOddFillStyle
-            }
+            // ボディ行（奇数行）のスタイルを設定
+            cell.fill = bodyOddFillStyle
           }
           // セルの枠線を設定
           cell.border = borderStyle
@@ -293,9 +305,39 @@ export default defineComponent({
       })
 
       // 行を定義
-      worksheet.addRow({ id: 1001, name: 'ハンバーガー', price: 170 })
-      worksheet.addRow({ id: 1002, name: 'チーズバーガー', price: 200 })
-      worksheet.addRow({ id: 1003, name: '照り焼きチキンバーガー', price: 260 })
+      worksheet.addRow(
+        {
+          date: '10月1日',
+          start: '10:00',
+          end: '12:00',
+          hour: 2,
+          start_place: '大阪',
+          end_place: '大阪',
+          description: '適当'
+        }
+      )
+      worksheet.addRow(
+        {
+          date: '10月2日',
+          start: '10:00',
+          end: '12:00',
+          hour: 2,
+          start_place: '大阪',
+          end_place: '大阪',
+          description: '適当'
+        }
+      )
+      worksheet.addRow(
+        {
+          date: '合計',
+          start: '-',
+          end: '-',
+          hour: 4,
+          start_place: '-',
+          end_place: '-',
+          description: '-'
+        }
+      )
 
       // UInt8Arrayを生成
       const uint8Array = await workbook.xlsx.writeBuffer()
@@ -308,7 +350,7 @@ export default defineComponent({
       // aタグのURLを設定
       a.href = url
       // aタグにdownload属性を付け、URLがダウンロード対象になるようにします
-      a.download = 'price_list.xlsx'
+      a.download = title + '.xlsx'
       // aタグをクリックさせます
       a.click()
       // ダウンロード後は不要なのでaタグを除去
@@ -332,8 +374,6 @@ export default defineComponent({
       lastDay,
       nextMonth,
       prevMonth,
-      start,
-      end,
       currentMonthData,
       calcPositionWidth,
       items,
