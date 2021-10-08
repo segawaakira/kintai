@@ -33,21 +33,12 @@
           </v-col>
         </v-row>
         <v-btn
-          @click="signInEmail()"
+          @click="createUserByEmail()"
         >
-          signInEmail
+          createUserByEmail
         </v-btn>
       </v-container>
     </v-form>
-
-    <hr>
-
-    <v-btn
-      type="button"
-      to="/reset"
-    >
-      パスワードをお忘れの方はこちら
-    </v-btn>
 
     <hr>
 
@@ -91,11 +82,11 @@ export default defineComponent({
         })
     }
 
-    const signInEmail = async () => {
-      const res = await firebase.auth().signInWithEmailAndPassword(email.value, password.value)
+    const createUserByEmail = async () => {
+      const res = await firebase.auth().createUserWithEmailAndPassword(email.value, password.value)
       user.value = res.user
       // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
-      location.href = '/input'
+      location.href = '/projects'
     }
 
     onMounted(() => {
@@ -104,7 +95,7 @@ export default defineComponent({
           isSignedIn.value = true
           user.value = data
           // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
-          location.href = '/input'
+          location.href = '/projects'
         } else {
           isSignedIn.value = false
           user.value = {}
@@ -114,7 +105,7 @@ export default defineComponent({
 
     return {
       loginGoogle,
-      signInEmail,
+      createUserByEmail,
       user,
       isSignedIn,
       valid,

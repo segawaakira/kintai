@@ -2,14 +2,22 @@
   <v-app dark>
     <v-navigation-drawer
       v-model="drawer"
-      :mini-variant="miniVariant"
-      :clipped="clipped"
       fixed
       app
+      width="320"
     >
-      <v-list>
+      <!-- ログイン中のメニュー -->
+      <v-list v-if="isSignedIn">
+        <v-list-item>
+          <v-list-item-action>
+            <v-icon>account_circle</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>{{ currentUser.email }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item
-          v-for="(item, i) in items"
+          v-for="(item, i) in isLoginItems"
           :key="i"
           :to="item.to"
           router
@@ -22,67 +30,90 @@
             <v-list-item-title v-text="item.title" />
           </v-list-item-content>
         </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-    <v-app-bar
-      :clipped-left="clipped"
-      fixed
-      app
-    >
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn
-        icon
-        @click.stop="miniVariant = !miniVariant"
-      >
-        <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
-      </v-btn>
-      <v-btn
-        icon
-        @click.stop="clipped = !clipped"
-      >
-        <v-icon>mdi-application</v-icon>
-      </v-btn>
-      <v-btn
-        icon
-        @click.stop="fixed = !fixed"
-      >
-        <v-icon>mdi-minus</v-icon>
-      </v-btn>
-      <v-toolbar-title v-text="title" />
-      <v-spacer />
-      <v-btn
-        icon
-        @click.stop="rightDrawer = !rightDrawer"
-      >
-        <v-icon>mdi-menu</v-icon>
-      </v-btn>
-    </v-app-bar>
-    <v-main>
-      <v-container>
-        <Nuxt />
-        <Input />
-        <Login />
-        <Calendar />
-        <Location />
-      </v-container>
-    </v-main>
-    <v-navigation-drawer
-      v-model="rightDrawer"
-      :right="right"
-      temporary
-      fixed
-    >
-      <v-list>
-        <v-list-item @click.native="right = !right">
+        <v-list-item
+          to="/settings"
+          router
+          exact
+        >
           <v-list-item-action>
-            <v-icon light>
-              mdi-repeat
-            </v-icon>
+            <v-icon>settings</v-icon>
           </v-list-item-action>
-          <v-list-item-title>Switch drawer (click me)</v-list-item-title>
+          <v-list-item-content>
+            <v-list-item-title>設定</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item
+          exact
+          @click="signOut"
+        >
+          <v-list-item-action>
+            <v-icon>logout</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>ログアウト</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-content>
+            <v-switch
+              v-model="theme"
+              :prepend-icon="themeIcon"
+            />
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+      <!-- 未ログイン中のメニュー -->
+      <v-list v-else>
+        <v-list-item
+          v-for="(item, i) in isLogoutItems"
+          :key="i"
+          :to="item.to"
+          router
+          exact
+        >
+          <v-list-item-action>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title v-text="item.title" />
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-content>
+            <v-switch
+              v-model="theme"
+              :prepend-icon="themeIcon"
+            />
+          </v-list-item-content>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
+    <v-app-bar
+      fixed
+      app
+    >
+      <v-app-bar-nav-icon v-if="!isPC" @click.stop="drawer = !drawer" />
+      <v-toolbar-title v-text="title" />
+      <v-spacer />
+    </v-app-bar>
+    <v-main>
+      <v-container>
+        <!-- プロジェクト選択メニュー -->
+        <v-select
+          v-if="isSignedIn && isShowSelectedProject"
+          v-model="selectedProject"
+          :items="projects"
+          filled
+          label="Select project"
+          item-text="name"
+          item-value="id"
+          return-object
+          @change="onChangeProject"
+        />
+        <hr>
+        <Nuxt />
+      </v-container>
+    </v-main>
     <v-footer
       :absolute="!fixed"
       app
@@ -92,34 +123,149 @@
   </v-app>
 </template>
 
-<script>
-import { defineComponent } from '@nuxtjs/composition-api'
-import Calendar from '../components/Calendar.vue'
-import Input from '../components/Input.vue'
+<script lang="ts">
+import { defineComponent, onMounted, Ref, ref, useStore, watch } from '@nuxtjs/composition-api'
+import firebase from 'firebase'
 
 export default defineComponent({
-  components: { Calendar, Input },
-  setup (_props, _context) {
+  setup (_props, context: any) {
+    const drawer: Ref<Boolean> = ref(false)
+    const isSignedIn: Ref<Boolean> = ref(false)
+    const projects: Ref<any> = ref([])
+    const selectedProject: Ref<any> = ref({})
+    const currentUser: Ref<any> = ref(null)
+    const store = useStore()
+    const theme: Ref<boolean> = ref(true)
+    const themeIcon: Ref<string> = ref('dark_mode')
+    const isShowSelectedProject: Ref<boolean> = ref(true)
+    const isPC: Ref<boolean> = ref(true)
+
+    // @ts-ignore
+    // console.log(store.state.project)
+
+    const onChangeProject = (e: any) => {
+      store.dispatch('writeProject', e)
+      // @ts-ignore
+      // console.log(store.state.project)
+    }
+
+    const signOut = () => {
+      firebase.auth().signOut().then(() => {
+        console.log('ログアウトしました')
+        // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
+        location.href = '/login'
+      }).catch((error) => {
+        console.log('ログアウト失敗', error)
+      })
+    }
+
+    const onCheckIsPC = () => {
+      if (window.innerWidth < 768) {
+        isPC.value = false
+      } else {
+        isPC.value = true
+        drawer.value = true
+      }
+    }
+
+    const onResize = () => {
+      window.onresize = () => {
+        onCheckIsPC()
+      }
+    }
+
+    onMounted(() => {
+      // @ts-ignore
+      theme.value = store.state.dark
+      // @ts-ignore
+      selectedProject.value = store.state.project
+      firebase.auth().onAuthStateChanged((data) => {
+        if (data) {
+          isSignedIn.value = true
+          currentUser.value = firebase.auth().currentUser
+          console.log(currentUser.value)
+          const db = firebase.firestore()
+
+          db.collection(`users/${currentUser.value.uid}/projects`).get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+              projects.value.push({
+                ...doc.data(),
+                id: doc.id
+              })
+            })
+          })
+        } else {
+          currentUser.value = {}
+        }
+      })
+      onCheckIsPC()
+      onResize()
+    })
+
+    watch(
+      () => theme.value,
+      (n, _) => {
+        context.root.$vuetify.theme.dark = theme.value
+        themeIcon.value = n ? 'dark_mode' : 'light_mode'
+        store.dispatch('writeDark', n)
+      }
+    )
+
+    watch(
+      () => context.root.$route.path,
+      (n, _) => {
+        if (n === '/settings') {
+          isShowSelectedProject.value = false
+        } else {
+          isShowSelectedProject.value = true
+        }
+      }
+    )
+
     return {
-      clipped: false,
-      drawer: false,
+      drawer,
       fixed: false,
-      items: [
+      isLogoutItems: [
         {
-          icon: 'mdi-apps',
-          title: 'Welcome',
-          to: '/'
+          icon: 'login',
+          title: 'ログイン',
+          to: '/login'
         },
         {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire'
+          icon: 'person',
+          title: '会員登録',
+          to: '/signup'
         }
       ],
-      miniVariant: false,
-      right: true,
-      rightDrawer: false,
-      title: 'Vuetify.js'
+      isLoginItems: [
+        {
+          icon: 'timer',
+          title: '出退勤入力',
+          to: '/input'
+        },
+        {
+          icon: 'event_note',
+          title: 'カレンダー',
+          to: '/calendar'
+        },
+        {
+          icon: 'view_list',
+          title: 'プロジェクト',
+          to: '/projects'
+        }
+      ],
+      title: 'Vuetify.js',
+      isSignedIn,
+      selectedProject,
+      projects,
+      currentUser,
+      onChangeProject,
+      store,
+      theme,
+      themeIcon,
+      signOut,
+      isShowSelectedProject,
+      isPC
     }
   }
 })

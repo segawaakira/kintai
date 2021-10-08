@@ -17,25 +17,12 @@
               required
             />
           </v-col>
-          <v-col
-            cols="12"
-            sm="12"
-            md="12"
-          >
-            <v-text-field
-              v-model="password"
-              :rules="passwordRules"
-              :type="show ? 'text' : 'password'"
-              label="パスワード"
-              :append-icon="show ? 'visibility' : 'visibility_off'"
-              @click:append="show = !show"
-            />
-          </v-col>
         </v-row>
         <v-btn
-          @click="signInEmail()"
+          type="button"
+          @click="save()"
         >
-          signInEmail
+          save
         </v-btn>
       </v-container>
     </v-form>
@@ -44,18 +31,9 @@
 
     <v-btn
       type="button"
-      to="/reset"
+      @click="leave()"
     >
-      パスワードをお忘れの方はこちら
-    </v-btn>
-
-    <hr>
-
-    <v-btn
-      type="button"
-      @click="loginGoogle()"
-    >
-      loginGoogle
+      退会する
     </v-btn>
   </div>
 </template>
@@ -68,6 +46,7 @@ import firebase from 'firebase'
 export default defineComponent({
   setup (_props, _context) {
     const isSignedIn: Ref<Boolean> = ref(false)
+    const currentUser: Ref<any> = ref(null)
     const user: Ref<any> = ref({})
     const valid: Ref<boolean> = ref(true)
     const myForm = ref(null)
@@ -76,35 +55,31 @@ export default defineComponent({
       (v: any) => !!v || 'E-mail is required',
       (v: any) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
     ]
-    const show: Ref<boolean> = ref(false)
-    const passwordRules = [
-      (v: any) => !!v || 'password is required'
-    ]
-    const password: Ref<string> = ref('')
+    const isEditEmail: Ref<boolean> = ref(false)
 
-    const loginGoogle = () => {
-      const provider = new firebase.auth.GoogleAuthProvider()
-      firebase.auth().signInWithRedirect(provider)
-        .then((res) => {
-          console.log('ログインしました')
-          console.log(res)
-        })
+    const save = () => {
+      currentUser.value.updateEmail(email.value).then(() => {
+        console.log('メアドを変更しました')
+      }).catch((error: any) => {
+        console.log('メアドを変更失敗しました', error)
+      })
     }
 
-    const signInEmail = async () => {
-      const res = await firebase.auth().signInWithEmailAndPassword(email.value, password.value)
-      user.value = res.user
-      // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
-      location.href = '/input'
+    const leave = () => {
+      currentUser.value.delete().then(() => {
+        console.log('退会しました')
+      }).catch((error: any) => {
+        console.log('退会失敗しました', error)
+      })
     }
 
     onMounted(() => {
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           isSignedIn.value = true
+          currentUser.value = firebase.auth().currentUser
           user.value = data
-          // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
-          location.href = '/input'
+          email.value = data.email as string
         } else {
           isSignedIn.value = false
           user.value = {}
@@ -113,17 +88,16 @@ export default defineComponent({
     })
 
     return {
-      loginGoogle,
-      signInEmail,
       user,
       isSignedIn,
       valid,
       email,
       emailRules,
-      show,
-      passwordRules,
-      password,
-      myForm
+      isEditEmail,
+      myForm,
+      save,
+      leave,
+      currentUser
     }
   }
 })
