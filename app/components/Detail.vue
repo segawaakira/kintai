@@ -100,7 +100,7 @@ export default defineComponent({
     const store = useStore()
     const currentUser: Ref<any> = ref(null)
     // @ts-ignore
-    const currentProject: Ref<any> = ref(store.state.project.id)
+    const currentProject: Ref<any> = ref(store.state.project)
     const db = firebase.firestore()
 
     const startTime: Ref<any> = ref()
@@ -118,7 +118,7 @@ export default defineComponent({
     // 更新
     const update = () => {
       // 退勤情報をupdateで記録する
-      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`).doc(context.root.$route.query.id as string)
+      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
         .update({
           start: new Date(startTime.value),
           start_place_name: startPlaceName.value,
@@ -137,7 +137,7 @@ export default defineComponent({
 
     // 削除
     const onDelete = () => {
-      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`).doc(context.root.$route.query.id as string)
+      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
         .delete()
         .then(() => {
           console.log('削除した')
@@ -151,7 +151,7 @@ export default defineComponent({
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           currentUser.value = firebase.auth().currentUser
-          const docRef = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`).doc(context.root.$route.query.id as string)
+          const docRef = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
 
           docRef.get().then((doc) => {
             if (doc.exists) {

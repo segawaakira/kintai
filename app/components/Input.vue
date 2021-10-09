@@ -64,7 +64,7 @@ export default defineComponent({
     const store = useStore()
     const currentUser: Ref<any> = ref(null)
     // @ts-ignore
-    const currentProject: Ref<any> = ref(store.state.project.id)
+    const currentProject: Ref<any> = ref(store.state.project)
     const db = firebase.firestore()
 
     const placeName: Ref<string> = ref('')
@@ -78,7 +78,7 @@ export default defineComponent({
       const start = new Date()
       const end = new Date()
 
-      const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`)
+      const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`)
       dbUsers
         .add({
           start,
@@ -94,7 +94,7 @@ export default defineComponent({
         .then((ref) => {
           // 稼働中の出勤情報をin_attendanceに記録する。
           console.log('Add ID: ', ref.id)
-          const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/in_attendance`)
+          const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`)
           dbUsers
             .add({
               item_id: ref.id,
@@ -111,6 +111,16 @@ export default defineComponent({
             .then((ref) => {
               console.log('Add ID: ', ref.id)
             })
+          // 稼働中のプロジェクト情報をin_attendance_projectに記録する。
+          const dbUsers2 = db.collection(`users/${currentUser.value.uid}/in_attendance_project`)
+          dbUsers2
+            .add({
+              item_id: currentProject.value.id,
+              name: currentProject.value.name
+            })
+            .then((ref) => {
+              console.log('Add ID: ', ref.id)
+            })
         })
     }
 
@@ -118,7 +128,7 @@ export default defineComponent({
     const departure = () => {
       // in_attendanceから稼働情報を取得する
       const inAttendanceArray: any = []
-      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/in_attendance`).onSnapshot((docs) => {
+      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`).onSnapshot((docs) => {
         docs.forEach((doc) => {
           inAttendanceArray.push({
             ...doc.data(),
@@ -130,7 +140,7 @@ export default defineComponent({
         // 退勤情報をupdateで記録する
         const inAttendance: any = inAttendanceArray[0]
         const end = new Date()
-        db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/items`).doc(inAttendance.item_id)
+        db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(inAttendance.item_id)
           .update({
             start: inAttendance.start,
             start_place_name: inAttendance.start_place_name,
@@ -144,7 +154,7 @@ export default defineComponent({
           })
           .then(() => {
             // in_attendanceを削除する。
-            db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/in_attendance`).doc(inAttendance.id)
+            db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`).doc(inAttendance.id)
               .delete()
               .then((ref) => {
                 console.log('del: ', ref)
@@ -258,7 +268,7 @@ export default defineComponent({
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           currentUser.value = firebase.auth().currentUser
-          db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value}/in_attendance`).onSnapshot((docs) => {
+          db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`).onSnapshot((docs) => {
             const inAttendanceArray: any = []
             isInAttendance.value = false
             docs.forEach((doc) => {

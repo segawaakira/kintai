@@ -15,6 +15,9 @@ $ yarn start
 
 # generate static project
 $ yarn generate
+
+# deploy project（yarn generateでdistに保存されたファイルを、publicディレクトリに入れてから）
+$ firebase deploy
 ```
 
 For detailed explanation on how things work, check out the [documentation](https://nuxtjs.org).
