@@ -130,6 +130,7 @@
     >
       <span>&copy; {{ new Date().getFullYear() }}</span>
     </v-footer>
+    <LoadingOverlay />
   </v-app>
 </template>
 
@@ -137,8 +138,10 @@
 import { defineComponent, onMounted, Ref, ref, useStore, watch } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 import dayjs from 'dayjs'
+import LoadingOverlay from '../components/LoadingOverlay.vue'
 
 export default defineComponent({
+  components: { LoadingOverlay },
   setup (_props, context: any) {
     const drawer: Ref<Boolean> = ref(false)
     const projects: Ref<any> = ref([])

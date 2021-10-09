@@ -55,7 +55,6 @@
     >
       loginGoogle
     </v-btn>
-    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
@@ -76,26 +75,25 @@ export default defineComponent({
       (v: any) => !!v || 'password is required'
     ]
     const password: Ref<string> = ref('')
-    const loading: Ref<boolean> = ref(false)
     const store = useStore()
 
     const loginGoogle = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       const provider = new firebase.auth.GoogleAuthProvider()
       firebase.auth().signInWithRedirect(provider)
         .then((res) => {
           console.log('ログインしました')
           console.log(res)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
     const signInEmail = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       firebase.auth().signInWithEmailAndPassword(email.value, password.value)
         .then((res) => {
           console.log('ログインしました')
@@ -105,20 +103,20 @@ export default defineComponent({
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
     onMounted(() => {
       firebase.auth().onAuthStateChanged((data) => {
-        loading.value = true
+        store.dispatch('writeLoading', true)
         if (data) {
           // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
           store.dispatch('writeUser', data)
           location.href = '/input'
         } else {
           store.dispatch('writeUser', null)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         }
       })
     })
@@ -132,8 +130,7 @@ export default defineComponent({
       show,
       passwordRules,
       password,
-      myForm,
-      loading
+      myForm
     }
   }
 })

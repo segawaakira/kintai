@@ -60,7 +60,6 @@
         </v-list-item>
       </template>
     </v-list>
-    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
@@ -72,14 +71,13 @@ export default defineComponent({
     const store = useStore()
     const projects: Ref<any> = ref([])
     const db = firebase.firestore()
-    const loading: Ref<boolean> = ref(false)
     const projectNameRules = [
       (v: any) => !!v || 'projectName is required'
     ]
     const projectName: Ref<string> = ref('')
 
     const createProject = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       // @ts-ignore
       db.collection(`users/${store.state.user.uid}/projects/`)
         .add({
@@ -87,26 +85,26 @@ export default defineComponent({
         })
         .then((ref) => {
           console.log('Add ID: ', ref.id)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
     const deleteProject = (id: string) => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       // @ts-ignore
       db.collection(`users/${store.state.user.uid}/projects/`).doc(id)
         .delete()
         .then((ref) => {
           console.log('del: ', ref)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
@@ -116,7 +114,7 @@ export default defineComponent({
     }
 
     const saveProject = (id: string, name: string) => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       // @ts-ignore
       db.collection(`users/${store.state.user.uid}/projects/`).doc(id)
         .update({
@@ -125,16 +123,16 @@ export default defineComponent({
         .then((ref) => {
           console.log('del: ', ref)
           editProjectId.value = null
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
     onMounted(() => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           // @ts-ignore
@@ -146,10 +144,10 @@ export default defineComponent({
                 id: doc.id
               })
             })
-            loading.value = false
+            store.dispatch('writeLoading', false)
           })
         } else {
-          loading.value = false
+          store.dispatch('writeLoading', false)
         }
       })
     })
@@ -162,8 +160,7 @@ export default defineComponent({
       editProjectId,
       projects,
       projectName,
-      projectNameRules,
-      loading
+      projectNameRules
     }
   }
 })

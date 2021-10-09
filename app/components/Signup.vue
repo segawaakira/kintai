@@ -46,15 +46,15 @@
     >
       loginGoogle
     </v-btn>
-    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref } from '@nuxtjs/composition-api'
+import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
+    const store = useStore()
     const valid: Ref<boolean> = ref(true)
     const myForm = ref(null)
     const email: Ref<string> = ref('')
@@ -67,25 +67,24 @@ export default defineComponent({
       (v: any) => !!v || 'password is required'
     ]
     const password: Ref<string> = ref('')
-    const loading: Ref<boolean> = ref(false)
 
     const loginGoogle = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       const provider = new firebase.auth.GoogleAuthProvider()
       firebase.auth().signInWithRedirect(provider)
         .then((res) => {
           console.log('ログインしました')
           console.log(res)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
     const createUserByEmail = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       firebase.auth().createUserWithEmailAndPassword(email.value, password.value)
         .then((res) => {
           console.log('作成しました')
@@ -95,7 +94,7 @@ export default defineComponent({
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
@@ -104,8 +103,6 @@ export default defineComponent({
         if (data) {
           // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
           location.href = '/projects'
-        } else {
-          user.value = {}
         }
       })
     })
@@ -119,8 +116,7 @@ export default defineComponent({
       show,
       passwordRules,
       password,
-      myForm,
-      loading
+      myForm
     }
   }
 })

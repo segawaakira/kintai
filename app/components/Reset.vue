@@ -24,17 +24,16 @@
         </v-btn>
       </v-container>
     </v-form>
-    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref } from '@nuxtjs/composition-api'
+import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
+    const store = useStore()
     const valid: Ref<boolean> = ref(true)
-    const loading: Ref<boolean> = ref(false)
     const myForm = ref(null)
     const email: Ref<string> = ref('')
     const emailRules = [
@@ -44,15 +43,15 @@ export default defineComponent({
     const isEditEmail: Ref<boolean> = ref(false)
 
     const reset = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       firebase.auth().sendPasswordResetEmail(email.value)
         .then(() => {
           console.log('リセットメールを送信しました')
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
         .catch((error) => {
           console.log('リセットメールを送信失敗しました', error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
@@ -65,8 +64,7 @@ export default defineComponent({
       emailRules,
       isEditEmail,
       myForm,
-      reset,
-      loading
+      reset
     }
   }
 })

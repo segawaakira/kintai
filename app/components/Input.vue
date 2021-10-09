@@ -53,7 +53,6 @@
         <div id="map-canvas" />
       </div>
     </div>
-    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
@@ -73,11 +72,9 @@ export default defineComponent({
     const description: Ref<string> = ref('')
     const isInAttendance: Ref<boolean> = ref(false)
 
-    const loading: Ref<boolean> = ref(false)
-
     // 出勤
     const attendance = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       const start = new Date()
       const end = new Date()
 
@@ -122,27 +119,27 @@ export default defineComponent({
                 })
                 .then((ref) => {
                   console.log('Add ID: ', ref.id)
-                  loading.value = false
+                  store.dispatch('writeLoading', false)
                 })
                 .catch((error) => {
                   console.log(error)
-                  loading.value = false
+                  store.dispatch('writeLoading', false)
                 })
             })
             .catch((error) => {
               console.log(error)
-              loading.value = false
+              store.dispatch('writeLoading', false)
             })
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
     // 退勤
     const departure = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       // in_attendanceから稼働情報を取得する
       const inAttendanceArray: any = []
       // @ts-ignore
@@ -179,22 +176,22 @@ export default defineComponent({
               .then((ref) => {
                 console.log('del: ', ref)
                 description.value = ''
-                loading.value = false
+                store.dispatch('writeLoading', false)
               })
               .catch((error) => {
                 console.log(error)
-                loading.value = false
+                store.dispatch('writeLoading', false)
               })
           })
           .catch((error) => {
             console.log(error)
-            loading.value = false
+            store.dispatch('writeLoading', false)
           })
       })
     }
 
     const getLocation = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       navigator.geolocation.getCurrentPosition(
         // [第1引数] 取得に成功した場合の関数
         function (position) {
@@ -239,7 +236,7 @@ export default defineComponent({
             // 変数に代入
             placeLat.value = lat
             placeLng.value = lng
-            loading.value = false
+            store.dispatch('writeLoading', false)
           })
         },
 
@@ -265,7 +262,7 @@ export default defineComponent({
           // エラーメッセージ
           const errorMessage = '[エラー番号: ' + errorNo + ']\n' + errorInfo[errorNo]
           console.log(errorMessage)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         },
 
         // [第3引数] オプション
@@ -310,8 +307,7 @@ export default defineComponent({
       placeLat,
       placeLng,
       description,
-      isInAttendance,
-      loading
+      isInAttendance
     }
   }
 })
