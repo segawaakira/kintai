@@ -110,7 +110,13 @@
           return-object
           @change="onChangeProject"
         />
-        <hr>
+        <v-alert
+          v-if="isSignedIn && isShowSelectedProject && inAttendanceTime"
+          dense
+          type="info"
+        >
+          {{ selectedProject.name }}で{{ inAttendanceTime }}〜稼働中。<nuxt-link v-if="isShowInputLink" to="/input">退勤はこちらから</nuxt-link>
+        </v-alert>
         <Nuxt />
       </v-container>
     </v-main>
@@ -126,19 +132,24 @@
 <script lang="ts">
 import { defineComponent, onMounted, Ref, ref, useStore, watch } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
+import dayjs from 'dayjs'
 
 export default defineComponent({
   setup (_props, context: any) {
     const drawer: Ref<Boolean> = ref(false)
     const isSignedIn: Ref<Boolean> = ref(false)
     const projects: Ref<any> = ref([])
+    const inAttendanceTime: Ref<any> = ref()
     const selectedProject: Ref<any> = ref({})
     const currentUser: Ref<any> = ref(null)
     const store = useStore()
     const theme: Ref<boolean> = ref(true)
     const themeIcon: Ref<string> = ref('dark_mode')
     const isShowSelectedProject: Ref<boolean> = ref(true)
+    const isShowInputLink: Ref<boolean> = ref(true)
     const isPC: Ref<boolean> = ref(true)
+
+    const db = firebase.firestore()
 
     // @ts-ignore
     // console.log(store.state.project)
@@ -174,6 +185,26 @@ export default defineComponent({
       }
     }
 
+    const onCheckInAttendance = () => {
+      // in_attendanceから稼働情報を取得する
+      // @ts-ignore
+      db.collection(`users/${currentUser.value.uid}/projects/${store.state.project.id}/in_attendance`).onSnapshot((docs) => {
+        const inAttendanceArray: any = []
+        inAttendanceTime.value = null
+        docs.forEach((doc) => {
+          inAttendanceArray.push({
+            ...doc.data(),
+            id: doc.id
+          })
+        })
+        if (inAttendanceArray.length) {
+          const start = new Date(inAttendanceArray[0].start.seconds * 1000)
+          inAttendanceTime.value = dayjs(start).format('MM月DD日 HH:MM')
+          isShowInputLink.value = false
+        }
+      })
+    }
+
     onMounted(() => {
       // @ts-ignore
       theme.value = store.state.dark
@@ -184,7 +215,6 @@ export default defineComponent({
           isSignedIn.value = true
           currentUser.value = firebase.auth().currentUser
           console.log(currentUser.value)
-          const db = firebase.firestore()
 
           db.collection(`users/${currentUser.value.uid}/projects`).get().then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
@@ -194,6 +224,7 @@ export default defineComponent({
               })
             })
           })
+          onCheckInAttendance()
         } else {
           currentUser.value = {}
         }
@@ -218,6 +249,11 @@ export default defineComponent({
           isShowSelectedProject.value = false
         } else {
           isShowSelectedProject.value = true
+        }
+        if (n === '/input') {
+          isShowInputLink.value = false
+        } else {
+          isShowInputLink.value = true
         }
       }
     )
@@ -258,6 +294,7 @@ export default defineComponent({
       isSignedIn,
       selectedProject,
       projects,
+      inAttendanceTime,
       currentUser,
       onChangeProject,
       store,
@@ -265,7 +302,9 @@ export default defineComponent({
       themeIcon,
       signOut,
       isShowSelectedProject,
-      isPC
+      isShowInputLink,
+      isPC,
+      dayjs
     }
   }
 })
