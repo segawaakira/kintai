@@ -5,7 +5,8 @@ export default ({ store }) => {
     key: 'Vuex',
     paths: [
       'project',
-      'dark'
+      'dark',
+      'user'
     ]
   })(store)
 }

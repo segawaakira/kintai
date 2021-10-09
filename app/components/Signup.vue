@@ -1,7 +1,5 @@
 <template>
   <div>
-    <pre>{{ user }}</pre>
-
     <v-form v-model="valid" ref="myForm" lazy-validation>
       <v-container>
         <v-row>
@@ -57,8 +55,6 @@ import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
-    const isSignedIn: Ref<Boolean> = ref(false)
-    const user: Ref<any> = ref({})
     const valid: Ref<boolean> = ref(true)
     const myForm = ref(null)
     const email: Ref<string> = ref('')
@@ -94,7 +90,6 @@ export default defineComponent({
         .then((res) => {
           console.log('作成しました')
           console.log(res)
-          user.value = res.user
           // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
           location.href = '/projects'
         })
@@ -107,12 +102,9 @@ export default defineComponent({
     onMounted(() => {
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
-          isSignedIn.value = true
-          user.value = data
           // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
           location.href = '/projects'
         } else {
-          isSignedIn.value = false
           user.value = {}
         }
       })
@@ -121,8 +113,6 @@ export default defineComponent({
     return {
       loginGoogle,
       createUserByEmail,
-      user,
-      isSignedIn,
       valid,
       email,
       emailRules,

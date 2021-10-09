@@ -1,7 +1,5 @@
 <template>
   <div>
-    <!-- <pre>{{ user }}</pre> -->
-
     <v-form v-model="valid" ref="myForm" lazy-validation>
       <v-container>
         <v-row>
@@ -44,10 +42,8 @@ import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
-    const isSignedIn: Ref<Boolean> = ref(false)
     const currentUser: Ref<any> = ref(null)
     const loading: Ref<boolean> = ref(false)
-    const user: Ref<any> = ref({})
     const valid: Ref<boolean> = ref(true)
     const myForm = ref(null)
     const email: Ref<string> = ref('')
@@ -87,21 +83,14 @@ export default defineComponent({
       loading.value = true
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
-          isSignedIn.value = true
           currentUser.value = firebase.auth().currentUser
-          user.value = data
           email.value = data.email as string
-        } else {
-          isSignedIn.value = false
-          user.value = {}
         }
         loading.value = false
       })
     })
 
     return {
-      user,
-      isSignedIn,
       valid,
       email,
       emailRules,

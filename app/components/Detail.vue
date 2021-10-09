@@ -99,7 +99,6 @@ import dayjs from 'dayjs'
 export default defineComponent({
   setup (_props, context) {
     const store = useStore()
-    const currentUser: Ref<any> = ref(null)
     // @ts-ignore
     const currentProject: Ref<any> = ref(store.state.project)
     const db = firebase.firestore()
@@ -121,7 +120,8 @@ export default defineComponent({
     const update = () => {
       loading.value = true
       // 退勤情報をupdateで記録する
-      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
+      // @ts-ignore
+      db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
         .update({
           start: new Date(startTime.value),
           start_place_name: startPlaceName.value,
@@ -146,7 +146,8 @@ export default defineComponent({
     // 削除
     const onDelete = () => {
       loading.value = true
-      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
+      // @ts-ignore
+      db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
         .delete()
         .then(() => {
           console.log('削除した')
@@ -164,8 +165,8 @@ export default defineComponent({
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           loading.value = true
-          currentUser.value = firebase.auth().currentUser
-          const docRef = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
+          // @ts-ignore
+          const docRef = db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
 
           docRef.get()
             .then((doc) => {
@@ -194,7 +195,6 @@ export default defineComponent({
               loading.value = false
             })
         } else {
-          currentUser.value = {}
           loading.value = false
         }
       })
@@ -203,7 +203,6 @@ export default defineComponent({
     return {
       update,
       onDelete,
-      currentUser,
       currentProject,
       startTime,
       start,

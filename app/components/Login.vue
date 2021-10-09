@@ -1,7 +1,5 @@
 <template>
   <div>
-    <!-- <pre>{{ user }}</pre> -->
-
     <v-form v-model="valid" ref="myForm" lazy-validation>
       <v-container>
         <v-row>
@@ -61,13 +59,11 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref } from '@nuxtjs/composition-api'
+import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
-    const isSignedIn: Ref<Boolean> = ref(false)
-    const user: Ref<any> = ref({})
     const valid: Ref<boolean> = ref(true)
     const myForm = ref(null)
     const email: Ref<string> = ref('')
@@ -81,6 +77,7 @@ export default defineComponent({
     ]
     const password: Ref<string> = ref('')
     const loading: Ref<boolean> = ref(false)
+    const store = useStore()
 
     const loginGoogle = () => {
       loading.value = true
@@ -103,7 +100,6 @@ export default defineComponent({
         .then((res) => {
           console.log('ログインしました')
           console.log(res)
-          user.value = res.user
           // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
           // location.href = '/input'
         })
@@ -117,13 +113,11 @@ export default defineComponent({
       firebase.auth().onAuthStateChanged((data) => {
         loading.value = true
         if (data) {
-          isSignedIn.value = true
-          user.value = data
           // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
+          store.dispatch('writeUser', data)
           location.href = '/input'
         } else {
-          isSignedIn.value = false
-          user.value = {}
+          store.dispatch('writeUser', null)
           loading.value = false
         }
       })
@@ -132,8 +126,6 @@ export default defineComponent({
     return {
       loginGoogle,
       signInEmail,
-      user,
-      isSignedIn,
       valid,
       email,
       emailRules,

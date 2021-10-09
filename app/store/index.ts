@@ -1,7 +1,8 @@
 // 状態管理したい要素に名前をつけて、stateとしてexportする
 export const state = () => ({
   project: '',
-  dark: true
+  dark: true,
+  user: null
 })
 
 // 状態を変更する処理は mutationとしてexportする
@@ -12,6 +13,9 @@ export const mutations = {
   },
   setDarkFromStore (state: any, value: any) {
     state.dark = value
+  },
+  setUserFromStore (state: any, value: any) {
+    state.user = value
   }
 }
 
@@ -32,5 +36,13 @@ export const actions = {
     console.log(value)
     // コミットすることで状態変更が反映される
     context.commit('setDarkFromStore', value)
+  },
+  writeUser (context: any, value: any) {
+    console.log('context')
+    console.log(context)
+    console.log('value')
+    console.log(value)
+    // コミットすることで状態変更が反映される
+    context.commit('setUserFromStore', value)
   }
 }

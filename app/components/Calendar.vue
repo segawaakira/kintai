@@ -77,7 +77,6 @@ const excelJs = require('exceljs')
 export default defineComponent({
   setup (_props, context) {
     const store = useStore()
-    const currentUser: Ref<any> = ref(null)
     const currentYear: Ref<number> = ref(new Date().getFullYear())
     const currentMonth: Ref<number> = ref(new Date().getMonth() + 1)
     const totalWorkedHourOfDay: Ref<any> = ref([])
@@ -179,7 +178,7 @@ export default defineComponent({
 
     const getItems = () => {
       // @ts-ignore
-      db.collection(`users/${currentUser.value.uid}/projects/${store.state.project.id}/items`).onSnapshot((docs) => {
+      db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/items`).onSnapshot((docs) => {
         loading.value = true
         items.value = []
         docs.forEach((doc) => {
@@ -355,14 +354,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      firebase.auth().onAuthStateChanged((data) => {
-        if (data) {
-          currentUser.value = firebase.auth().currentUser
-          getItems()
-        } else {
-          currentUser.value = {}
-        }
-      })
+      getItems()
     })
 
     return {
