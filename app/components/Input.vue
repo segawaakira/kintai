@@ -53,6 +53,7 @@
         <div id="map-canvas" />
       </div>
     </div>
+    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
@@ -72,6 +73,8 @@ export default defineComponent({
     const placeLng: Ref<number | null> = ref(null)
     const description: Ref<string> = ref('')
     const isInAttendance: Ref<boolean> = ref(false)
+
+    const loading: Ref<boolean> = ref(false)
 
     // 出勤
     const attendance = () => {
@@ -165,6 +168,7 @@ export default defineComponent({
     }
 
     const getLocation = () => {
+      loading.value = true
       navigator.geolocation.getCurrentPosition(
         // [第1引数] 取得に成功した場合の関数
         function (position) {
@@ -174,14 +178,6 @@ export default defineComponent({
           // データの整理
           const lat = data.latitude
           const lng = data.longitude
-          // const alt = data.altitude
-          // const accLatlng = data.accuracy
-          // const accAlt = data.altitudeAccuracy
-          // const heading = data.heading
-          // const speed = data.speed
-
-          // HTMLへの書き出し
-          // document.getElementById('result').innerHTML = '<dl><dt>緯度</dt><dd>' + lat + '</dd><dt>経度</dt><dd>' + lng + '</dd><dt>高度</dt><dd>' + alt + '</dd><dt>緯度、経度の精度</dt><dd>' + accLatlng + '</dd><dt>高度の精度</dt><dd>' + accAlt + '</dd><dt>方角</dt><dd>' + heading + '</dd><dt>速度</dt><dd>' + speed + '</dd></dl>'
 
           // 位置情報
           // @ts-ignore
@@ -218,11 +214,11 @@ export default defineComponent({
             } else {
               window.alert('google.maps.GeocoderStatus is not OK. due to ' + status)
             }
+            // 変数に代入
+            placeLat.value = lat
+            placeLng.value = lng
+            loading.value = false
           })
-
-          // 変数に代入
-          placeLat.value = lat
-          placeLng.value = lng
         },
 
         // [第2引数] 取得に失敗した場合の関数
@@ -248,10 +244,8 @@ export default defineComponent({
           const errorMessage = '[エラー番号: ' + errorNo + ']\n' + errorInfo[errorNo]
 
           // アラート表示
-          alert(errorMessage)
-
-          // HTMLに書き出し
-          // document.getElementById('result').innerHTML = errorMessage
+          console.log(errorMessage)
+          loading.value = false
         },
 
         // [第3引数] オプション
@@ -299,7 +293,8 @@ export default defineComponent({
       placeLat,
       placeLng,
       description,
-      isInAttendance
+      isInAttendance,
+      loading
     }
   }
 })
