@@ -88,7 +88,6 @@
     >
       カレンダーに戻る
     </v-btn>
-    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
@@ -99,11 +98,9 @@ import dayjs from 'dayjs'
 export default defineComponent({
   setup (_props, context) {
     const store = useStore()
-    const currentUser: Ref<any> = ref(null)
     // @ts-ignore
     const currentProject: Ref<any> = ref(store.state.project)
     const db = firebase.firestore()
-    const loading: Ref<boolean> = ref(false)
 
     const startTime: Ref<any> = ref()
     const start: Ref<any> = ref()
@@ -119,9 +116,10 @@ export default defineComponent({
 
     // 更新
     const update = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       // 退勤情報をupdateで記録する
-      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
+      // @ts-ignore
+      db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
         .update({
           start: new Date(startTime.value),
           start_place_name: startPlaceName.value,
@@ -135,18 +133,19 @@ export default defineComponent({
         })
         .then(() => {
           console.log('更新した')
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
     // 削除
     const onDelete = () => {
-      loading.value = true
-      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
+      store.dispatch('writeLoading', true)
+      // @ts-ignore
+      db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
         .delete()
         .then(() => {
           console.log('削除した')
@@ -155,7 +154,7 @@ export default defineComponent({
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
@@ -163,9 +162,9 @@ export default defineComponent({
       // 今登録されている稼働情報を取得
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
-          loading.value = true
-          currentUser.value = firebase.auth().currentUser
-          const docRef = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
+          store.dispatch('writeLoading', true)
+          // @ts-ignore
+          const docRef = db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
 
           docRef.get()
             .then((doc) => {
@@ -187,15 +186,14 @@ export default defineComponent({
                 // doc.data() will be undefined in this case
                 console.log('No such document!')
               }
-              loading.value = false
+              store.dispatch('writeLoading', false)
             })
             .catch((error) => {
               console.log('Error getting document:', error)
-              loading.value = false
+              store.dispatch('writeLoading', false)
             })
         } else {
-          currentUser.value = {}
-          loading.value = false
+          store.dispatch('writeLoading', false)
         }
       })
     })
@@ -203,7 +201,6 @@ export default defineComponent({
     return {
       update,
       onDelete,
-      currentUser,
       currentProject,
       startTime,
       start,
@@ -215,8 +212,7 @@ export default defineComponent({
       endPlaceName,
       endPlaceLat,
       endPlaceLng,
-      description,
-      loading
+      description
     }
   }
 })

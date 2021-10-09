@@ -60,51 +60,51 @@
         </v-list-item>
       </template>
     </v-list>
-    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref } from '@nuxtjs/composition-api'
+import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
-    const currentUser: Ref<any> = ref(null)
+    const store = useStore()
     const projects: Ref<any> = ref([])
     const db = firebase.firestore()
-    const loading: Ref<boolean> = ref(false)
     const projectNameRules = [
       (v: any) => !!v || 'projectName is required'
     ]
     const projectName: Ref<string> = ref('')
 
     const createProject = () => {
-      loading.value = true
-      db.collection(`users/${currentUser.value.uid}/projects/`)
+      store.dispatch('writeLoading', true)
+      // @ts-ignore
+      db.collection(`users/${store.state.user.uid}/projects/`)
         .add({
           name: projectName.value
         })
         .then((ref) => {
           console.log('Add ID: ', ref.id)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
     const deleteProject = (id: string) => {
-      loading.value = true
-      db.collection(`users/${currentUser.value.uid}/projects/`).doc(id)
+      store.dispatch('writeLoading', true)
+      // @ts-ignore
+      db.collection(`users/${store.state.user.uid}/projects/`).doc(id)
         .delete()
         .then((ref) => {
           console.log('del: ', ref)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
@@ -114,28 +114,29 @@ export default defineComponent({
     }
 
     const saveProject = (id: string, name: string) => {
-      loading.value = true
-      db.collection(`users/${currentUser.value.uid}/projects/`).doc(id)
+      store.dispatch('writeLoading', true)
+      // @ts-ignore
+      db.collection(`users/${store.state.user.uid}/projects/`).doc(id)
         .update({
           name
         })
         .then((ref) => {
           console.log('del: ', ref)
           editProjectId.value = null
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
     onMounted(() => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
-          currentUser.value = firebase.auth().currentUser
-          db.collection(`users/${currentUser.value.uid}/projects`).onSnapshot((docs) => {
+          // @ts-ignore
+          db.collection(`users/${store.state.user.uid}/projects`).onSnapshot((docs) => {
             projects.value = []
             docs.forEach((doc) => {
               projects.value.push({
@@ -143,11 +144,10 @@ export default defineComponent({
                 id: doc.id
               })
             })
-            loading.value = false
+            store.dispatch('writeLoading', false)
           })
         } else {
-          currentUser.value = {}
-          loading.value = false
+          store.dispatch('writeLoading', false)
         }
       })
     })
@@ -158,11 +158,9 @@ export default defineComponent({
       editProject,
       saveProject,
       editProjectId,
-      currentUser,
       projects,
       projectName,
-      projectNameRules,
-      loading
+      projectNameRules
     }
   }
 })

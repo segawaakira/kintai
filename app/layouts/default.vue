@@ -6,14 +6,15 @@
       app
       width="320"
     >
+      <pre v-if="store.state">{{ store.state }}</pre>
       <!-- ログイン中のメニュー -->
-      <v-list v-if="isSignedIn">
+      <v-list v-if="store.state.user">
         <v-list-item>
           <v-list-item-action>
             <v-icon>account_circle</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>{{ currentUser.email }}</v-list-item-title>
+            <v-list-item-title>{{ store.state.user.email }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item
@@ -100,7 +101,7 @@
       <v-container>
         <!-- プロジェクト選択メニュー -->
         <v-select
-          v-if="isSignedIn && isShowSelectedProject"
+          v-if="store.state.user && isShowSelectedProject"
           v-model="selectedProject"
           :items="projects"
           filled
@@ -111,11 +112,14 @@
           @change="onChangeProject"
         />
         <v-alert
-          v-if="isSignedIn && isShowSelectedProject && inAttendanceTime"
+          v-if="store.state.user && isShowSelectedProject && inAttendanceTime"
           dense
           type="info"
         >
-          {{ inAttendanceProject.name }}で{{ inAttendanceTime }}〜稼働中。<nuxt-link v-if="isShowInputLink" to="/input">退勤はこちらから</nuxt-link>
+          {{ inAttendanceProject.name }}で{{ inAttendanceTime }}〜稼働中。
+          <nuxt-link v-if="isShowInputLink" to="/input">
+            退勤はこちらから
+          </nuxt-link>
         </v-alert>
         <Nuxt />
       </v-container>
@@ -126,6 +130,7 @@
     >
       <span>&copy; {{ new Date().getFullYear() }}</span>
     </v-footer>
+    <LoadingOverlay />
   </v-app>
 </template>
 
@@ -133,16 +138,16 @@
 import { defineComponent, onMounted, Ref, ref, useStore, watch } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 import dayjs from 'dayjs'
+import LoadingOverlay from '../components/LoadingOverlay.vue'
 
 export default defineComponent({
+  components: { LoadingOverlay },
   setup (_props, context: any) {
     const drawer: Ref<Boolean> = ref(false)
-    const isSignedIn: Ref<Boolean> = ref(false)
     const projects: Ref<any> = ref([])
     const inAttendanceTime: Ref<any> = ref()
     const inAttendanceProject: Ref<any> = ref()
     const selectedProject: Ref<any> = ref({})
-    const currentUser: Ref<any> = ref(null)
     const store = useStore()
     const theme: Ref<boolean> = ref(true)
     const themeIcon: Ref<string> = ref('dark_mode')
@@ -152,21 +157,16 @@ export default defineComponent({
 
     const db = firebase.firestore()
 
-    // @ts-ignore
-    // console.log(store.state.project)
-
     const onChangeProject = (e: any) => {
-      console.log(e)
       store.dispatch('writeProject', e)
       onCheckInAttendanceProject()
       onCheckInAttendance()
-      // @ts-ignore
-      // console.log(store.state.project)
     }
 
     const signOut = () => {
       firebase.auth().signOut().then(() => {
         console.log('ログアウトしました')
+        store.dispatch('writeUser', null)
         // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
         location.href = '/login'
       }).catch((error) => {
@@ -192,7 +192,7 @@ export default defineComponent({
     const onCheckInAttendanceProject = () => {
       // in_attendanceから稼働情報を取得する
       // @ts-ignore
-      db.collection(`users/${currentUser.value.uid}/in_attendance_project`).onSnapshot((docs) => {
+      db.collection(`users/${store.state.user.uid}/in_attendance_project`).onSnapshot((docs) => {
         const inAttendanceProjectArray: any = []
         docs.forEach((doc) => {
           inAttendanceProjectArray.push({
@@ -213,7 +213,7 @@ export default defineComponent({
     const onCheckInAttendance = () => {
       // in_attendanceから稼働情報を取得する
       // @ts-ignore
-      db.collection(`users/${currentUser.value.uid}/projects/${store.state.project.id}/in_attendance`).onSnapshot((docs) => {
+      db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/in_attendance`).onSnapshot((docs) => {
         const inAttendanceArray: any = []
         inAttendanceTime.value = null
         docs.forEach((doc) => {
@@ -237,11 +237,8 @@ export default defineComponent({
       selectedProject.value = store.state.project
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
-          isSignedIn.value = true
-          currentUser.value = firebase.auth().currentUser
-          console.log(currentUser.value)
-
-          db.collection(`users/${currentUser.value.uid}/projects`).get().then((querySnapshot) => {
+          // @ts-ignore
+          db.collection(`users/${store.state.user.uid}/projects`).get().then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
               projects.value.push({
                 ...doc.data(),
@@ -252,7 +249,7 @@ export default defineComponent({
           onCheckInAttendanceProject()
           onCheckInAttendance()
         } else {
-          currentUser.value = {}
+          // TODO: ログインしてない時の処理
         }
       })
       onCheckIsPC()
@@ -317,12 +314,10 @@ export default defineComponent({
         }
       ],
       title: 'Vuetify.js',
-      isSignedIn,
       selectedProject,
       projects,
       inAttendanceTime,
       inAttendanceProject,
-      currentUser,
       onChangeProject,
       store,
       theme,

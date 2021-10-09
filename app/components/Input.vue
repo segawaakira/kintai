@@ -53,7 +53,6 @@
         <div id="map-canvas" />
       </div>
     </div>
-    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
@@ -63,7 +62,6 @@ import firebase from 'firebase'
 export default defineComponent({
   setup (_props, _context) {
     const store = useStore()
-    const currentUser: Ref<any> = ref(null)
     // @ts-ignore
     const currentProject: Ref<any> = ref(store.state.project)
     const db = firebase.firestore()
@@ -74,15 +72,14 @@ export default defineComponent({
     const description: Ref<string> = ref('')
     const isInAttendance: Ref<boolean> = ref(false)
 
-    const loading: Ref<boolean> = ref(false)
-
     // 出勤
     const attendance = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       const start = new Date()
       const end = new Date()
 
-      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`)
+      // @ts-ignore
+      db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`)
         .add({
           start,
           start_place_name: placeName.value,
@@ -97,7 +94,8 @@ export default defineComponent({
         .then((ref) => {
           console.log('Add ID: ', ref.id)
           // 稼働中の出勤情報をin_attendanceに記録する。
-          db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`)
+          // @ts-ignore
+          db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/in_attendance`)
             .add({
               item_id: ref.id,
               start,
@@ -113,37 +111,39 @@ export default defineComponent({
             .then((ref) => {
               console.log('Add ID: ', ref.id)
               // 稼働中のプロジェクト情報をin_attendance_projectに記録する。
-              db.collection(`users/${currentUser.value.uid}/in_attendance_project`)
+              // @ts-ignore
+              db.collection(`users/${store.state.user.uid}/in_attendance_project`)
                 .add({
                   item_id: currentProject.value.id,
                   name: currentProject.value.name
                 })
                 .then((ref) => {
                   console.log('Add ID: ', ref.id)
-                  loading.value = false
+                  store.dispatch('writeLoading', false)
                 })
                 .catch((error) => {
                   console.log(error)
-                  loading.value = false
+                  store.dispatch('writeLoading', false)
                 })
             })
             .catch((error) => {
               console.log(error)
-              loading.value = false
+              store.dispatch('writeLoading', false)
             })
         })
         .catch((error) => {
           console.log(error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
     // 退勤
     const departure = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       // in_attendanceから稼働情報を取得する
       const inAttendanceArray: any = []
-      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`).onSnapshot((docs) => {
+      // @ts-ignore
+      db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/in_attendance`).onSnapshot((docs) => {
         docs.forEach((doc) => {
           inAttendanceArray.push({
             ...doc.data(),
@@ -155,7 +155,8 @@ export default defineComponent({
         // 退勤情報をupdateで記録する
         const inAttendance: any = inAttendanceArray[0]
         const end = new Date()
-        db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(inAttendance.item_id)
+        // @ts-ignore
+        db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(inAttendance.item_id)
           .update({
             start: inAttendance.start,
             start_place_name: inAttendance.start_place_name,
@@ -169,27 +170,28 @@ export default defineComponent({
           })
           .then(() => {
             // in_attendanceを削除する。
-            db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`).doc(inAttendance.id)
+            // @ts-ignore
+            db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/in_attendance`).doc(inAttendance.id)
               .delete()
               .then((ref) => {
                 console.log('del: ', ref)
                 description.value = ''
-                loading.value = false
+                store.dispatch('writeLoading', false)
               })
               .catch((error) => {
                 console.log(error)
-                loading.value = false
+                store.dispatch('writeLoading', false)
               })
           })
           .catch((error) => {
             console.log(error)
-            loading.value = false
+            store.dispatch('writeLoading', false)
           })
       })
     }
 
     const getLocation = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       navigator.geolocation.getCurrentPosition(
         // [第1引数] 取得に成功した場合の関数
         function (position) {
@@ -234,7 +236,7 @@ export default defineComponent({
             // 変数に代入
             placeLat.value = lat
             placeLng.value = lng
-            loading.value = false
+            store.dispatch('writeLoading', false)
           })
         },
 
@@ -260,7 +262,7 @@ export default defineComponent({
           // エラーメッセージ
           const errorMessage = '[エラー番号: ' + errorNo + ']\n' + errorInfo[errorNo]
           console.log(errorMessage)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         },
 
         // [第3引数] オプション
@@ -276,8 +278,8 @@ export default defineComponent({
     onMounted(() => {
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
-          currentUser.value = firebase.auth().currentUser
-          db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`).onSnapshot((docs) => {
+          // @ts-ignore
+          db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/in_attendance`).onSnapshot((docs) => {
             const inAttendanceArray: any = []
             isInAttendance.value = false
             docs.forEach((doc) => {
@@ -291,8 +293,6 @@ export default defineComponent({
               description.value = inAttendanceArray[0].description
             }
           })
-        } else {
-          currentUser.value = {}
         }
       })
       getLocation()
@@ -301,15 +301,13 @@ export default defineComponent({
     return {
       attendance,
       departure,
-      currentUser,
       currentProject,
       getLocation,
       placeName,
       placeLat,
       placeLng,
       description,
-      isInAttendance,
-      loading
+      isInAttendance
     }
   }
 })

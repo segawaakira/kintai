@@ -1,7 +1,5 @@
 <template>
   <div>
-    <!-- <pre>{{ user }}</pre> -->
-
     <v-form v-model="valid" ref="myForm" lazy-validation>
       <v-container>
         <v-row>
@@ -35,19 +33,16 @@
     >
       退会する
     </v-btn>
-    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref } from '@nuxtjs/composition-api'
+import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
-    const isSignedIn: Ref<Boolean> = ref(false)
+    const store = useStore()
     const currentUser: Ref<any> = ref(null)
-    const loading: Ref<boolean> = ref(false)
-    const user: Ref<any> = ref({})
     const valid: Ref<boolean> = ref(true)
     const myForm = ref(null)
     const email: Ref<string> = ref('')
@@ -58,50 +53,43 @@ export default defineComponent({
     const isEditEmail: Ref<boolean> = ref(false)
 
     const save = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       currentUser.value.updateEmail(email.value)
         .then(() => {
           console.log('メアドを変更しました')
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
         .catch((error: any) => {
           console.log('メアドを変更失敗しました', error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
     const leave = () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       currentUser.value.delete()
         .then(() => {
           console.log('退会しました')
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
         .catch((error: any) => {
           console.log('退会失敗しました', error)
-          loading.value = false
+          store.dispatch('writeLoading', false)
         })
     }
 
     onMounted(() => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
-          isSignedIn.value = true
           currentUser.value = firebase.auth().currentUser
-          user.value = data
           email.value = data.email as string
-        } else {
-          isSignedIn.value = false
-          user.value = {}
         }
-        loading.value = false
+        store.dispatch('writeLoading', false)
       })
     })
 
     return {
-      user,
-      isSignedIn,
       valid,
       email,
       emailRules,
@@ -109,8 +97,7 @@ export default defineComponent({
       myForm,
       save,
       leave,
-      currentUser,
-      loading
+      currentUser
     }
   }
 })

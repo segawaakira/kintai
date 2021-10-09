@@ -65,7 +65,6 @@
     >
       onCreateExcel
     </v-btn>
-    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
@@ -77,14 +76,12 @@ const excelJs = require('exceljs')
 export default defineComponent({
   setup (_props, context) {
     const store = useStore()
-    const currentUser: Ref<any> = ref(null)
     const currentYear: Ref<number> = ref(new Date().getFullYear())
     const currentMonth: Ref<number> = ref(new Date().getMonth() + 1)
     const totalWorkedHourOfDay: Ref<any> = ref([])
     const totalWorkedHourOfMonth: Ref<number> = ref(0)
     const db = firebase.firestore()
     const items: Ref<any> = ref([])
-    const loading: Ref<boolean> = ref(false)
 
     /**
      * 指定月の日数を取得
@@ -179,8 +176,8 @@ export default defineComponent({
 
     const getItems = () => {
       // @ts-ignore
-      db.collection(`users/${currentUser.value.uid}/projects/${store.state.project.id}/items`).onSnapshot((docs) => {
-        loading.value = true
+      db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/items`).onSnapshot((docs) => {
+        store.dispatch('writeLoading', true)
         items.value = []
         docs.forEach((doc) => {
           items.value.push({
@@ -214,7 +211,7 @@ export default defineComponent({
           }
           totalWorkedHourOfMonth.value += workHourTotal
         })
-        loading.value = false
+        store.dispatch('writeLoading', false)
       })
     }
 
@@ -254,7 +251,7 @@ export default defineComponent({
     }
 
     const onCreateExcel = async () => {
-      loading.value = true
+      store.dispatch('writeLoading', true)
       const itemsExcel: any[] = []
       items.value.forEach((item: any) => {
         const start = new Date(item.start.seconds * 1000)
@@ -351,18 +348,11 @@ export default defineComponent({
       a.click()
       // ダウンロード後は不要なのでaタグを除去
       a.remove()
-      loading.value = false
+      store.dispatch('writeLoading', false)
     }
 
     onMounted(() => {
-      firebase.auth().onAuthStateChanged((data) => {
-        if (data) {
-          currentUser.value = firebase.auth().currentUser
-          getItems()
-        } else {
-          currentUser.value = {}
-        }
-      })
+      getItems()
     })
 
     return {
@@ -378,8 +368,7 @@ export default defineComponent({
       onClickDetail,
       totalWorkedHourOfDay,
       totalWorkedHourOfMonth,
-      onCreateExcel,
-      loading
+      onCreateExcel
     }
   }
 })
