@@ -48,13 +48,12 @@
     >
       loginGoogle
     </v-btn>
+    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, Ref, ref } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
-// import axios from 'axios'
-// import { Client } from '@googlemaps/google-maps-services-js'
 
 export default defineComponent({
   setup (_props, _context) {
@@ -72,21 +71,37 @@ export default defineComponent({
       (v: any) => !!v || 'password is required'
     ]
     const password: Ref<string> = ref('')
+    const loading: Ref<boolean> = ref(false)
 
     const loginGoogle = () => {
+      loading.value = true
       const provider = new firebase.auth.GoogleAuthProvider()
       firebase.auth().signInWithRedirect(provider)
         .then((res) => {
           console.log('ログインしました')
           console.log(res)
+          loading.value = false
+        })
+        .catch((error) => {
+          console.log(error)
+          loading.value = false
         })
     }
 
-    const createUserByEmail = async () => {
-      const res = await firebase.auth().createUserWithEmailAndPassword(email.value, password.value)
-      user.value = res.user
-      // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
-      location.href = '/projects'
+    const createUserByEmail = () => {
+      loading.value = true
+      firebase.auth().createUserWithEmailAndPassword(email.value, password.value)
+        .then((res) => {
+          console.log('作成しました')
+          console.log(res)
+          user.value = res.user
+          // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
+          location.href = '/projects'
+        })
+        .catch((error) => {
+          console.log(error)
+          loading.value = false
+        })
     }
 
     onMounted(() => {
@@ -114,7 +129,8 @@ export default defineComponent({
       show,
       passwordRules,
       password,
-      myForm
+      myForm,
+      loading
     }
   }
 })

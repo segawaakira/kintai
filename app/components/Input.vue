@@ -2,15 +2,15 @@
   <div>
     <v-btn
       type="button"
-      @click="attendance()"
       :disabled="isInAttendance"
+      @click="attendance()"
     >
       出勤
     </v-btn>
     <v-btn
       type="button"
-      @click="departure()"
       :disabled="!isInAttendance"
+      @click="departure()"
     >
       退勤
     </v-btn>
@@ -78,11 +78,11 @@ export default defineComponent({
 
     // 出勤
     const attendance = () => {
+      loading.value = true
       const start = new Date()
       const end = new Date()
 
-      const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`)
-      dbUsers
+      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`)
         .add({
           start,
           start_place_name: placeName.value,
@@ -95,10 +95,9 @@ export default defineComponent({
           description: description.value
         })
         .then((ref) => {
-          // 稼働中の出勤情報をin_attendanceに記録する。
           console.log('Add ID: ', ref.id)
-          const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`)
-          dbUsers
+          // 稼働中の出勤情報をin_attendanceに記録する。
+          db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`)
             .add({
               item_id: ref.id,
               start,
@@ -113,22 +112,35 @@ export default defineComponent({
             })
             .then((ref) => {
               console.log('Add ID: ', ref.id)
+              // 稼働中のプロジェクト情報をin_attendance_projectに記録する。
+              db.collection(`users/${currentUser.value.uid}/in_attendance_project`)
+                .add({
+                  item_id: currentProject.value.id,
+                  name: currentProject.value.name
+                })
+                .then((ref) => {
+                  console.log('Add ID: ', ref.id)
+                  loading.value = false
+                })
+                .catch((error) => {
+                  console.log(error)
+                  loading.value = false
+                })
             })
-          // 稼働中のプロジェクト情報をin_attendance_projectに記録する。
-          const dbUsers2 = db.collection(`users/${currentUser.value.uid}/in_attendance_project`)
-          dbUsers2
-            .add({
-              item_id: currentProject.value.id,
-              name: currentProject.value.name
+            .catch((error) => {
+              console.log(error)
+              loading.value = false
             })
-            .then((ref) => {
-              console.log('Add ID: ', ref.id)
-            })
+        })
+        .catch((error) => {
+          console.log(error)
+          loading.value = false
         })
     }
 
     // 退勤
     const departure = () => {
+      loading.value = true
       // in_attendanceから稼働情報を取得する
       const inAttendanceArray: any = []
       db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`).onSnapshot((docs) => {
@@ -161,8 +173,17 @@ export default defineComponent({
               .delete()
               .then((ref) => {
                 console.log('del: ', ref)
+                description.value = ''
+                loading.value = false
               })
-            description.value = ''
+              .catch((error) => {
+                console.log(error)
+                loading.value = false
+              })
+          })
+          .catch((error) => {
+            console.log(error)
+            loading.value = false
           })
       })
     }
@@ -207,10 +228,6 @@ export default defineComponent({
             // @ts-ignore
             if (status === google.maps.GeocoderStatus.OK) {
               placeName.value = results[0].formatted_address // 一番最初の住所を登録する。
-              // for (const i in results) {
-              //   console.log(results[i].formatted_address)
-              //   document.getElementById('address').innerHTML += (results[i].formatted_address + '<br />')
-              // }
             } else {
               window.alert('google.maps.GeocoderStatus is not OK. due to ' + status)
             }
@@ -242,8 +259,6 @@ export default defineComponent({
 
           // エラーメッセージ
           const errorMessage = '[エラー番号: ' + errorNo + ']\n' + errorInfo[errorNo]
-
-          // アラート表示
           console.log(errorMessage)
           loading.value = false
         },
@@ -303,6 +318,6 @@ export default defineComponent({
 <style>
 #map-canvas {
   width: 100%;
-  height: 100vh;
+  height: 320px;
 }
 </style>

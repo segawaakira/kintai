@@ -88,6 +88,7 @@
     >
       カレンダーに戻る
     </v-btn>
+    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
@@ -102,6 +103,7 @@ export default defineComponent({
     // @ts-ignore
     const currentProject: Ref<any> = ref(store.state.project)
     const db = firebase.firestore()
+    const loading: Ref<boolean> = ref(false)
 
     const startTime: Ref<any> = ref()
     const start: Ref<any> = ref()
@@ -117,6 +119,7 @@ export default defineComponent({
 
     // 更新
     const update = () => {
+      loading.value = true
       // 退勤情報をupdateで記録する
       db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
         .update({
@@ -132,11 +135,17 @@ export default defineComponent({
         })
         .then(() => {
           console.log('更新した')
+          loading.value = false
+        })
+        .catch((error) => {
+          console.log(error)
+          loading.value = false
         })
     }
 
     // 削除
     const onDelete = () => {
+      loading.value = true
       db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
         .delete()
         .then(() => {
@@ -144,39 +153,49 @@ export default defineComponent({
           // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
           location.href = '/calendar'
         })
+        .catch((error) => {
+          console.log(error)
+          loading.value = false
+        })
     }
 
     onMounted(() => {
       // 今登録されている稼働情報を取得
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
+          loading.value = true
           currentUser.value = firebase.auth().currentUser
           const docRef = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
 
-          docRef.get().then((doc) => {
-            if (doc.exists) {
-              console.log('Document data:', doc.data())
-              const data: any = doc.data()
-              startTime.value = dayjs(new Date(data.start.seconds * 1000)).format('YYYY-MM-DDTHH:MM')
-              start.value = data.start
-              startPlaceName.value = data.start_place_name
-              startPlaceLat.value = data.start_place_lat
-              startPlaceLng.value = data.start_place_lng
-              endTime.value = dayjs(new Date(data.end.seconds * 1000)).format('YYYY-MM-DDTHH:MM')
-              end.value = data.end
-              endPlaceName.value = data.end_place_name
-              endPlaceLat.value = data.end_place_lat
-              endPlaceLng.value = data.end_place_lng
-              description.value = data.description
-            } else {
-              // doc.data() will be undefined in this case
-              console.log('No such document!')
-            }
-          }).catch((error) => {
-            console.log('Error getting document:', error)
-          })
+          docRef.get()
+            .then((doc) => {
+              if (doc.exists) {
+                console.log('Document data:', doc.data())
+                const data: any = doc.data()
+                startTime.value = dayjs(new Date(data.start.seconds * 1000)).format('YYYY-MM-DDTHH:MM')
+                start.value = data.start
+                startPlaceName.value = data.start_place_name
+                startPlaceLat.value = data.start_place_lat
+                startPlaceLng.value = data.start_place_lng
+                endTime.value = dayjs(new Date(data.end.seconds * 1000)).format('YYYY-MM-DDTHH:MM')
+                end.value = data.end
+                endPlaceName.value = data.end_place_name
+                endPlaceLat.value = data.end_place_lat
+                endPlaceLng.value = data.end_place_lng
+                description.value = data.description
+              } else {
+                // doc.data() will be undefined in this case
+                console.log('No such document!')
+              }
+              loading.value = false
+            })
+            .catch((error) => {
+              console.log('Error getting document:', error)
+              loading.value = false
+            })
         } else {
           currentUser.value = {}
+          loading.value = false
         }
       })
     })
@@ -196,7 +215,8 @@ export default defineComponent({
       endPlaceName,
       endPlaceLat,
       endPlaceLng,
-      description
+      description,
+      loading
     }
   }
 })

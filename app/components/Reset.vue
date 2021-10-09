@@ -24,17 +24,17 @@
         </v-btn>
       </v-container>
     </v-form>
+    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, Ref, ref } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
-// import axios from 'axios'
-// import { Client } from '@googlemaps/google-maps-services-js'
 
 export default defineComponent({
   setup (_props, _context) {
     const valid: Ref<boolean> = ref(true)
+    const loading: Ref<boolean> = ref(false)
     const myForm = ref(null)
     const email: Ref<string> = ref('')
     const emailRules = [
@@ -44,11 +44,16 @@ export default defineComponent({
     const isEditEmail: Ref<boolean> = ref(false)
 
     const reset = () => {
-      firebase.auth().sendPasswordResetEmail(email.value).then(() => {
-        console.log('リセットメールを送信しました')
-      }).catch((error) => {
-        console.log('リセットメールを送信失敗しました', error)
-      })
+      loading.value = true
+      firebase.auth().sendPasswordResetEmail(email.value)
+        .then(() => {
+          console.log('リセットメールを送信しました')
+          loading.value = false
+        })
+        .catch((error) => {
+          console.log('リセットメールを送信失敗しました', error)
+          loading.value = false
+        })
     }
 
     onMounted(() => {
@@ -60,7 +65,8 @@ export default defineComponent({
       emailRules,
       isEditEmail,
       myForm,
-      reset
+      reset,
+      loading
     }
   }
 })
