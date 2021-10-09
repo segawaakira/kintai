@@ -115,7 +115,7 @@
           dense
           type="info"
         >
-          {{ selectedProject.name }}で{{ inAttendanceTime }}〜稼働中。<nuxt-link v-if="isShowInputLink" to="/input">退勤はこちらから</nuxt-link>
+          {{ inAttendanceProject.name }}で{{ inAttendanceTime }}〜稼働中。<nuxt-link v-if="isShowInputLink" to="/input">退勤はこちらから</nuxt-link>
         </v-alert>
         <Nuxt />
       </v-container>
@@ -140,6 +140,7 @@ export default defineComponent({
     const isSignedIn: Ref<Boolean> = ref(false)
     const projects: Ref<any> = ref([])
     const inAttendanceTime: Ref<any> = ref()
+    const inAttendanceProject: Ref<any> = ref()
     const selectedProject: Ref<any> = ref({})
     const currentUser: Ref<any> = ref(null)
     const store = useStore()
@@ -155,7 +156,10 @@ export default defineComponent({
     // console.log(store.state.project)
 
     const onChangeProject = (e: any) => {
+      console.log(e)
       store.dispatch('writeProject', e)
+      onCheckInAttendanceProject()
+      onCheckInAttendance()
       // @ts-ignore
       // console.log(store.state.project)
     }
@@ -183,6 +187,27 @@ export default defineComponent({
       window.onresize = () => {
         onCheckIsPC()
       }
+    }
+
+    const onCheckInAttendanceProject = () => {
+      // in_attendanceから稼働情報を取得する
+      // @ts-ignore
+      db.collection(`users/${currentUser.value.uid}/in_attendance_project`).onSnapshot((docs) => {
+        const inAttendanceProjectArray: any = []
+        docs.forEach((doc) => {
+          inAttendanceProjectArray.push({
+            ...doc.data(),
+            id: doc.id
+          })
+        })
+        if (inAttendanceProjectArray.length) {
+          // const obj = {
+          //   id: inAttendanceProjectArray[0].item_id,
+          //   name: inAttendanceProjectArray[0].name
+          // }
+          inAttendanceProject.value = inAttendanceProjectArray[0]
+        }
+      })
     }
 
     const onCheckInAttendance = () => {
@@ -224,6 +249,7 @@ export default defineComponent({
               })
             })
           })
+          onCheckInAttendanceProject()
           onCheckInAttendance()
         } else {
           currentUser.value = {}
@@ -295,6 +321,7 @@ export default defineComponent({
       selectedProject,
       projects,
       inAttendanceTime,
+      inAttendanceProject,
       currentUser,
       onChangeProject,
       store,
