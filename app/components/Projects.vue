@@ -18,9 +18,9 @@
         </v-row>
         <v-btn
           type="button"
-          @click="submit()"
+          @click="createProject()"
         >
-          submit
+          createProject
         </v-btn>
       </v-container>
     </v-form>
@@ -60,6 +60,7 @@
         </v-list-item>
       </template>
     </v-list>
+    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
@@ -71,32 +72,49 @@ export default defineComponent({
     const currentUser: Ref<any> = ref(null)
     const projects: Ref<any> = ref([])
     const db = firebase.firestore()
+    const loading: Ref<boolean> = ref(false)
     const projectNameRules = [
       (v: any) => !!v || 'projectName is required'
     ]
     const projectName: Ref<string> = ref('')
-    const submit = () => {
-      const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/`)
-      dbUsers
+
+    const createProject = () => {
+      loading.value = true
+      db.collection(`users/${currentUser.value.uid}/projects/`)
         .add({
           name: projectName.value
         })
         .then((ref) => {
           console.log('Add ID: ', ref.id)
+          loading.value = false
+        })
+        .catch((error) => {
+          console.log(error)
+          loading.value = false
         })
     }
+
     const deleteProject = (id: string) => {
+      loading.value = true
       db.collection(`users/${currentUser.value.uid}/projects/`).doc(id)
         .delete()
         .then((ref) => {
           console.log('del: ', ref)
+          loading.value = false
+        })
+        .catch((error) => {
+          console.log(error)
+          loading.value = false
         })
     }
+
     const editProjectId: Ref<string | null> = ref(null)
     const editProject = (id: string) => {
       editProjectId.value = id
     }
+
     const saveProject = (id: string, name: string) => {
+      loading.value = true
       db.collection(`users/${currentUser.value.uid}/projects/`).doc(id)
         .update({
           name
@@ -104,10 +122,16 @@ export default defineComponent({
         .then((ref) => {
           console.log('del: ', ref)
           editProjectId.value = null
+          loading.value = false
+        })
+        .catch((error) => {
+          console.log(error)
+          loading.value = false
         })
     }
 
     onMounted(() => {
+      loading.value = true
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           currentUser.value = firebase.auth().currentUser
@@ -119,15 +143,17 @@ export default defineComponent({
                 id: doc.id
               })
             })
+            loading.value = false
           })
         } else {
           currentUser.value = {}
+          loading.value = false
         }
       })
     })
 
     return {
-      submit,
+      createProject,
       deleteProject,
       editProject,
       saveProject,
@@ -135,7 +161,8 @@ export default defineComponent({
       currentUser,
       projects,
       projectName,
-      projectNameRules
+      projectNameRules,
+      loading
     }
   }
 })

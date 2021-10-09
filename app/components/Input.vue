@@ -2,15 +2,15 @@
   <div>
     <v-btn
       type="button"
-      @click="attendance()"
       :disabled="isInAttendance"
+      @click="attendance()"
     >
       出勤
     </v-btn>
     <v-btn
       type="button"
-      @click="departure()"
       :disabled="!isInAttendance"
+      @click="departure()"
     >
       退勤
     </v-btn>
@@ -53,6 +53,7 @@
         <div id="map-canvas" />
       </div>
     </div>
+    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
@@ -73,13 +74,15 @@ export default defineComponent({
     const description: Ref<string> = ref('')
     const isInAttendance: Ref<boolean> = ref(false)
 
+    const loading: Ref<boolean> = ref(false)
+
     // 出勤
     const attendance = () => {
+      loading.value = true
       const start = new Date()
       const end = new Date()
 
-      const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`)
-      dbUsers
+      db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/items`)
         .add({
           start,
           start_place_name: placeName.value,
@@ -92,10 +95,9 @@ export default defineComponent({
           description: description.value
         })
         .then((ref) => {
-          // 稼働中の出勤情報をin_attendanceに記録する。
           console.log('Add ID: ', ref.id)
-          const dbUsers = db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`)
-          dbUsers
+          // 稼働中の出勤情報をin_attendanceに記録する。
+          db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`)
             .add({
               item_id: ref.id,
               start,
@@ -110,22 +112,35 @@ export default defineComponent({
             })
             .then((ref) => {
               console.log('Add ID: ', ref.id)
+              // 稼働中のプロジェクト情報をin_attendance_projectに記録する。
+              db.collection(`users/${currentUser.value.uid}/in_attendance_project`)
+                .add({
+                  item_id: currentProject.value.id,
+                  name: currentProject.value.name
+                })
+                .then((ref) => {
+                  console.log('Add ID: ', ref.id)
+                  loading.value = false
+                })
+                .catch((error) => {
+                  console.log(error)
+                  loading.value = false
+                })
             })
-          // 稼働中のプロジェクト情報をin_attendance_projectに記録する。
-          const dbUsers2 = db.collection(`users/${currentUser.value.uid}/in_attendance_project`)
-          dbUsers2
-            .add({
-              item_id: currentProject.value.id,
-              name: currentProject.value.name
+            .catch((error) => {
+              console.log(error)
+              loading.value = false
             })
-            .then((ref) => {
-              console.log('Add ID: ', ref.id)
-            })
+        })
+        .catch((error) => {
+          console.log(error)
+          loading.value = false
         })
     }
 
     // 退勤
     const departure = () => {
+      loading.value = true
       // in_attendanceから稼働情報を取得する
       const inAttendanceArray: any = []
       db.collection(`users/${currentUser.value.uid}/projects/${currentProject.value.id}/in_attendance`).onSnapshot((docs) => {
@@ -158,13 +173,23 @@ export default defineComponent({
               .delete()
               .then((ref) => {
                 console.log('del: ', ref)
+                description.value = ''
+                loading.value = false
               })
-            description.value = ''
+              .catch((error) => {
+                console.log(error)
+                loading.value = false
+              })
+          })
+          .catch((error) => {
+            console.log(error)
+            loading.value = false
           })
       })
     }
 
     const getLocation = () => {
+      loading.value = true
       navigator.geolocation.getCurrentPosition(
         // [第1引数] 取得に成功した場合の関数
         function (position) {
@@ -174,14 +199,6 @@ export default defineComponent({
           // データの整理
           const lat = data.latitude
           const lng = data.longitude
-          // const alt = data.altitude
-          // const accLatlng = data.accuracy
-          // const accAlt = data.altitudeAccuracy
-          // const heading = data.heading
-          // const speed = data.speed
-
-          // HTMLへの書き出し
-          // document.getElementById('result').innerHTML = '<dl><dt>緯度</dt><dd>' + lat + '</dd><dt>経度</dt><dd>' + lng + '</dd><dt>高度</dt><dd>' + alt + '</dd><dt>緯度、経度の精度</dt><dd>' + accLatlng + '</dd><dt>高度の精度</dt><dd>' + accAlt + '</dd><dt>方角</dt><dd>' + heading + '</dd><dt>速度</dt><dd>' + speed + '</dd></dl>'
 
           // 位置情報
           // @ts-ignore
@@ -211,18 +228,14 @@ export default defineComponent({
             // @ts-ignore
             if (status === google.maps.GeocoderStatus.OK) {
               placeName.value = results[0].formatted_address // 一番最初の住所を登録する。
-              // for (const i in results) {
-              //   console.log(results[i].formatted_address)
-              //   document.getElementById('address').innerHTML += (results[i].formatted_address + '<br />')
-              // }
             } else {
               window.alert('google.maps.GeocoderStatus is not OK. due to ' + status)
             }
+            // 変数に代入
+            placeLat.value = lat
+            placeLng.value = lng
+            loading.value = false
           })
-
-          // 変数に代入
-          placeLat.value = lat
-          placeLng.value = lng
         },
 
         // [第2引数] 取得に失敗した場合の関数
@@ -246,12 +259,8 @@ export default defineComponent({
 
           // エラーメッセージ
           const errorMessage = '[エラー番号: ' + errorNo + ']\n' + errorInfo[errorNo]
-
-          // アラート表示
-          alert(errorMessage)
-
-          // HTMLに書き出し
-          // document.getElementById('result').innerHTML = errorMessage
+          console.log(errorMessage)
+          loading.value = false
         },
 
         // [第3引数] オプション
@@ -299,7 +308,8 @@ export default defineComponent({
       placeLat,
       placeLng,
       description,
-      isInAttendance
+      isInAttendance,
+      loading
     }
   }
 })
@@ -308,6 +318,6 @@ export default defineComponent({
 <style>
 #map-canvas {
   width: 100%;
-  height: 100vh;
+  height: 320px;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <pre>{{ user }}</pre>
+    <!-- <pre>{{ user }}</pre> -->
 
     <v-form v-model="valid" ref="myForm" lazy-validation>
       <v-container>
@@ -35,18 +35,18 @@
     >
       退会する
     </v-btn>
+    <loading-overlay :p-loading="loading" />
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, Ref, ref } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
-// import axios from 'axios'
-// import { Client } from '@googlemaps/google-maps-services-js'
 
 export default defineComponent({
   setup (_props, _context) {
     const isSignedIn: Ref<Boolean> = ref(false)
     const currentUser: Ref<any> = ref(null)
+    const loading: Ref<boolean> = ref(false)
     const user: Ref<any> = ref({})
     const valid: Ref<boolean> = ref(true)
     const myForm = ref(null)
@@ -58,22 +58,33 @@ export default defineComponent({
     const isEditEmail: Ref<boolean> = ref(false)
 
     const save = () => {
-      currentUser.value.updateEmail(email.value).then(() => {
-        console.log('メアドを変更しました')
-      }).catch((error: any) => {
-        console.log('メアドを変更失敗しました', error)
-      })
+      loading.value = true
+      currentUser.value.updateEmail(email.value)
+        .then(() => {
+          console.log('メアドを変更しました')
+          loading.value = false
+        })
+        .catch((error: any) => {
+          console.log('メアドを変更失敗しました', error)
+          loading.value = false
+        })
     }
 
     const leave = () => {
-      currentUser.value.delete().then(() => {
-        console.log('退会しました')
-      }).catch((error: any) => {
-        console.log('退会失敗しました', error)
-      })
+      loading.value = true
+      currentUser.value.delete()
+        .then(() => {
+          console.log('退会しました')
+          loading.value = false
+        })
+        .catch((error: any) => {
+          console.log('退会失敗しました', error)
+          loading.value = false
+        })
     }
 
     onMounted(() => {
+      loading.value = true
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           isSignedIn.value = true
@@ -84,6 +95,7 @@ export default defineComponent({
           isSignedIn.value = false
           user.value = {}
         }
+        loading.value = false
       })
     })
 
@@ -97,7 +109,8 @@ export default defineComponent({
       myForm,
       save,
       leave,
-      currentUser
+      currentUser,
+      loading
     }
   }
 })
