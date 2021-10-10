@@ -128,11 +128,9 @@
       :absolute="!fixed"
       app
     >
-      <v-btn color="success" @click="onClickOpen">OpenConfirm</v-btn>
       <span>&copy; {{ new Date().getFullYear() }}</span>
     </v-footer>
     <LoadingOverlay />
-    <Confirm ref="confirmRef" />
   </v-app>
 </template>
 
@@ -141,10 +139,9 @@ import { defineComponent, onMounted, Ref, ref, useStore, watch } from '@nuxtjs/c
 import firebase from 'firebase'
 import dayjs from 'dayjs'
 import LoadingOverlay from '../components/LoadingOverlay.vue'
-import Confirm from '../components/Confirm.vue'
 
 export default defineComponent({
-  components: { LoadingOverlay, Confirm },
+  components: { LoadingOverlay },
   setup (_props, context: any) {
     const drawer: Ref<Boolean> = ref(false)
     const projects: Ref<any> = ref([])
@@ -159,17 +156,6 @@ export default defineComponent({
     const isPC: Ref<boolean> = ref(true)
 
     const db = firebase.firestore()
-    // @ts-ignore
-    const confirmRef = ref(null)
-
-    const onClickOpen = async () => {
-      console.log('--onClickOpen')
-      if (await confirmRef.value.open('ああああ', 'Are you sure?', { color: 'red' })) {
-        console.log('--yes')
-      } else {
-        console.log('--no')
-      }
-    }
 
     const onChangeProject = (e: any) => {
       store.dispatch('writeProject', e)
@@ -340,9 +326,7 @@ export default defineComponent({
       isShowSelectedProject,
       isShowInputLink,
       isPC,
-      dayjs,
-      onClickOpen,
-      confirmRef
+      dayjs
     }
   }
 })

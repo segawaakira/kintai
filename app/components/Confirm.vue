@@ -1,30 +1,14 @@
 <template>
-  <v-dialog v-model="dialog" :max-width="options.width">
-    <v-card>
-      <v-toolbar dark :color="options.color" dense>
-        <v-toolbar-title class="white--text">{{ title }}</v-toolbar-title>
-      </v-toolbar>
+  <v-dialog v-model="dialog" width="320" persistent>
+    <v-card class="pa-8">
       <v-card-text>{{ message }}</v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
-        <v-btn color="primary darken-1" @click.native="agree">Yes</v-btn>
-        <v-btn color="grey" @click.native="cancel">Cancel</v-btn>
+        <v-btn v-if="isConfirm" color="grey" @click.native="cancel">CANCEL</v-btn>
+        <v-btn color="primary darken-1" @click.native="agree">OK</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
-  <!-- <v-dialog v-model="dialog" :max-width="options.width" @keydown.esc="cancel">
-    <v-card>
-      <v-toolbar dark :color="options.color" dense flat>
-        <v-toolbar-title class="white--text">{{ title }}</v-toolbar-title>
-      </v-toolbar>
-      <v-card-text v-show="!!message">{{ message }}</v-card-text>
-      <v-card-actions class="pt-0">
-        <v-spacer></v-spacer>
-        <v-btn color="primary darken-1" flat="flat" @click.native="agree">Yes</v-btn>
-        <v-btn color="grey" flat="flat" @click.native="cancel">Cancel</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog> -->
 </template>
 <script lang="ts">
 import { defineComponent, Ref, ref } from '@nuxtjs/composition-api'
@@ -35,17 +19,12 @@ export default defineComponent({
     const resolve: Ref<any> = ref(null)
     const reject: Ref<any> = ref(null)
     const message: Ref<any> = ref(null)
-    const title: Ref<any> = ref(null)
-    const options: Ref<any> = ref({
-      color: 'primary',
-      width: 290
-    })
+    const isConfirm: Ref<boolean> = ref(true)
 
-    const open = (_title: any, _message: any, _options: any) => {
+    const open = (_message: any, _isConfirm: boolean) => {
       dialog.value = true
-      title.value = _title
       message.value = _message
-      options.value = Object.assign(options.value, _options)
+      isConfirm.value = _isConfirm
       return new Promise((_resolve: any, _reject: any) => {
         resolve.value = _resolve
         reject.value = _reject
@@ -65,8 +44,7 @@ export default defineComponent({
       resolve,
       reject,
       message,
-      title,
-      options,
+      isConfirm,
       open,
       agree,
       cancel

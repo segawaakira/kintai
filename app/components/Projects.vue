@@ -60,6 +60,7 @@
         </v-list-item>
       </template>
     </v-list>
+    <Confirm ref="confirmRef" />
   </div>
 </template>
 <script lang="ts">
@@ -75,6 +76,7 @@ export default defineComponent({
       (v: any) => !!v || 'projectName is required'
     ]
     const projectName: Ref<string> = ref('')
+    const confirmRef = ref(null)
 
     const createProject = () => {
       store.dispatch('writeLoading', true)
@@ -93,19 +95,21 @@ export default defineComponent({
         })
     }
 
-    const deleteProject = (id: string) => {
-      store.dispatch('writeLoading', true)
-      // @ts-ignore
-      db.collection(`users/${store.state.user.uid}/projects/`).doc(id)
-        .delete()
-        .then((ref) => {
-          console.log('del: ', ref)
-          store.dispatch('writeLoading', false)
-        })
-        .catch((error) => {
-          console.log(error)
-          store.dispatch('writeLoading', false)
-        })
+    const deleteProject = async (id: string) => {
+      if (await confirmRef.value.open('本当に削除しますか？', true)) {
+        store.dispatch('writeLoading', true)
+        // @ts-ignore
+        db.collection(`users/${store.state.user.uid}/projects/`).doc(id)
+          .delete()
+          .then((ref) => {
+            console.log('del: ', ref)
+            store.dispatch('writeLoading', false)
+          })
+          .catch((error) => {
+            console.log(error)
+            store.dispatch('writeLoading', false)
+          })
+      }
     }
 
     const editProjectId: Ref<string | null> = ref(null)
@@ -120,10 +124,12 @@ export default defineComponent({
         .update({
           name
         })
-        .then((ref) => {
+        .then(async (ref) => {
           console.log('del: ', ref)
           editProjectId.value = null
-          store.dispatch('writeLoading', false)
+          if (await confirmRef.value.open('保存しました', false)) {
+            store.dispatch('writeLoading', false)
+          }
         })
         .catch((error) => {
           console.log(error)
@@ -160,7 +166,8 @@ export default defineComponent({
       editProjectId,
       projects,
       projectName,
-      projectNameRules
+      projectNameRules,
+      confirmRef
     }
   }
 })
