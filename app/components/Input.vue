@@ -1,39 +1,41 @@
 <template>
   <div>
-    <v-btn
-      type="button"
-      :disabled="isInAttendance"
-      @click="attendance()"
-    >
-      出勤
-    </v-btn>
-    <v-btn
-      type="button"
-      :disabled="!isInAttendance"
-      @click="departure()"
-    >
-      退勤
-    </v-btn>
+    <div v-if="store.state.project">
+      <v-btn
+        type="button"
+        :disabled="isInAttendance"
+        @click="attendance()"
+      >
+        出勤
+      </v-btn>
+      <v-btn
+        type="button"
+        :disabled="!isInAttendance"
+        @click="departure()"
+      >
+        退勤
+      </v-btn>
 
-    <hr>
+      <hr>
 
-    <v-form ref="myForm" lazy-validation>
-      <v-container>
-        <v-row>
-          <v-col
-            cols="12"
-            sm="12"
-            md="12"
-          >
-            <v-text-field
-              v-model="description"
-              label="やること・やったことなど"
-              required
-            />
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-form>
+      <v-form ref="myForm" lazy-validation>
+        <v-container>
+          <v-row>
+            <v-col
+              cols="12"
+              sm="12"
+              md="12"
+            >
+              <v-text-field
+                v-model="description"
+                label="やること・やったことなど"
+                required
+              />
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-form>
+    </div>
 
     <hr>
 
@@ -63,8 +65,6 @@ import firebase from 'firebase'
 export default defineComponent({
   setup (_props, _context) {
     const store = useStore()
-    // @ts-ignore
-    const currentProject: Ref<any> = ref(store.state.project)
     const db = firebase.firestore()
 
     const placeName: Ref<string> = ref('')
@@ -81,7 +81,7 @@ export default defineComponent({
       const end = new Date()
 
       // @ts-ignore
-      db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`)
+      db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/items`)
         .add({
           start,
           start_place_name: placeName.value,
@@ -97,7 +97,7 @@ export default defineComponent({
           console.log('Add ID: ', ref.id)
           // 稼働中の出勤情報をin_attendanceに記録する。
           // @ts-ignore
-          db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/in_attendance`)
+          db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/in_attendance`)
             .add({
               item_id: ref.id,
               start,
@@ -116,8 +116,8 @@ export default defineComponent({
               // @ts-ignore
               db.collection(`users/${store.state.user.uid}/in_attendance_project`)
                 .add({
-                  item_id: currentProject.value.id,
-                  name: currentProject.value.name
+                  item_id: store.state.project.id,
+                  name: store.state.project.name
                 })
                 .then(async (ref) => {
                   if (await confirmRef.value.open('出勤しました', false)) {
@@ -127,23 +127,23 @@ export default defineComponent({
                 })
                 .catch(async (error: any) => {
                   console.log(error)
-                  if (await confirmRef.value.open('出勤に失敗しました', false)) {
-                    store.dispatch('writeLoading', false)
-                  }
+                  // if (await confirmRef.value.open('出勤に失敗しました', false)) {
+                  //   store.dispatch('writeLoading', false)
+                  // }
                 })
             })
             .catch(async (error: any) => {
               console.log(error)
-              if (await confirmRef.value.open('出勤に失敗しました', false)) {
-                store.dispatch('writeLoading', false)
-              }
+              // if (await confirmRef.value.open('出勤に失敗しました', false)) {
+              //   store.dispatch('writeLoading', false)
+              // }
             })
         })
         .catch(async (error: any) => {
           console.log(error)
-          if (await confirmRef.value.open('出勤に失敗しました', false)) {
-            store.dispatch('writeLoading', false)
-          }
+          // if (await confirmRef.value.open('出勤に失敗しました', false)) {
+          //   store.dispatch('writeLoading', false)
+          // }
         })
     }
 
@@ -153,7 +153,7 @@ export default defineComponent({
       // in_attendanceから稼働情報を取得する
       const inAttendanceArray: any = []
       // @ts-ignore
-      db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/in_attendance`).onSnapshot((docs) => {
+      db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/in_attendance`).onSnapshot((docs) => {
         docs.forEach((doc) => {
           inAttendanceArray.push({
             ...doc.data(),
@@ -166,7 +166,7 @@ export default defineComponent({
         const inAttendance: any = inAttendanceArray[0]
         const end = new Date()
         // @ts-ignore
-        db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(inAttendance.item_id)
+        db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/items`).doc(inAttendance.item_id)
           .update({
             start: inAttendance.start,
             start_place_name: inAttendance.start_place_name,
@@ -181,7 +181,7 @@ export default defineComponent({
           .then(() => {
             // in_attendanceを削除する。
             // @ts-ignore
-            db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/in_attendance`).doc(inAttendance.id)
+            db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/in_attendance`).doc(inAttendance.id)
               .delete()
               .then(async (ref) => {
                 console.log('del: ', ref)
@@ -199,9 +199,9 @@ export default defineComponent({
           })
           .catch(async (error: any) => {
             console.log(error)
-            if (await confirmRef.value.open('退勤に失敗しました', false)) {
-              store.dispatch('writeLoading', false)
-            }
+            // if (await confirmRef.value.open('退勤に失敗しました', false)) {
+            //   store.dispatch('writeLoading', false)
+            // }
           })
       })
     }
@@ -278,7 +278,7 @@ export default defineComponent({
           // エラーメッセージ
           const errorMessage = '[エラー番号: ' + errorNo + ']\n' + errorInfo[errorNo]
           console.log(errorMessage)
-          confirmRef.value.open(errorMessage, false)
+          // confirmRef.value.open(errorMessage, false)
           store.dispatch('writeLoading', false)
         },
 
@@ -296,7 +296,7 @@ export default defineComponent({
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           // @ts-ignore
-          db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/in_attendance`).onSnapshot((docs) => {
+          db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/in_attendance`).onSnapshot((docs) => {
             const inAttendanceArray: any = []
             isInAttendance.value = false
             docs.forEach((doc) => {
@@ -318,14 +318,14 @@ export default defineComponent({
     return {
       attendance,
       departure,
-      currentProject,
       getLocation,
       placeName,
       placeLat,
       placeLng,
       description,
       isInAttendance,
-      confirmRef
+      confirmRef,
+      store
     }
   }
 })
