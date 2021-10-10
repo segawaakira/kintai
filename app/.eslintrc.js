@@ -12,6 +12,7 @@ module.exports = {
   ],
   // add your custom rules here
   rules: {
-    'no-new': 'off'
+    'no-new': 'off',
+    'promise/param-names': 'off'
   }
 }
