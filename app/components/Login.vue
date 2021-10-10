@@ -62,7 +62,7 @@ import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composit
 import firebase from 'firebase'
 
 export default defineComponent({
-  setup (_props, context) {
+  setup (_props, _context) {
     const valid: Ref<boolean> = ref(true)
     const myForm = ref(null)
     const email: Ref<string> = ref('')
@@ -78,17 +78,23 @@ export default defineComponent({
     const store = useStore()
 
     const loginGoogle = () => {
-      store.dispatch('writeLoading', true)
+      // store.dispatch('writeLoading', true)
       const provider = new firebase.auth.GoogleAuthProvider()
       firebase.auth().signInWithPopup(provider)
         .then((res) => {
-          console.log('ログインしました')
+          console.log('ログインしました!')
           console.log(res)
-          store.dispatch('writeLoading', false)
+          const object = {
+            email: res.user.email,
+            uid: res.user.uid
+          }
+          store.dispatch('writeUser', object)
+          location.href = '/input'
+          // context.root.$router.push('/input')
         })
         .catch((error) => {
           console.log(error)
-          store.dispatch('writeLoading', false)
+          // store.dispatch('writeLoading', false)
         })
     }
 
@@ -98,6 +104,13 @@ export default defineComponent({
         .then((res) => {
           console.log('ログインしました')
           console.log(res)
+          const object = {
+            email: res.user.email,
+            uid: res.user.uid
+          }
+          store.dispatch('writeUser', object)
+          location.href = '/input'
+          // context.root.$router.push('/input')
         })
         .catch((error) => {
           console.log(error)
@@ -106,16 +119,16 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      firebase.auth().onAuthStateChanged((data) => {
-        store.dispatch('writeLoading', true)
-        if (data) {
-          store.dispatch('writeUser', data)
-          context.root.$router.push('/input')
-        } else {
-          store.dispatch('writeUser', null)
-          store.dispatch('writeLoading', false)
-        }
-      })
+      // firebase.auth().onAuthStateChanged((data) => {
+      //   store.dispatch('writeLoading', true)
+      //   if (data) {
+      //     store.dispatch('writeUser', data)
+      //     context.root.$router.push('/input')
+      //   } else {
+      //     store.dispatch('writeUser', null)
+      //     store.dispatch('writeLoading', false)
+      //   }
+      // })
     })
 
     return {
