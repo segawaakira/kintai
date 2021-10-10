@@ -153,8 +153,7 @@ export default defineComponent({
           .delete()
           .then(() => {
             console.log('削除した')
-            // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
-            location.href = '/calendar'
+            context.root.$router.push('/calendar')
           })
           .catch((error) => {
             console.log(error)

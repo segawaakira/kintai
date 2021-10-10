@@ -167,8 +167,7 @@ export default defineComponent({
       firebase.auth().signOut().then(() => {
         console.log('ログアウトしました')
         store.dispatch('writeUser', null)
-        // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
-        location.href = '/login'
+        context.root.$router.push('/login')
       }).catch((error) => {
         console.log('ログアウト失敗', error)
       })
