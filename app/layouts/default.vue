@@ -6,7 +6,7 @@
       app
       width="320"
     >
-      <pre v-if="store.state">{{ store.state }}</pre>
+      <!-- <pre v-if="store.state">{{ store.state }}</pre> -->
       <!-- ログイン中のメニュー -->
       <v-list v-if="store.state.user">
         <v-list-item>

@@ -88,6 +88,7 @@
     >
       カレンダーに戻る
     </v-btn>
+    <Confirm ref="confirmRef" />
   </div>
 </template>
 <script lang="ts">
@@ -113,6 +114,7 @@ export default defineComponent({
     const endPlaceLat: Ref<number | null> = ref(null)
     const endPlaceLng: Ref<number | null> = ref(null)
     const description: Ref<string> = ref('')
+    const confirmRef = ref(null)
 
     // 更新
     const update = () => {
@@ -131,9 +133,10 @@ export default defineComponent({
           end_place_lng: endPlaceLng.value,
           description: description.value
         })
-        .then(() => {
-          console.log('更新した')
-          store.dispatch('writeLoading', false)
+        .then(async () => {
+          if (await confirmRef.value.open('更新しました', false)) {
+            store.dispatch('writeLoading', false)
+          }
         })
         .catch((error) => {
           console.log(error)
@@ -142,20 +145,22 @@ export default defineComponent({
     }
 
     // 削除
-    const onDelete = () => {
-      store.dispatch('writeLoading', true)
-      // @ts-ignore
-      db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
-        .delete()
-        .then(() => {
-          console.log('削除した')
-          // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
-          location.href = '/calendar'
-        })
-        .catch((error) => {
-          console.log(error)
-          store.dispatch('writeLoading', false)
-        })
+    const onDelete = async () => {
+      if (await confirmRef.value.open('本当に削除しますか？', true)) {
+        store.dispatch('writeLoading', true)
+        // @ts-ignore
+        db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
+          .delete()
+          .then(() => {
+            console.log('削除した')
+            // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
+            location.href = '/calendar'
+          })
+          .catch((error) => {
+            console.log(error)
+            store.dispatch('writeLoading', false)
+          })
+      }
     }
 
     onMounted(() => {
@@ -212,7 +217,8 @@ export default defineComponent({
       endPlaceName,
       endPlaceLat,
       endPlaceLng,
-      description
+      description,
+      confirmRef
     }
   }
 })

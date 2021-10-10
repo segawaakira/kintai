@@ -53,6 +53,7 @@
         <div id="map-canvas" />
       </div>
     </div>
+    <Confirm ref="confirmRef" />
   </div>
 </template>
 <script lang="ts">
@@ -71,6 +72,7 @@ export default defineComponent({
     const placeLng: Ref<number | null> = ref(null)
     const description: Ref<string> = ref('')
     const isInAttendance: Ref<boolean> = ref(false)
+    const confirmRef = ref(null)
 
     // 出勤
     const attendance = () => {
@@ -117,23 +119,31 @@ export default defineComponent({
                   item_id: currentProject.value.id,
                   name: currentProject.value.name
                 })
-                .then((ref) => {
+                .then(async (ref) => {
+                  if (await confirmRef.value.open('出勤しました', false)) {
+                    store.dispatch('writeLoading', false)
+                  }
                   console.log('Add ID: ', ref.id)
-                  store.dispatch('writeLoading', false)
                 })
-                .catch((error) => {
+                .catch(async (error: any) => {
                   console.log(error)
-                  store.dispatch('writeLoading', false)
+                  if (await confirmRef.value.open('出勤に失敗しました', false)) {
+                    store.dispatch('writeLoading', false)
+                  }
                 })
             })
-            .catch((error) => {
+            .catch(async (error: any) => {
               console.log(error)
-              store.dispatch('writeLoading', false)
+              if (await confirmRef.value.open('出勤に失敗しました', false)) {
+                store.dispatch('writeLoading', false)
+              }
             })
         })
-        .catch((error) => {
+        .catch(async (error: any) => {
           console.log(error)
-          store.dispatch('writeLoading', false)
+          if (await confirmRef.value.open('出勤に失敗しました', false)) {
+            store.dispatch('writeLoading', false)
+          }
         })
     }
 
@@ -173,19 +183,25 @@ export default defineComponent({
             // @ts-ignore
             db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/in_attendance`).doc(inAttendance.id)
               .delete()
-              .then((ref) => {
+              .then(async (ref) => {
                 console.log('del: ', ref)
                 description.value = ''
-                store.dispatch('writeLoading', false)
+                if (await confirmRef.value.open('退勤しました', false)) {
+                  store.dispatch('writeLoading', false)
+                }
               })
-              .catch((error) => {
+              .catch(async (error: any) => {
                 console.log(error)
-                store.dispatch('writeLoading', false)
+                if (await confirmRef.value.open('退勤に失敗しました', false)) {
+                  store.dispatch('writeLoading', false)
+                }
               })
           })
-          .catch((error) => {
+          .catch(async (error: any) => {
             console.log(error)
-            store.dispatch('writeLoading', false)
+            if (await confirmRef.value.open('退勤に失敗しました', false)) {
+              store.dispatch('writeLoading', false)
+            }
           })
       })
     }
@@ -250,10 +266,10 @@ export default defineComponent({
 
           // エラー番号に対応したメッセージ
           const errorInfo = [
-            '原因不明のエラーが発生しました…。',
-            '位置情報の取得が許可されませんでした…。',
-            '電波状況などで位置情報が取得できませんでした…。',
-            '位置情報の取得に時間がかかり過ぎてタイムアウトしました…。'
+            '原因不明のエラーが発生しました。',
+            '位置情報の取得が許可されませんでした。',
+            '電波状況などで位置情報が取得できませんでした。',
+            '位置情報の取得に時間がかかり過ぎてタイムアウトしました。'
           ]
 
           // エラー番号
@@ -262,13 +278,14 @@ export default defineComponent({
           // エラーメッセージ
           const errorMessage = '[エラー番号: ' + errorNo + ']\n' + errorInfo[errorNo]
           console.log(errorMessage)
+          confirmRef.value.open(errorMessage, false)
           store.dispatch('writeLoading', false)
         },
 
         // [第3引数] オプション
         {
           enableHighAccuracy: false,
-          timeout: 8000,
+          timeout: 10000,
           maximumAge: 2000
         }
 
@@ -307,7 +324,8 @@ export default defineComponent({
       placeLat,
       placeLng,
       description,
-      isInAttendance
+      isInAttendance,
+      confirmRef
     }
   }
 })

@@ -24,6 +24,7 @@
         </v-btn>
       </v-container>
     </v-form>
+    <Confirm ref="confirmRef" />
   </div>
 </template>
 <script lang="ts">
@@ -41,13 +42,15 @@ export default defineComponent({
       (v: any) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
     ]
     const isEditEmail: Ref<boolean> = ref(false)
+    const confirmRef = ref(null)
 
     const reset = () => {
       store.dispatch('writeLoading', true)
       firebase.auth().sendPasswordResetEmail(email.value)
-        .then(() => {
-          console.log('リセットメールを送信しました')
-          store.dispatch('writeLoading', false)
+        .then(async () => {
+          if (await confirmRef.value.open(email.value + '宛にパスワードリセットメールを送信しました', false)) {
+            store.dispatch('writeLoading', false)
+          }
         })
         .catch((error) => {
           console.log('リセットメールを送信失敗しました', error)
@@ -64,7 +67,8 @@ export default defineComponent({
       emailRules,
       isEditEmail,
       myForm,
-      reset
+      reset,
+      confirmRef
     }
   }
 })

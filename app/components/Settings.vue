@@ -33,6 +33,7 @@
     >
       退会する
     </v-btn>
+    <Confirm ref="confirmRef" />
   </div>
 </template>
 <script lang="ts">
@@ -51,31 +52,39 @@ export default defineComponent({
       (v: any) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
     ]
     const isEditEmail: Ref<boolean> = ref(false)
+    const confirmRef = ref(null)
 
     const save = () => {
       store.dispatch('writeLoading', true)
       currentUser.value.updateEmail(email.value)
-        .then(() => {
-          console.log('メアドを変更しました')
-          store.dispatch('writeLoading', false)
+        .then(async () => {
+          if (await confirmRef.value.open('メールアドレスを変更しました', false)) {
+            store.dispatch('writeLoading', false)
+          }
         })
-        .catch((error: any) => {
-          console.log('メアドを変更失敗しました', error)
-          store.dispatch('writeLoading', false)
+        .catch(async (error: any) => {
+          console.log(error)
+          if (await confirmRef.value.open('メールアドレスを変更失敗しました', false)) {
+            store.dispatch('writeLoading', false)
+          }
         })
     }
 
-    const leave = () => {
-      store.dispatch('writeLoading', true)
-      currentUser.value.delete()
-        .then(() => {
-          console.log('退会しました')
-          store.dispatch('writeLoading', false)
-        })
-        .catch((error: any) => {
-          console.log('退会失敗しました', error)
-          store.dispatch('writeLoading', false)
-        })
+    const leave = async () => {
+      if (await confirmRef.value.open('本当に退会しますか？', true)) {
+        store.dispatch('writeLoading', true)
+        currentUser.value.delete()
+          .then(() => {
+            console.log('退会しました')
+            store.dispatch('writeLoading', false)
+          })
+          .catch(async (error: any) => {
+            console.log(error)
+            if (await confirmRef.value.open('退会失敗しました', false)) {
+              store.dispatch('writeLoading', false)
+            }
+          })
+      }
     }
 
     onMounted(() => {
@@ -97,7 +106,8 @@ export default defineComponent({
       myForm,
       save,
       leave,
-      currentUser
+      currentUser,
+      confirmRef
     }
   }
 })
