@@ -16,7 +16,12 @@ export const mutations = {
     state.dark = value
   },
   setUserFromStore (state: any, value: any) {
-    state.user = value
+    // state.user = value
+    const object = {
+      email: value.email,
+      uid: value.uid
+    }
+    state.user = object
   },
   setLoadingFromStore (state: any, value: any) {
     state.loading = value
