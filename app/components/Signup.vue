@@ -53,7 +53,7 @@ import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composit
 import firebase from 'firebase'
 
 export default defineComponent({
-  setup (_props, _context) {
+  setup (_props, context) {
     const store = useStore()
     const valid: Ref<boolean> = ref(true)
     const myForm = ref(null)
@@ -89,8 +89,7 @@ export default defineComponent({
         .then((res) => {
           console.log('作成しました')
           console.log(res)
-          // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
-          location.href = '/projects'
+          context.root.$router.push('/projects')
         })
         .catch((error) => {
           console.log(error)
@@ -101,8 +100,7 @@ export default defineComponent({
     onMounted(() => {
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
-          // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
-          location.href = '/projects'
+          context.root.$router.push('/projects')
         }
       })
     })

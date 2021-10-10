@@ -216,8 +216,7 @@ export default defineComponent({
     }
 
     const onClickDetail = (id: string) => {
-      // Todo:location.hrefでなく、Nuxtでの書き方あればそれにする
-      location.href = '/detail?id=' + id
+      context.root.$router.push('/detail?id=' + id)
     }
 
     /** 枠線のスタイル */
