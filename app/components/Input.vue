@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="store.state.project">
+    <div v-if="state.project">
       <v-btn
         type="button"
         :disabled="isInAttendance"
@@ -61,10 +61,12 @@
 <script lang="ts">
 import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
+import { IProject, IState } from '../interfaces/'
 
 export default defineComponent({
   setup (_props, _context) {
     const store = useStore()
+    const state: IState = store.state as IState
     const db = firebase.firestore()
 
     const placeName: Ref<string> = ref('')
@@ -72,7 +74,7 @@ export default defineComponent({
     const placeLng: Ref<number | null> = ref(null)
     const description: Ref<string> = ref('')
     const isInAttendance: Ref<boolean> = ref(false)
-    const confirmRef = ref(null)
+    const confirmRef: Ref<any> = ref()
 
     // 出勤
     const attendance = () => {
@@ -80,8 +82,7 @@ export default defineComponent({
       const start = new Date()
       const end = new Date()
 
-      // @ts-ignore
-      db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/items`)
+      db.collection(`users/${state.user.uid}/projects/${state.project.id}/items`)
         .add({
           start,
           start_place_name: placeName.value,
@@ -96,8 +97,7 @@ export default defineComponent({
         .then((ref) => {
           console.log('Add ID: ', ref.id)
           // 稼働中の出勤情報をin_attendanceに記録する。
-          // @ts-ignore
-          db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/in_attendance`)
+          db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`)
             .add({
               item_id: ref.id,
               start,
@@ -113,33 +113,33 @@ export default defineComponent({
             .then((ref) => {
               console.log('Add ID: ', ref.id)
               // 稼働中のプロジェクト情報をin_attendance_projectに記録する。
-              // @ts-ignore
-              db.collection(`users/${store.state.user.uid}/in_attendance_project`)
-                .add({
-                  item_id: store.state.project.id,
-                  name: store.state.project.name
-                })
+              const inAttendanceProject: IProject = {
+                id: state.project.id,
+                name: state.project.name
+              }
+              db.collection(`users/${state.user.uid}/in_attendance_project`)
+                .add(inAttendanceProject)
                 .then(async (ref) => {
                   if (await confirmRef.value.open('出勤しました', false)) {
                     store.dispatch('writeLoading', false)
                   }
                   console.log('Add ID: ', ref.id)
                 })
-                .catch(async (error: any) => {
+                .catch((error: any) => {
                   console.log(error)
                   // if (await confirmRef.value.open('出勤に失敗しました', false)) {
                   //   store.dispatch('writeLoading', false)
                   // }
                 })
             })
-            .catch(async (error: any) => {
+            .catch((error: any) => {
               console.log(error)
               // if (await confirmRef.value.open('出勤に失敗しました', false)) {
               //   store.dispatch('writeLoading', false)
               // }
             })
         })
-        .catch(async (error: any) => {
+        .catch((error: any) => {
           console.log(error)
           // if (await confirmRef.value.open('出勤に失敗しました', false)) {
           //   store.dispatch('writeLoading', false)
@@ -152,8 +152,7 @@ export default defineComponent({
       store.dispatch('writeLoading', true)
       // in_attendanceから稼働情報を取得する
       const inAttendanceArray: any = []
-      // @ts-ignore
-      db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/in_attendance`).onSnapshot((docs) => {
+      db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`).onSnapshot((docs) => {
         docs.forEach((doc) => {
           inAttendanceArray.push({
             ...doc.data(),
@@ -165,8 +164,7 @@ export default defineComponent({
         // 退勤情報をupdateで記録する
         const inAttendance: any = inAttendanceArray[0]
         const end = new Date()
-        // @ts-ignore
-        db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/items`).doc(inAttendance.item_id)
+        db.collection(`users/${state.user.uid}/projects/${state.project.id}/items`).doc(inAttendance.item_id)
           .update({
             start: inAttendance.start,
             start_place_name: inAttendance.start_place_name,
@@ -180,8 +178,7 @@ export default defineComponent({
           })
           .then(() => {
             // in_attendanceを削除する。
-            // @ts-ignore
-            db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/in_attendance`).doc(inAttendance.id)
+            db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`).doc(inAttendance.id)
               .delete()
               .then(async (ref) => {
                 console.log('del: ', ref)
@@ -197,7 +194,7 @@ export default defineComponent({
                 }
               })
           })
-          .catch(async (error: any) => {
+          .catch((error: any) => {
             console.log(error)
             // if (await confirmRef.value.open('退勤に失敗しました', false)) {
             //   store.dispatch('writeLoading', false)
@@ -295,8 +292,7 @@ export default defineComponent({
     onMounted(() => {
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
-          // @ts-ignore
-          db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/in_attendance`).onSnapshot((docs) => {
+          db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`).onSnapshot((docs) => {
             const inAttendanceArray: any = []
             isInAttendance.value = false
             docs.forEach((doc) => {
@@ -325,7 +321,7 @@ export default defineComponent({
       description,
       isInAttendance,
       confirmRef,
-      store
+      state
     }
   }
 })

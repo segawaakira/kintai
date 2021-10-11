@@ -52,7 +52,7 @@ export default defineComponent({
       (v: any) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
     ]
     const isEditEmail: Ref<boolean> = ref(false)
-    const confirmRef = ref(null)
+    const confirmRef: Ref<any> = ref()
 
     const save = () => {
       store.dispatch('writeLoading', true)

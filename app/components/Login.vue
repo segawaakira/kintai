@@ -58,8 +58,9 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
+import { defineComponent, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
+import { IUser } from '../interfaces/'
 
 export default defineComponent({
   setup (_props, _context) {
@@ -84,11 +85,12 @@ export default defineComponent({
         .then((res) => {
           console.log('ログインしました!')
           console.log(res)
-          const object = {
-            email: res.user.email,
-            uid: res.user.uid
+          const user = res.user as IUser
+          const userObj: IUser = {
+            email: user.email,
+            uid: user.uid
           }
-          store.dispatch('writeUser', object)
+          store.dispatch('writeUser', userObj)
           location.href = '/input'
           // context.root.$router.push('/input')
         })
@@ -104,11 +106,12 @@ export default defineComponent({
         .then((res) => {
           console.log('ログインしました')
           console.log(res)
-          const object = {
-            email: res.user.email,
-            uid: res.user.uid
+          const user = res.user as IUser
+          const userObj: IUser = {
+            email: user.email,
+            uid: user.uid
           }
-          store.dispatch('writeUser', object)
+          store.dispatch('writeUser', userObj)
           location.href = '/input'
           // context.root.$router.push('/input')
         })
@@ -117,19 +120,6 @@ export default defineComponent({
           store.dispatch('writeLoading', false)
         })
     }
-
-    onMounted(() => {
-      // firebase.auth().onAuthStateChanged((data) => {
-      //   store.dispatch('writeLoading', true)
-      //   if (data) {
-      //     store.dispatch('writeUser', data)
-      //     context.root.$router.push('/input')
-      //   } else {
-      //     store.dispatch('writeUser', null)
-      //     store.dispatch('writeLoading', false)
-      //   }
-      // })
-    })
 
     return {
       loginGoogle,

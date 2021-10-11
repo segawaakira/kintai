@@ -76,7 +76,7 @@ export default defineComponent({
       (v: any) => !!v || 'projectName is required'
     ]
     const projectName: Ref<string> = ref('')
-    const confirmRef = ref(null)
+    const confirmRef: Ref<any> = ref()
 
     const createProject = () => {
       store.dispatch('writeLoading', true)

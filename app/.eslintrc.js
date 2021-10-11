@@ -13,6 +13,8 @@ module.exports = {
   // add your custom rules here
   rules: {
     'no-new': 'off',
+    'quote-props': 'off',
+    'camelcase': 'off',
     'promise/param-names': 'off'
   }
 }

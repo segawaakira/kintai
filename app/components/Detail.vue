@@ -114,7 +114,7 @@ export default defineComponent({
     const endPlaceLat: Ref<number | null> = ref(null)
     const endPlaceLng: Ref<number | null> = ref(null)
     const description: Ref<string> = ref('')
-    const confirmRef = ref(null)
+    const confirmRef: Ref<any> = ref()
 
     // 更新
     const update = () => {
