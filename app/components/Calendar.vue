@@ -2,16 +2,13 @@
   <div>
     <v-flex>
       <p>{{ currentYear }}年{{ currentMonth }}月</p>
-      <v-btn type="button" @click="prevMonth">
+      <v-btn type="button" @click="handlePrev">
         前
       </v-btn>
-      <v-btn type="button" @click="nextMonth">
+      <v-btn type="button" @click="handleNext">
         次
       </v-btn>
     </v-flex>
-    <!-- <pre>{{ totalWorkedHourOfDay }}</pre> -->
-    <!-- <pre>{{ currentMonthData }}</pre>
-    <pre>{{ items }}</pre> -->
 
     <v-list three-line class="calendar">
       <v-list-item>
@@ -33,7 +30,7 @@
               v-if="data.startDate === index + 1"
               class="timeline-item"
               :style="calcPositionWidth(data.startTime - data.startDateTime, data.endTime - data.startDateTime)"
-              @click="onClickDetail(data.id)"
+              @click="handleClickDetail(data.id)"
             />
             <!-- ▽ 日付を跨いだ時 ▽ -->
             <div
@@ -42,7 +39,7 @@
               :data-end-time="data.endTime"
               :data-end-date-time="data.endDateTime"
               :style="calcPositionWidth(0, data.endTime - data.endDateTime)"
-              @click="onClickDetail(data.id)"
+              @click="handleClickDetail(data.id)"
             />
             <!-- ▽ 稼働時間 ▽ -->
             <div style="display: none;">
@@ -61,9 +58,9 @@
     <!-- ▽ 月別稼働合計時間 ▽ -->
     <div>{{ totalWorkedHourOfMonth }}</div>
     <v-btn
-      @click="onCreateExcel"
+      @click="handleDownloadExcel"
     >
-      onCreateExcel
+      handleDownloadExcel
     </v-btn>
   </div>
 </template>
@@ -71,17 +68,40 @@
 import { defineComponent, ref, Ref, onMounted, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 import dayjs from 'dayjs'
+import { IState, IProjectItem } from '../interfaces/'
 const excelJs = require('exceljs')
+
+interface IItemData {
+  startDateTime: number
+  startDate: number
+  startTime: number
+  endDateTime: number
+  endDate: number
+  endTime: number
+  startWorkTime: number
+  endWorkTime: number
+  id: string
+}
+
+interface IItemDataExel {
+  start: string,
+  end: string,
+  hour: number,
+  start_place_name: string,
+  end_place_name: string,
+  description: string
+}
 
 export default defineComponent({
   setup (_props, context) {
     const store = useStore()
+    const state: IState = store.state as IState
     const currentYear: Ref<number> = ref(new Date().getFullYear())
     const currentMonth: Ref<number> = ref(new Date().getMonth() + 1)
-    const totalWorkedHourOfDay: Ref<any> = ref([])
+    const totalWorkedHourOfDay: Ref<number[]> = ref([])
     const totalWorkedHourOfMonth: Ref<number> = ref(0)
     const db = firebase.firestore()
-    const items: Ref<any> = ref([])
+    const items: Ref<IProjectItem[]> = ref([])
 
     /**
      * 指定月の日数を取得
@@ -93,6 +113,13 @@ export default defineComponent({
       return new Date(year, month, 0).getDate()
     }
 
+    /**
+     * 年月日から曜日を取得
+     * @param  {number} year  年
+     * @param  {number} month 月
+     * @param  {number} day 日
+     * @return {string} 曜日
+     */
     const getDayOfWeek = (year: number, month: number, day: number) => {
       const date = new Date(year, month - 1, day)
       const dayOfWeek = date.getDay()
@@ -101,7 +128,8 @@ export default defineComponent({
 
     const lastDay: Ref<number> = ref(getLastDay(currentYear.value, currentMonth.value))
 
-    const nextMonth = () => {
+    /* 次の月 */
+    const handleNext = () => {
       if (currentMonth.value !== 12) {
         currentMonth.value += 1
       } else {
@@ -112,7 +140,8 @@ export default defineComponent({
       getItems()
     }
 
-    const prevMonth = () => {
+    /* 前の月 */
+    const handlePrev = () => {
       if (currentMonth.value !== 1) {
         currentMonth.value -= 1
       } else {
@@ -123,7 +152,7 @@ export default defineComponent({
       getItems()
     }
 
-    const currentMonthData: Ref<any> = ref([])
+    const currentMonthData: Ref<IItemData[]> = ref([])
 
     const msDay = 86400000 // 1日何ミリ秒か
     /**
@@ -138,9 +167,10 @@ export default defineComponent({
       return `left: ${startPosition}%; width: ${width}%;`
     }
 
-    const checkCurrentMonthData = (items: any) => {
+    /* 表示中の年月の稼働データから、カレンダーに表示用のデータに整形する */
+    const checkCurrentMonthData = (items: IProjectItem[]) => {
       currentMonthData.value = []
-      items.forEach((item: any) => {
+      items.forEach((item: IProjectItem) => {
         const start = new Date(item.start.seconds * 1000)
         const end = new Date(item.end.seconds * 1000)
         if (
@@ -157,31 +187,29 @@ export default defineComponent({
             endWorkTime = end.getTime() - new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0).getTime()
           }
           // 選択中の年月に一致するデータのみ出力する
-          currentMonthData.value.push(
-            {
-              startDateTime: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0).getTime(), // 開始した日の0時0分0秒のタイムスタンプ
-              startDate: start.getDate(),
-              startTime: start.getTime(),
-              endDateTime: new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0).getTime(), // 終了した日の0時0分0秒のタイムスタンプ
-              endDate: end.getDate(),
-              endTime: end.getTime(),
-              startWorkTime,
-              endWorkTime,
-              id: item.id
-            }
-          )
+          currentMonthData.value.push({
+            startDateTime: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0).getTime(), // 開始した日の0時0分0秒のタイムスタンプ
+            startDate: start.getDate(),
+            startTime: start.getTime(),
+            endDateTime: new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0).getTime(), // 終了した日の0時0分0秒のタイムスタンプ
+            endDate: end.getDate(),
+            endTime: end.getTime(),
+            startWorkTime,
+            endWorkTime,
+            id: item.id as string
+          })
         }
       })
     }
 
+    /* 表示中の年月の稼働状況を取得する */
     const getItems = () => {
-      // @ts-ignore
-      db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/items`).onSnapshot((docs) => {
+      db.collection(`users/${state.user.uid}/projects/${state.project.id}/items`).onSnapshot((docs) => {
         store.dispatch('writeLoading', true)
         items.value = []
         docs.forEach((doc) => {
           items.value.push({
-            ...doc.data(),
+            ...doc.data() as IProjectItem,
             id: doc.id
           })
         })
@@ -215,7 +243,8 @@ export default defineComponent({
       })
     }
 
-    const onClickDetail = (id: string) => {
+    /* タイムラインをクリックでその稼働詳細画面に遷移する */
+    const handleClickDetail = (id: string) => {
       context.root.$router.push('/detail?id=' + id)
     }
 
@@ -249,10 +278,11 @@ export default defineComponent({
       fgColor: { argb: 'FFFFFFFF' }
     }
 
-    const onCreateExcel = async () => {
+    /* 表示中の年月の稼働実績を記載されたエクセルをダウンロード */
+    const handleDownloadExcel = async () => {
       store.dispatch('writeLoading', true)
-      const itemsExcel: any[] = []
-      items.value.forEach((item: any) => {
+      const itemsExcel: IItemDataExel[] = []
+      items.value.forEach((item: IProjectItem) => {
         const start = new Date(item.start.seconds * 1000)
         const end = new Date(item.end.seconds * 1000)
         itemsExcel.push(
@@ -286,9 +316,9 @@ export default defineComponent({
       ]
 
       // すべての行を走査
-      worksheet.eachRow((row: any, rowNumber: any) => {
+      worksheet.eachRow((row: any, rowNumber: number) => {
         // すべてのセルを走査
-        row.eachCell((cell: any, _colNumber: any) => {
+        row.eachCell((cell: any, _colNumber: number) => {
           if (rowNumber === 1) {
             // ヘッダ行のスタイルを設定
             cell.fill = headerFillStyle
@@ -308,7 +338,7 @@ export default defineComponent({
       })
 
       // 行を定義
-      itemsExcel.forEach((item: any) => {
+      itemsExcel.forEach((item: IItemDataExel) => {
         worksheet.addRow(
           {
             start: item.start,
@@ -358,16 +388,16 @@ export default defineComponent({
       currentYear,
       currentMonth,
       lastDay,
-      nextMonth,
-      prevMonth,
+      handleNext,
+      handlePrev,
       currentMonthData,
       calcPositionWidth,
       items,
       getDayOfWeek,
-      onClickDetail,
+      handleClickDetail,
       totalWorkedHourOfDay,
       totalWorkedHourOfMonth,
-      onCreateExcel
+      handleDownloadExcel
     }
   }
 })

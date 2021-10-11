@@ -18,9 +18,9 @@
         </v-row>
         <v-btn
           type="button"
-          @click="save()"
+          @click="handleSave()"
         >
-          save
+          handleSave
         </v-btn>
       </v-container>
     </v-form>
@@ -29,7 +29,7 @@
 
     <v-btn
       type="button"
-      @click="leave()"
+      @click="handleLeave()"
     >
       退会する
     </v-btn>
@@ -52,9 +52,9 @@ export default defineComponent({
       (v: any) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
     ]
     const isEditEmail: Ref<boolean> = ref(false)
-    const confirmRef = ref(null)
+    const confirmRef: Ref<any> = ref()
 
-    const save = () => {
+    const handleSave = () => {
       store.dispatch('writeLoading', true)
       currentUser.value.updateEmail(email.value)
         .then(async () => {
@@ -70,7 +70,7 @@ export default defineComponent({
         })
     }
 
-    const leave = async () => {
+    const handleLeave = async () => {
       if (await confirmRef.value.open('本当に退会しますか？', true)) {
         store.dispatch('writeLoading', true)
         currentUser.value.delete()
@@ -104,8 +104,8 @@ export default defineComponent({
       emailRules,
       isEditEmail,
       myForm,
-      save,
-      leave,
+      handleSave,
+      handleLeave,
       currentUser,
       confirmRef
     }

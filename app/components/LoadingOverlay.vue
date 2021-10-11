@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-overlay
-      :value="store.state.loading"
+      :value="state.loading"
       :z-index="10"
     >
       <v-progress-circular
@@ -13,20 +13,17 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, useStore } from '@nuxtjs/composition-api'
+import { defineComponent, useStore } from '@nuxtjs/composition-api'
+import { IState } from '../interfaces/'
 
 export default defineComponent({
   setup (_props, _context) {
     const store = useStore()
-    onMounted(() => {
-    })
+    const state: IState = store.state as IState
 
     return {
-      store
+      state
     }
   }
 })
 </script>
-
-<style lang="scss">
-</style>

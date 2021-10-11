@@ -65,7 +65,7 @@
 
       <v-btn
         type="button"
-        @click="update()"
+        @click="handleUpdateItem()"
       >
         更新する
       </v-btn>
@@ -74,7 +74,7 @@
 
       <v-btn
         type="button"
-        @click="onDelete()"
+        @click="handleDeleteItem()"
       >
         削除する
       </v-btn>
@@ -95,33 +95,33 @@
 import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 import dayjs from 'dayjs'
+import { IState, IProject, IProjectItem } from '../interfaces/'
 
 export default defineComponent({
   setup (_props, context) {
     const store = useStore()
-    // @ts-ignore
-    const currentProject: Ref<any> = ref(store.state.project)
+    const state: IState = store.state as IState
+    const currentProject: Ref<IProject> = ref(state.project)
     const db = firebase.firestore()
 
-    const startTime: Ref<any> = ref()
-    const start: Ref<any> = ref()
+    const startTime: Ref<string> = ref('') // datetime-localで扱うYYYY-MM-DDThh:mm:ss
+    const start: Ref<Date | null> = ref(null)
     const startPlaceName: Ref<string> = ref('')
     const startPlaceLat: Ref<number | null> = ref(null)
     const startPlaceLng: Ref<number | null> = ref(null)
-    const endTime: Ref<any> = ref()
-    const end: Ref<any> = ref()
+    const endTime: Ref<string> = ref('') // datetime-localで扱うYYYY-MM-DDThh:mm:ss
+    const end: Ref<Date | null> = ref(null)
     const endPlaceName: Ref<string> = ref('')
     const endPlaceLat: Ref<number | null> = ref(null)
     const endPlaceLng: Ref<number | null> = ref(null)
     const description: Ref<string> = ref('')
-    const confirmRef = ref(null)
+    const confirmRef: Ref<any> = ref()
 
-    // 更新
-    const update = () => {
+    /* 更新 */
+    const handleUpdateItem = () => {
       store.dispatch('writeLoading', true)
       // 退勤情報をupdateで記録する
-      // @ts-ignore
-      db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
+      db.collection(`users/${state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
         .update({
           start: new Date(startTime.value),
           start_place_name: startPlaceName.value,
@@ -144,12 +144,11 @@ export default defineComponent({
         })
     }
 
-    // 削除
-    const onDelete = async () => {
+    /* 削除 */
+    const handleDeleteItem = async () => {
       if (await confirmRef.value.open('本当に削除しますか？', true)) {
         store.dispatch('writeLoading', true)
-        // @ts-ignore
-        db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
+        db.collection(`users/${state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
           .delete()
           .then(() => {
             console.log('削除した')
@@ -167,14 +166,11 @@ export default defineComponent({
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
           store.dispatch('writeLoading', true)
-          // @ts-ignore
-          const docRef = db.collection(`users/${store.state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
-
-          docRef.get()
+          db.collection(`users/${state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string).get()
             .then((doc) => {
               if (doc.exists) {
                 console.log('Document data:', doc.data())
-                const data: any = doc.data()
+                const data: IProjectItem = doc.data() as IProjectItem
                 startTime.value = dayjs(new Date(data.start.seconds * 1000)).format('YYYY-MM-DDTHH:MM')
                 start.value = data.start
                 startPlaceName.value = data.start_place_name
@@ -203,8 +199,8 @@ export default defineComponent({
     })
 
     return {
-      update,
-      onDelete,
+      handleUpdateItem,
+      handleDeleteItem,
       currentProject,
       startTime,
       start,
