@@ -18,7 +18,7 @@ export default defineComponent({
     const dialog: Ref<boolean> = ref(false)
     const resolve: Ref<any> = ref(null)
     const reject: Ref<any> = ref(null)
-    const message: Ref<string> = ref(null)
+    const message: Ref<string> = ref('')
     const isConfirm: Ref<boolean> = ref(true)
 
     /**

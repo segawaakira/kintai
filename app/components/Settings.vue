@@ -62,7 +62,7 @@ export default defineComponent({
             store.dispatch('writeLoading', false)
           }
         })
-        .catch(async (error) => {
+        .catch(async (error: any) => {
           console.log(error)
           if (await confirmRef.value.open('メールアドレスを変更失敗しました', false)) {
             store.dispatch('writeLoading', false)
@@ -78,7 +78,7 @@ export default defineComponent({
             console.log('退会しました')
             store.dispatch('writeLoading', false)
           })
-          .catch(async (error) => {
+          .catch(async (error: any) => {
             console.log(error)
             if (await confirmRef.value.open('退会失敗しました', false)) {
               store.dispatch('writeLoading', false)

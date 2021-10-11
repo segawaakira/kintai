@@ -104,13 +104,13 @@ export default defineComponent({
     const currentProject: Ref<IProject> = ref(state.project)
     const db = firebase.firestore()
 
-    const startTime: Ref<string> = ref() // datetime-localで扱うYYYY-MM-DDThh:mm:ss
-    const start: Ref<Date> = ref()
+    const startTime: Ref<string> = ref('') // datetime-localで扱うYYYY-MM-DDThh:mm:ss
+    const start: Ref<Date | null> = ref(null)
     const startPlaceName: Ref<string> = ref('')
     const startPlaceLat: Ref<number | null> = ref(null)
     const startPlaceLng: Ref<number | null> = ref(null)
-    const endTime: Ref<string> = ref() // datetime-localで扱うYYYY-MM-DDThh:mm:ss
-    const end: Ref<Date> = ref()
+    const endTime: Ref<string> = ref('') // datetime-localで扱うYYYY-MM-DDThh:mm:ss
+    const end: Ref<Date | null> = ref(null)
     const endPlaceName: Ref<string> = ref('')
     const endPlaceLat: Ref<number | null> = ref(null)
     const endPlaceLng: Ref<number | null> = ref(null)

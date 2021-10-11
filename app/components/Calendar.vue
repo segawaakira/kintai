@@ -196,7 +196,7 @@ export default defineComponent({
             endTime: end.getTime(),
             startWorkTime,
             endWorkTime,
-            id: item.id
+            id: item.id as string
           })
         }
       })

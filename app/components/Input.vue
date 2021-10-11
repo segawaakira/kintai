@@ -83,13 +83,13 @@ export default defineComponent({
       const end = new Date()
       const attendanceItem: IProjectItem = {
         start,
-        start_place_name: placeName.value,
-        start_place_lat: placeLat.value,
-        start_place_lng: placeLng.value,
+        start_place_name: placeName.value as string,
+        start_place_lat: placeLat.value as number,
+        start_place_lng: placeLng.value as number,
         end,
-        end_place_name: placeName.value,
-        end_place_lat: placeLat.value,
-        end_place_lng: placeLng.value,
+        end_place_name: placeName.value as string,
+        end_place_lat: placeLat.value as number,
+        end_place_lng: placeLng.value as number,
         description: description.value
       }
 
@@ -100,13 +100,13 @@ export default defineComponent({
           const inAttendanceItem: IProjectItem = {
             item_id: ref.id,
             start,
-            start_place_name: placeName.value,
-            start_place_lat: placeLat.value,
-            start_place_lng: placeLng.value,
+            start_place_name: placeName.value as string,
+            start_place_lat: placeLat.value as number,
+            start_place_lng: placeLng.value as number,
             end,
-            end_place_name: placeName.value,
-            end_place_lat: placeLat.value,
-            end_place_lng: placeLng.value,
+            end_place_name: placeName.value as string,
+            end_place_lat: placeLat.value as number,
+            end_place_lng: placeLng.value as number,
             description: description.value
           }
           // 稼働中の出勤情報をin_attendanceに記録する。
@@ -168,13 +168,13 @@ export default defineComponent({
         const end = new Date()
         const inAttendanceItem: IProjectItem = {
           start: inAttendance.start,
-          start_place_name: inAttendance.start_place_name,
-          start_place_lat: inAttendance.start_place_lat,
-          start_place_lng: inAttendance.start_place_lng,
+          start_place_name: inAttendance.start_place_name as string,
+          start_place_lat: inAttendance.start_place_lat as number,
+          start_place_lng: inAttendance.start_place_lng as number,
           end,
-          end_place_name: placeName.value,
-          end_place_lat: placeLat.value,
-          end_place_lng: placeLng.value,
+          end_place_name: placeName.value as string,
+          end_place_lat: placeLat.value as number,
+          end_place_lng: placeLng.value as number,
           description: description.value
         }
         db.collection(`users/${state.user.uid}/projects/${state.project.id}/items`).doc(inAttendance.item_id)
