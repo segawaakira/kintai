@@ -61,7 +61,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
-import { IProject, IState } from '../interfaces/'
+import { IProject, IProjectItem, IState } from '../interfaces/'
 
 export default defineComponent({
   setup (_props, _context) {
@@ -81,35 +81,37 @@ export default defineComponent({
       store.dispatch('writeLoading', true)
       const start = new Date()
       const end = new Date()
+      const attendanceItem: IProjectItem = {
+        start,
+        start_place_name: placeName.value,
+        start_place_lat: placeLat.value,
+        start_place_lng: placeLng.value,
+        end,
+        end_place_name: placeName.value,
+        end_place_lat: placeLat.value,
+        end_place_lng: placeLng.value,
+        description: description.value
+      }
 
       db.collection(`users/${state.user.uid}/projects/${state.project.id}/items`)
-        .add({
-          start,
-          start_place_name: placeName.value,
-          start_place_lat: placeLat.value,
-          start_place_lng: placeLng.value,
-          end,
-          end_place_name: placeName.value,
-          end_place_lat: placeLat.value,
-          end_place_lng: placeLng.value,
-          description: description.value
-        })
+        .add(attendanceItem)
         .then((ref) => {
           console.log('Add ID: ', ref.id)
+          const inAttendanceItem: IProjectItem = {
+            item_id: ref.id,
+            start,
+            start_place_name: placeName.value,
+            start_place_lat: placeLat.value,
+            start_place_lng: placeLng.value,
+            end,
+            end_place_name: placeName.value,
+            end_place_lat: placeLat.value,
+            end_place_lng: placeLng.value,
+            description: description.value
+          }
           // 稼働中の出勤情報をin_attendanceに記録する。
           db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`)
-            .add({
-              item_id: ref.id,
-              start,
-              start_place_name: placeName.value,
-              start_place_lat: placeLat.value,
-              start_place_lng: placeLng.value,
-              end,
-              end_place_name: placeName.value,
-              end_place_lat: placeLat.value,
-              end_place_lng: placeLng.value,
-              description: description.value
-            })
+            .add(inAttendanceItem)
             .then((ref) => {
               console.log('Add ID: ', ref.id)
               // 稼働中のプロジェクト情報をin_attendance_projectに記録する。
@@ -164,18 +166,19 @@ export default defineComponent({
         // 退勤情報をupdateで記録する
         const inAttendance: any = inAttendanceArray[0]
         const end = new Date()
+        const inAttendanceItem: IProjectItem = {
+          start: inAttendance.start,
+          start_place_name: inAttendance.start_place_name,
+          start_place_lat: inAttendance.start_place_lat,
+          start_place_lng: inAttendance.start_place_lng,
+          end,
+          end_place_name: placeName.value,
+          end_place_lat: placeLat.value,
+          end_place_lng: placeLng.value,
+          description: description.value
+        }
         db.collection(`users/${state.user.uid}/projects/${state.project.id}/items`).doc(inAttendance.item_id)
-          .update({
-            start: inAttendance.start,
-            start_place_name: inAttendance.start_place_name,
-            start_place_lat: inAttendance.start_place_lat,
-            start_place_lng: inAttendance.start_place_lng,
-            end,
-            end_place_name: placeName.value,
-            end_place_lat: placeLat.value,
-            end_place_lng: placeLng.value,
-            description: description.value
-          })
+          .update(inAttendanceItem)
           .then(() => {
             // in_attendanceを削除する。
             db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`).doc(inAttendance.id)

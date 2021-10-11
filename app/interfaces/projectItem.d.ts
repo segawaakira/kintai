@@ -3,7 +3,6 @@
  */
 
 export interface IProjectItem {
-  id: string
   start: Date
   start_place_name: string
   start_place_lat: number
@@ -13,6 +12,8 @@ export interface IProjectItem {
   end_place_lat: number
   end_place_lng: number
   description: string
+  /* ▽ add以外の場合のみ必要 */
+  id?: string
   /* ▽ in_attendanceに保存されている出勤中の情報の場合のみ必要 */
   item_id?: string
 }
