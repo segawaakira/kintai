@@ -6,15 +6,14 @@
       app
       width="320"
     >
-      <!-- <pre v-if="store.state">{{ store.state }}</pre> -->
       <!-- ログイン中のメニュー -->
-      <v-list v-if="store.state.user">
+      <v-list v-if="state.user">
         <v-list-item>
           <v-list-item-action>
             <v-icon>account_circle</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>{{ store.state.user.email }}</v-list-item-title>
+            <v-list-item-title>{{ state.user.email }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item
@@ -45,7 +44,7 @@
         </v-list-item>
         <v-list-item
           exact
-          @click="signOut"
+          @click="handleLogout"
         >
           <v-list-item-action>
             <v-icon>logout</v-icon>
@@ -101,7 +100,7 @@
       <v-container>
         <!-- プロジェクト選択メニュー -->
         <v-select
-          v-if="store.state.user && isShowSelectedProject"
+          v-if="state.user && isShowSelectedProject"
           v-model="selectedProject"
           :items="projects"
           filled
@@ -109,10 +108,10 @@
           item-text="name"
           item-value="id"
           return-object
-          @change="onChangeProject"
+          @change="handleChangeProject"
         />
         <v-alert
-          v-if="store.state.user && isShowSelectedProject && inAttendanceTime"
+          v-if="state.user && isShowSelectedProject && inAttendanceTime"
           dense
           type="info"
         >
@@ -139,16 +138,19 @@ import { defineComponent, onMounted, Ref, ref, useStore, watch } from '@nuxtjs/c
 import firebase from 'firebase'
 import dayjs from 'dayjs'
 import LoadingOverlay from '../components/LoadingOverlay.vue'
+import { BREAK_POINT } from '../common/constants'
+import { IState, IProject, IProjectItem } from '../interfaces/'
 
 export default defineComponent({
   components: { LoadingOverlay },
   setup (_props, context: any) {
     const drawer: Ref<Boolean> = ref(false)
-    const projects: Ref<any> = ref([])
-    const inAttendanceTime: Ref<any> = ref()
-    const inAttendanceProject: Ref<any> = ref()
-    const selectedProject: Ref<any> = ref({})
+    const projects: Ref<IProject[]> = ref([])
+    const inAttendanceTime: Ref<string> = ref('')
+    const inAttendanceProject: Ref<IProject | null> = ref(null)
+    const selectedProject: Ref<IProject | null> = ref(null)
     const store = useStore()
+    const state: IState = store.state as IState
     const theme: Ref<boolean> = ref(true)
     const themeIcon: Ref<string> = ref('dark_mode')
     const isShowSelectedProject: Ref<boolean> = ref(true)
@@ -157,13 +159,18 @@ export default defineComponent({
 
     const db = firebase.firestore()
 
-    const onChangeProject = (e: any) => {
-      store.dispatch('writeProject', e)
+    /**
+     * プロジェクト変更
+     * @param  {IProject} project  選択したプロジェクト
+     */
+    const handleChangeProject = (project: IProject) => {
+      store.dispatch('writeProject', project)
       onCheckInAttendanceProject()
       onCheckInAttendance()
     }
 
-    const signOut = () => {
+    /* ログアウト */
+    const handleLogout = () => {
       store.dispatch('writeLoading', true)
       firebase.auth().signOut().then(() => {
         console.log('ログアウトしました')
@@ -177,8 +184,9 @@ export default defineComponent({
       })
     }
 
+    /* 画面幅から、PCかSPか判定 */
     const onCheckIsPC = () => {
-      if (window.innerWidth < 1264) {
+      if (window.innerWidth < BREAK_POINT) {
         isPC.value = false
       } else {
         isPC.value = true
@@ -186,42 +194,39 @@ export default defineComponent({
       }
     }
 
+    /* 画面幅リサイズ */
     const onResize = () => {
       window.onresize = () => {
         onCheckIsPC()
       }
     }
 
+    /* 稼働中のプロジェクト情報を取得する */
     const onCheckInAttendanceProject = () => {
       // in_attendanceから稼働情報を取得する
-      // @ts-ignore
-      db.collection(`users/${store.state.user.uid}/in_attendance_project`).onSnapshot((docs) => {
-        const inAttendanceProjectArray: any = []
+      db.collection(`users/${state.user.uid}/in_attendance_project`).onSnapshot((docs) => {
+        const inAttendanceProjectArray: IProject[] = []
         docs.forEach((doc) => {
           inAttendanceProjectArray.push({
-            ...doc.data(),
+            ...doc.data() as IProject,
             id: doc.id
           })
         })
         if (inAttendanceProjectArray.length) {
-          // const obj = {
-          //   id: inAttendanceProjectArray[0].item_id,
-          //   name: inAttendanceProjectArray[0].name
-          // }
           inAttendanceProject.value = inAttendanceProjectArray[0]
         }
       })
     }
 
+    /* 稼働中の情報を取得する */
     const onCheckInAttendance = () => {
       // in_attendanceから稼働情報を取得する
-      // @ts-ignore
-      db.collection(`users/${store.state.user.uid}/projects/${store.state.project.id}/in_attendance`).onSnapshot((docs) => {
-        const inAttendanceArray: any = []
-        inAttendanceTime.value = null
+      db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`).onSnapshot((docs) => {
+        const inAttendanceArray: IProjectItem[] = []
+        inAttendanceTime.value = ''
         docs.forEach((doc) => {
           inAttendanceArray.push({
-            ...doc.data(),
+            ...doc.data() as IProjectItem,
             id: doc.id
           })
         })
@@ -234,17 +239,14 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      // @ts-ignore
-      theme.value = store.state.dark
-      // @ts-ignore
-      selectedProject.value = store.state.project
+      theme.value = state.dark
+      selectedProject.value = state.project
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
-          // @ts-ignore
-          db.collection(`users/${store.state.user.uid}/projects`).get().then((querySnapshot) => {
+          db.collection(`users/${state.user.uid}/projects`).get().then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
               projects.value.push({
-                ...doc.data(),
+                ...doc.data() as IProject,
                 id: doc.id
               })
             })
@@ -259,6 +261,7 @@ export default defineComponent({
       onResize()
     })
 
+    /* ダークモードかライトモードか */
     watch(
       () => theme.value,
       (n, _) => {
@@ -268,6 +271,7 @@ export default defineComponent({
       }
     )
 
+    /* 画面によって要素の出しわけ */
     watch(
       () => context.root.$route.path,
       (n, _) => {
@@ -321,11 +325,11 @@ export default defineComponent({
       projects,
       inAttendanceTime,
       inAttendanceProject,
-      onChangeProject,
-      store,
+      handleChangeProject,
+      state,
       theme,
       themeIcon,
-      signOut,
+      handleLogout,
       isShowSelectedProject,
       isShowInputLink,
       isPC,
