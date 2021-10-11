@@ -18,7 +18,7 @@
         </v-row>
         <v-btn
           type="button"
-          @click="reset()"
+          @click="handleResetPassword()"
         >
           パスワードリセットメールを送信する
         </v-btn>
@@ -44,7 +44,7 @@ export default defineComponent({
     const isEditEmail: Ref<boolean> = ref(false)
     const confirmRef: Ref<any> = ref()
 
-    const reset = () => {
+    const handleResetPassword = () => {
       store.dispatch('writeLoading', true)
       firebase.auth().sendPasswordResetEmail(email.value)
         .then(async () => {
@@ -67,7 +67,7 @@ export default defineComponent({
       emailRules,
       isEditEmail,
       myForm,
-      reset,
+      handleResetPassword,
       confirmRef
     }
   }

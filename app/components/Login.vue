@@ -31,9 +31,9 @@
           </v-col>
         </v-row>
         <v-btn
-          @click="signInEmail()"
+          @click="handleLoginEmail()"
         >
-          signInEmail
+          handleLoginEmail
         </v-btn>
       </v-container>
     </v-form>
@@ -51,9 +51,9 @@
 
     <v-btn
       type="button"
-      @click="loginGoogle()"
+      @click="handleLoginGoogle()"
     >
-      loginGoogle
+      handleLoginGoogle
     </v-btn>
   </div>
 </template>
@@ -78,7 +78,7 @@ export default defineComponent({
     const password: Ref<string> = ref('')
     const store = useStore()
 
-    const loginGoogle = () => {
+    const handleLoginGoogle = () => {
       // store.dispatch('writeLoading', true)
       const provider = new firebase.auth.GoogleAuthProvider()
       firebase.auth().signInWithPopup(provider)
@@ -100,7 +100,7 @@ export default defineComponent({
         })
     }
 
-    const signInEmail = () => {
+    const handleLoginEmail = () => {
       store.dispatch('writeLoading', true)
       firebase.auth().signInWithEmailAndPassword(email.value, password.value)
         .then((res) => {
@@ -122,8 +122,8 @@ export default defineComponent({
     }
 
     return {
-      loginGoogle,
-      signInEmail,
+      handleLoginGoogle,
+      handleLoginEmail,
       valid,
       email,
       emailRules,

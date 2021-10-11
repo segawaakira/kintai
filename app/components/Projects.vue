@@ -18,9 +18,9 @@
         </v-row>
         <v-btn
           type="button"
-          @click="createProject()"
+          @click="handleCreateProject()"
         >
-          createProject
+          handleCreateProject
         </v-btn>
       </v-container>
     </v-form>
@@ -37,24 +37,24 @@
             <v-text-field v-model="item.name" />
             <v-btn
               type="button"
-              @click="saveProject(item.id, item.name)"
+              @click="handleSaveProject(item.id, item.name)"
             >
-              saveProject
+              handleSaveProject
             </v-btn>
           </div>
           <div v-else>
             {{ item.name }}
             <v-btn
               type="button"
-              @click="editProject(item.id)"
+              @click="handleEditProject(item.id)"
             >
-              editProject
+              handleEditProject
             </v-btn>
             <v-btn
               type="button"
-              @click="deleteProject(item.id)"
+              @click="handleDeleteProject(item.id)"
             >
-              deleteProject
+              handleDeleteProject
             </v-btn>
           </div>
         </v-list-item>
@@ -66,11 +66,13 @@
 <script lang="ts">
 import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
+import { IState, IProject } from '../interfaces/'
 
 export default defineComponent({
   setup (_props, _context) {
     const store = useStore()
-    const projects: Ref<any> = ref([])
+    const state: IState = store.state as IState
+    const projects: Ref<IProject[]> = ref([])
     const db = firebase.firestore()
     const projectNameRules = [
       (v: any) => !!v || 'projectName is required'
@@ -78,10 +80,10 @@ export default defineComponent({
     const projectName: Ref<string> = ref('')
     const confirmRef: Ref<any> = ref()
 
-    const createProject = () => {
+    /* プロジェクト作成 */
+    const handleCreateProject = () => {
       store.dispatch('writeLoading', true)
-      // @ts-ignore
-      db.collection(`users/${store.state.user.uid}/projects/`)
+      db.collection(`users/${state.user.uid}/projects/`)
         .add({
           name: projectName.value
         })
@@ -95,11 +97,14 @@ export default defineComponent({
         })
     }
 
-    const deleteProject = async (id: string) => {
+    /**
+     * プロジェクト削除
+     * @param  {string} id  削除するプロジェクトid
+     */
+    const handleDeleteProject = async (id: string) => {
       if (await confirmRef.value.open('本当に削除しますか？', true)) {
         store.dispatch('writeLoading', true)
-        // @ts-ignore
-        db.collection(`users/${store.state.user.uid}/projects/`).doc(id)
+        db.collection(`users/${state.user.uid}/projects/`).doc(id)
           .delete()
           .then((ref) => {
             console.log('del: ', ref)
@@ -113,14 +118,22 @@ export default defineComponent({
     }
 
     const editProjectId: Ref<string | null> = ref(null)
-    const editProject = (id: string) => {
+    /**
+     * プロジェクト編集
+     * @param  {string} id  編集するプロジェクトid
+     */
+    const handleEditProject = (id: string) => {
       editProjectId.value = id
     }
 
-    const saveProject = (id: string, name: string) => {
+    /**
+     * プロジェクト更新
+     * @param  {string} id  編集するプロジェクトid
+     * @param  {string} name  編集したプロジェクト名
+     */
+    const handleSaveProject = (id: string, name: string) => {
       store.dispatch('writeLoading', true)
-      // @ts-ignore
-      db.collection(`users/${store.state.user.uid}/projects/`).doc(id)
+      db.collection(`users/${state.user.uid}/projects/`).doc(id)
         .update({
           name
         })
@@ -141,12 +154,11 @@ export default defineComponent({
       store.dispatch('writeLoading', true)
       firebase.auth().onAuthStateChanged((data) => {
         if (data) {
-          // @ts-ignore
-          db.collection(`users/${store.state.user.uid}/projects`).onSnapshot((docs) => {
+          db.collection(`users/${state.user.uid}/projects`).onSnapshot((docs) => {
             projects.value = []
             docs.forEach((doc) => {
               projects.value.push({
-                ...doc.data(),
+                ...doc.data() as IProject,
                 id: doc.id
               })
             })
@@ -159,10 +171,10 @@ export default defineComponent({
     })
 
     return {
-      createProject,
-      deleteProject,
-      editProject,
-      saveProject,
+      handleCreateProject,
+      handleDeleteProject,
+      handleEditProject,
+      handleSaveProject,
       editProjectId,
       projects,
       projectName,

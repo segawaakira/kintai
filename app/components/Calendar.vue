@@ -2,10 +2,10 @@
   <div>
     <v-flex>
       <p>{{ currentYear }}年{{ currentMonth }}月</p>
-      <v-btn type="button" @click="prevMonth">
+      <v-btn type="button" @click="handlePrev">
         前
       </v-btn>
-      <v-btn type="button" @click="nextMonth">
+      <v-btn type="button" @click="handleNext">
         次
       </v-btn>
     </v-flex>
@@ -30,7 +30,7 @@
               v-if="data.startDate === index + 1"
               class="timeline-item"
               :style="calcPositionWidth(data.startTime - data.startDateTime, data.endTime - data.startDateTime)"
-              @click="onClickDetail(data.id)"
+              @click="handleClickDetail(data.id)"
             />
             <!-- ▽ 日付を跨いだ時 ▽ -->
             <div
@@ -39,7 +39,7 @@
               :data-end-time="data.endTime"
               :data-end-date-time="data.endDateTime"
               :style="calcPositionWidth(0, data.endTime - data.endDateTime)"
-              @click="onClickDetail(data.id)"
+              @click="handleClickDetail(data.id)"
             />
             <!-- ▽ 稼働時間 ▽ -->
             <div style="display: none;">
@@ -58,9 +58,9 @@
     <!-- ▽ 月別稼働合計時間 ▽ -->
     <div>{{ totalWorkedHourOfMonth }}</div>
     <v-btn
-      @click="onCreateExcel"
+      @click="handleDownloadExcel"
     >
-      onCreateExcel
+      handleDownloadExcel
     </v-btn>
   </div>
 </template>
@@ -113,6 +113,13 @@ export default defineComponent({
       return new Date(year, month, 0).getDate()
     }
 
+    /**
+     * 年月日から曜日を取得
+     * @param  {number} year  年
+     * @param  {number} month 月
+     * @param  {number} day 日
+     * @return {string} 曜日
+     */
     const getDayOfWeek = (year: number, month: number, day: number) => {
       const date = new Date(year, month - 1, day)
       const dayOfWeek = date.getDay()
@@ -121,7 +128,8 @@ export default defineComponent({
 
     const lastDay: Ref<number> = ref(getLastDay(currentYear.value, currentMonth.value))
 
-    const nextMonth = () => {
+    /* 次の月 */
+    const handleNext = () => {
       if (currentMonth.value !== 12) {
         currentMonth.value += 1
       } else {
@@ -132,7 +140,8 @@ export default defineComponent({
       getItems()
     }
 
-    const prevMonth = () => {
+    /* 前の月 */
+    const handlePrev = () => {
       if (currentMonth.value !== 1) {
         currentMonth.value -= 1
       } else {
@@ -158,6 +167,7 @@ export default defineComponent({
       return `left: ${startPosition}%; width: ${width}%;`
     }
 
+    /* 表示中の年月の稼働データから、カレンダーに表示用のデータに整形する */
     const checkCurrentMonthData = (items: IProjectItem[]) => {
       currentMonthData.value = []
       items.forEach((item: IProjectItem) => {
@@ -192,6 +202,7 @@ export default defineComponent({
       })
     }
 
+    /* 表示中の年月の稼働状況を取得する */
     const getItems = () => {
       db.collection(`users/${state.user.uid}/projects/${state.project.id}/items`).onSnapshot((docs) => {
         store.dispatch('writeLoading', true)
@@ -232,7 +243,8 @@ export default defineComponent({
       })
     }
 
-    const onClickDetail = (id: string) => {
+    /* タイムラインをクリックでその稼働詳細画面に遷移する */
+    const handleClickDetail = (id: string) => {
       context.root.$router.push('/detail?id=' + id)
     }
 
@@ -266,7 +278,8 @@ export default defineComponent({
       fgColor: { argb: 'FFFFFFFF' }
     }
 
-    const onCreateExcel = async () => {
+    /* 表示中の年月の稼働実績を記載されたエクセルをダウンロード */
+    const handleDownloadExcel = async () => {
       store.dispatch('writeLoading', true)
       const itemsExcel: IItemDataExel[] = []
       items.value.forEach((item: IProjectItem) => {
@@ -375,16 +388,16 @@ export default defineComponent({
       currentYear,
       currentMonth,
       lastDay,
-      nextMonth,
-      prevMonth,
+      handleNext,
+      handlePrev,
       currentMonthData,
       calcPositionWidth,
       items,
       getDayOfWeek,
-      onClickDetail,
+      handleClickDetail,
       totalWorkedHourOfDay,
       totalWorkedHourOfMonth,
-      onCreateExcel
+      handleDownloadExcel
     }
   }
 })

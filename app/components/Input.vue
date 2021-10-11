@@ -4,14 +4,14 @@
       <v-btn
         type="button"
         :disabled="isInAttendance"
-        @click="attendance()"
+        @click="handleAttendance()"
       >
         出勤
       </v-btn>
       <v-btn
         type="button"
         :disabled="!isInAttendance"
-        @click="departure()"
+        @click="handleDeparture()"
       >
         退勤
       </v-btn>
@@ -76,8 +76,8 @@ export default defineComponent({
     const isInAttendance: Ref<boolean> = ref(false)
     const confirmRef: Ref<any> = ref()
 
-    // 出勤
-    const attendance = () => {
+    /* 出勤 */
+    const handleAttendance = () => {
       store.dispatch('writeLoading', true)
       const start = new Date()
       const end = new Date()
@@ -149,8 +149,8 @@ export default defineComponent({
         })
     }
 
-    // 退勤
-    const departure = () => {
+    /* 退勤 */
+    const handleDeparture = () => {
       store.dispatch('writeLoading', true)
       // in_attendanceから稼働情報を取得する
       const inAttendanceArray: any = []
@@ -206,6 +206,7 @@ export default defineComponent({
       })
     }
 
+    /* 現在地取得 */
     const getLocation = () => {
       store.dispatch('writeLoading', true)
       navigator.geolocation.getCurrentPosition(
@@ -315,8 +316,8 @@ export default defineComponent({
     })
 
     return {
-      attendance,
-      departure,
+      handleAttendance,
+      handleDeparture,
       getLocation,
       placeName,
       placeLat,
