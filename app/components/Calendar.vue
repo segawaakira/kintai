@@ -1,5 +1,6 @@
 <template>
   <div>
+    <ProjectSelect />
     <v-flex>
       <p>{{ currentYear }}年{{ currentMonth }}月</p>
       <v-btn type="button" @click="handlePrev">
@@ -69,6 +70,7 @@ import { defineComponent, ref, Ref, onMounted, useStore } from '@nuxtjs/composit
 import firebase from 'firebase'
 import dayjs from 'dayjs'
 import { IState, IProjectItem } from '../interfaces/'
+import ProjectSelect from './parts/ProjectSelect.vue'
 const excelJs = require('exceljs')
 
 interface IItemData {
@@ -93,6 +95,7 @@ interface IItemDataExel {
 }
 
 export default defineComponent({
+  components: { ProjectSelect },
   setup (_props, context) {
     const store = useStore()
     const state: IState = store.state as IState
@@ -204,6 +207,9 @@ export default defineComponent({
 
     /* 表示中の年月の稼働状況を取得する */
     const getItems = () => {
+      if (!state.project) {
+        return
+      }
       db.collection(`users/${state.user.uid}/projects/${state.project.id}/items`).onSnapshot((docs) => {
         store.dispatch('writeLoading', true)
         items.value = []

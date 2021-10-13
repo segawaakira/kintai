@@ -1,5 +1,6 @@
 <template>
   <div>
+    <ProjectSelect />
     <div v-if="state.project">
       <v-btn
         type="button"
@@ -36,6 +37,9 @@
         </v-container>
       </v-form>
     </div>
+    <div v-else>
+      稼働するプロジェクトを選択してください。
+    </div>
 
     <hr>
 
@@ -59,11 +63,16 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
+import { defineComponent, onMounted, Ref, ref, useStore, watch } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 import { IProject, IProjectItem, IState } from '../interfaces/'
+import Confirm from './common/Confirm.vue'
+import ProjectSelect from './parts/ProjectSelect.vue'
 
 export default defineComponent({
+  components: {
+    Confirm, ProjectSelect
+  },
   setup (_props, _context) {
     const store = useStore()
     const state: IState = store.state as IState
@@ -184,6 +193,7 @@ export default defineComponent({
             db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`).doc(inAttendance.id)
               .delete()
               .then(async (ref) => {
+                // TODO:in_attendance_projectも削除する。
                 console.log('del: ', ref)
                 description.value = ''
                 if (await confirmRef.value.open('退勤しました', false)) {
@@ -297,9 +307,9 @@ export default defineComponent({
       )
     }
 
-    onMounted(() => {
+    const checkInAttendance = () => {
       firebase.auth().onAuthStateChanged((data) => {
-        if (data) {
+        if (data && state.project) {
           db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`).onSnapshot((docs) => {
             const inAttendanceArray: any = []
             isInAttendance.value = false
@@ -316,8 +326,20 @@ export default defineComponent({
           })
         }
       })
+    }
+
+    onMounted(() => {
+      checkInAttendance()
       getLocation()
     })
+
+    /* プロジェクト変更時 */
+    watch(
+      () => state.project,
+      (_n, _) => {
+        checkInAttendance()
+      }
+    )
 
     return {
       handleAttendance,
