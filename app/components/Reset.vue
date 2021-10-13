@@ -30,8 +30,12 @@
 <script lang="ts">
 import { defineComponent, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
+import Confirm from './common/Confirm.vue'
 
 export default defineComponent({
+  components: {
+    Confirm
+  },
   setup (_props, _context) {
     const store = useStore()
     const email: Ref<string> = ref('')

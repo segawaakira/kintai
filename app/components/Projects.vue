@@ -78,8 +78,12 @@
 import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 import { IState, IProject } from '../interfaces/'
+import Confirm from './common/Confirm.vue'
 
 export default defineComponent({
+  components: {
+    Confirm
+  },
   setup (_props, _context) {
     const store = useStore()
     const state: IState = store.state as IState
