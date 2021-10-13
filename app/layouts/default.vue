@@ -97,7 +97,7 @@
       <v-spacer />
     </v-app-bar>
     <v-main>
-      <v-container>
+      <v-container style="max-width: 960px;">
         <Nuxt />
       </v-container>
     </v-main>
@@ -207,7 +207,7 @@ export default defineComponent({
           to: '/projects'
         }
       ],
-      title: 'Vuetify.js',
+      title: 'kintai',
       state,
       theme,
       themeIcon,

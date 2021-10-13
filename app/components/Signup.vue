@@ -1,53 +1,48 @@
 <template>
-  <div>
+  <div class="mt-16" style="max-width: 480px;margin: 0 auto;">
     <v-form lazy-validation autocomplete="off">
       <v-container>
-        <v-row>
-          <v-col
-            cols="12"
-            sm="12"
-            md="12"
+        <h1 class="headline mb-12">
+          会員登録
+        </h1>
+        <v-text-field
+          v-model="email"
+          label="メールアドレス"
+          required
+          :error-messages="emailError"
+          @input="emailError = ''"
+        />
+        <v-text-field
+          v-model="password"
+          :type="show ? 'text' : 'password'"
+          label="パスワード"
+          :append-icon="show ? 'visibility' : 'visibility_off'"
+          :error-messages="passwordError"
+          @input="passwordError = ''"
+          @click:append="show = !show"
+        />
+        <div class="mt-4">
+          <v-btn
+            depressed
+            type="button"
+            color="primary"
+            @click="handleCreateUserByEmail()"
           >
-            <v-text-field
-              v-model="email"
-              label="メールアドレス"
-              required
-              :error-messages="emailError"
-              @input="emailError = ''"
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            sm="12"
-            md="12"
+            登録する
+          </v-btn>
+        </div>
+        <hr class="mt-8">
+        <div class="mt-8">
+          <v-btn
+            depressed
+            type="button"
+            @click="handleLoginGoogle()"
           >
-            <v-text-field
-              v-model="password"
-              :type="show ? 'text' : 'password'"
-              label="パスワード"
-              :append-icon="show ? 'visibility' : 'visibility_off'"
-              :error-messages="passwordError"
-              @input="passwordError = ''"
-              @click:append="show = !show"
-            />
-          </v-col>
-        </v-row>
-        <v-btn
-          @click="handleCreateUserByEmail()"
-        >
-          handleCreateUserByEmail
-        </v-btn>
+            Googleアカウントで会員登録
+          </v-btn>
+        </div>
       </v-container>
     </v-form>
-
-    <hr>
-
-    <v-btn
-      type="button"
-      @click="handleLoginGoogle()"
-    >
-      handleLoginGoogle
-    </v-btn>
   </div>
 </template>
 <script lang="ts">
