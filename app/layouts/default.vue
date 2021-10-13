@@ -338,3 +338,7 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss">
+@import '../assets/form.scss';
+</style>

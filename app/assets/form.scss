@@ -1,0 +1,26 @@
+/* form要素のスタイル
+------------------------------------- */
+
+.v-application {
+  /* ダークモード */
+  &.theme--dark {
+    input {
+      // オートコンプリートの背景とテキストカラー
+      &:-webkit-autofill {
+        box-shadow: 0 0 0 1000px rgb(18, 18, 18) inset;
+        -webkit-text-fill-color: white !important;
+      }
+    }
+  }
+
+  /* ライトモード */
+  &.theme--light {
+    input {
+      // オートコンプリートの背景とテキストカラー
+      &:-webkit-autofill {
+        box-shadow: 0 0 0 1000px #fff inset;
+        -webkit-text-fill-color: black !important;
+      }
+    }
+  }
+}
