@@ -12,7 +12,7 @@
               v-model="email"
               label="メールアドレス"
               :error-messages="emailError"
-              @input="handleInputEmail"
+              @input="emailError = ''"
             />
           </v-col>
         </v-row>
@@ -53,16 +53,10 @@ export default defineComponent({
         })
     }
 
-    /* メールアドレス入力 */
-    const handleInputEmail = () => {
-      emailError.value = ''
-    }
-
     return {
       email,
       emailError,
       handleResetPassword,
-      handleInputEmail,
       confirmRef
     }
   }
