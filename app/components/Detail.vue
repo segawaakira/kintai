@@ -1,88 +1,89 @@
 <template>
-  <div>
-    <v-form ref="myForm" lazy-validation>
-      <v-container>
-        <v-row>
-          <v-col
-            cols="12"
-            sm="12"
-            md="12"
-          >
-            <v-text-field
-              v-model="startTime"
-              label="開始時間"
-              type="datetime-local"
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            sm="12"
-            md="12"
-          >
-            <v-text-field
-              v-model="startPlaceName"
-              label="開始場所"
-              required
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            sm="12"
-            md="12"
-          >
-            <v-text-field
-              v-model="endTime"
-              label="終了時間"
-              type="datetime-local"
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            sm="12"
-            md="12"
-          >
-            <v-text-field
-              v-model="endPlaceName"
-              label="終了場所"
-              required
-            />
-          </v-col>
-          <v-col
-            cols="12"
-            sm="12"
-            md="12"
-          >
-            <v-text-field
-              v-model="description"
-              label="やること・やったことなど"
-              required
-            />
-          </v-col>
-        </v-row>
-      </v-container>
+  <div class="my-16">
+    <h1 class="headline mb-12">
+      稼働詳細
+    </h1>
+    <v-form lazy-validation>
+      <v-row>
+        <v-col
+          cols="12"
+          sm="12"
+          md="12"
+        >
+          <v-text-field
+            v-model="startTime"
+            label="開始時間"
+            type="datetime-local"
+          />
+        </v-col>
+        <v-col
+          cols="12"
+          sm="12"
+          md="12"
+        >
+          <v-text-field
+            v-model="startPlaceName"
+            label="開始場所"
+            required
+          />
+        </v-col>
+        <v-col
+          cols="12"
+          sm="12"
+          md="12"
+        >
+          <v-text-field
+            v-model="endTime"
+            label="終了時間"
+            type="datetime-local"
+          />
+        </v-col>
+        <v-col
+          cols="12"
+          sm="12"
+          md="12"
+        >
+          <v-text-field
+            v-model="endPlaceName"
+            label="終了場所"
+            required
+          />
+        </v-col>
+        <v-col
+          cols="12"
+          sm="12"
+          md="12"
+        >
+          <v-text-field
+            v-model="description"
+            label="やること・やったことなど"
+            required
+          />
+        </v-col>
+      </v-row>
 
-      <hr>
-
-      <v-btn
-        type="button"
-        @click="handleUpdateItem()"
-      >
-        更新する
-      </v-btn>
-
-      <hr>
-
-      <v-btn
-        type="button"
-        @click="handleDeleteItem()"
-      >
-        削除する
-      </v-btn>
+      <div class="mt-4 d-flex justify-space-between align-center">
+        <v-btn
+          type="button"
+          depressed
+          color="primary"
+          @click="handleUpdateItem()"
+        >
+          更新する
+        </v-btn>
+        <v-btn
+          type="button"
+          depressed
+          @click="handleDeleteItem()"
+        >
+          削除する
+        </v-btn>
+      </div>
     </v-form>
 
-    <hr>
+    <hr class="my-8">
     <v-btn
-      color="primary"
+      depressed
       nuxt
       to="/calendar"
     >

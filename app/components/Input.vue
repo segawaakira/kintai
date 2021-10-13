@@ -49,6 +49,7 @@
       <v-btn
         class="my-8"
         type="button"
+        depressed
         @click="getLocation()"
       >
         現在地を取得し直す

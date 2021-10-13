@@ -7,13 +7,13 @@
     <ProjectSelect />
 
     <div class="d-flex justify-space-between align-center mb-4">
-      <v-btn type="button" @click="handlePrev">
+      <v-btn type="button" depressed @click="handlePrev">
         <v-icon>
           chevron_left
         </v-icon>
       </v-btn>
       <div class="title">{{ currentYear }}年{{ currentMonth }}月</div>
-      <v-btn type="button" @click="handleNext">
+      <v-btn type="button" depressed @click="handleNext">
         <v-icon>
           chevron_right
         </v-icon>
