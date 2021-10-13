@@ -1,27 +1,26 @@
 <template>
-  <div>
+  <div class="mt-16" style="max-width: 480px;margin: 0 auto;">
     <v-form lazy-validation>
       <v-container>
-        <v-row>
-          <v-col
-            cols="12"
-            sm="12"
-            md="12"
+        <h1 class="headline mb-12">
+          パスワードリセット
+        </h1>
+        <v-text-field
+          v-model="email"
+          label="メールアドレス"
+          :error-messages="emailError"
+          @input="emailError = ''"
+        />
+        <div class="mt-4">
+          <v-btn
+            depressed
+            type="button"
+            color="primary"
+            @click="handleResetPassword()"
           >
-            <v-text-field
-              v-model="email"
-              label="メールアドレス"
-              :error-messages="emailError"
-              @input="emailError = ''"
-            />
-          </v-col>
-        </v-row>
-        <v-btn
-          type="button"
-          @click="handleResetPassword()"
-        >
-          パスワードリセットメールを送信する
-        </v-btn>
+            パスワードリセットメールを送信する
+          </v-btn>
+        </div>
       </v-container>
     </v-form>
     <Confirm ref="confirmRef" />

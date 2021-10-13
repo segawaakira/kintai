@@ -4,8 +4,8 @@
       <v-card-text>{{ message }}</v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer />
-        <v-btn v-if="isConfirm" color="grey" @click.native="handleCancel">CANCEL</v-btn>
-        <v-btn color="primary darken-1" @click.native="handleAgree">OK</v-btn>
+        <v-btn v-if="isConfirm" depressed @click.native="handleCancel">CANCEL</v-btn>
+        <v-btn color="primary" depressed @click.native="handleAgree">OK</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

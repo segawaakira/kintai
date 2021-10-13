@@ -91,13 +91,14 @@
     <v-app-bar
       fixed
       app
+      flat
     >
       <v-app-bar-nav-icon v-if="!isPC" @click.stop="drawer = !drawer" />
       <v-toolbar-title v-text="title" />
       <v-spacer />
     </v-app-bar>
     <v-main>
-      <v-container>
+      <v-container style="max-width: 960px;">
         <Nuxt />
       </v-container>
     </v-main>
@@ -207,7 +208,7 @@ export default defineComponent({
           to: '/projects'
         }
       ],
-      title: 'Vuetify.js',
+      title: 'kintai',
       state,
       theme,
       themeIcon,
