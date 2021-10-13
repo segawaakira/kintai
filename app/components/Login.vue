@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-form v-model="valid" ref="myForm" lazy-validation>
+    <v-form lazy-validation autocomplete="off">
       <v-container>
         <v-row>
           <v-col
@@ -10,9 +10,10 @@
           >
             <v-text-field
               v-model="email"
-              :rules="emailRules"
               label="メールアドレス"
               required
+              :error-messages="emailError"
+              @input="emailError = ''"
             />
           </v-col>
           <v-col
@@ -22,10 +23,11 @@
           >
             <v-text-field
               v-model="password"
-              :rules="passwordRules"
               :type="show ? 'text' : 'password'"
               label="パスワード"
               :append-icon="show ? 'visibility' : 'visibility_off'"
+              :error-messages="passwordError"
+              @input="passwordError = ''"
               @click:append="show = !show"
             />
           </v-col>
@@ -64,20 +66,14 @@ import { IUser } from '../interfaces/'
 
 export default defineComponent({
   setup (_props, _context) {
-    const valid: Ref<boolean> = ref(true)
-    const myForm = ref(null)
     const email: Ref<string> = ref('')
-    const emailRules = [
-      (v: any) => !!v || 'E-mail is required',
-      (v: any) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
-    ]
-    const show: Ref<boolean> = ref(false)
-    const passwordRules = [
-      (v: any) => !!v || 'password is required'
-    ]
+    const emailError: Ref<string> = ref('')
     const password: Ref<string> = ref('')
+    const passwordError: Ref<string> = ref('')
+    const show: Ref<boolean> = ref(false)
     const store = useStore()
 
+    /* Googleでログイン */
     const handleLoginGoogle = () => {
       // store.dispatch('writeLoading', true)
       const provider = new firebase.auth.GoogleAuthProvider()
@@ -100,6 +96,7 @@ export default defineComponent({
         })
     }
 
+    /* Emailでログイン */
     const handleLoginEmail = () => {
       store.dispatch('writeLoading', true)
       firebase.auth().signInWithEmailAndPassword(email.value, password.value)
@@ -116,6 +113,23 @@ export default defineComponent({
           // context.root.$router.push('/input')
         })
         .catch((error) => {
+          /**
+           * エラーコードによって、何が起因のエラーか出し分ける
+           * https://firebase.google.com/docs/auth/admin/errors?hl=ja
+           */
+          switch (error.code) {
+            case 'auth/invalid-email':
+            case 'auth/user-not-found':
+            case 'auth/email-already-exists':
+              emailError.value = error.message
+              break
+            case 'auth/invalid-password':
+            case 'auth/wrong-password':
+              passwordError.value = error.message
+              break
+            default:
+              break
+          }
           console.log(error)
           store.dispatch('writeLoading', false)
         })
@@ -124,17 +138,12 @@ export default defineComponent({
     return {
       handleLoginGoogle,
       handleLoginEmail,
-      valid,
       email,
-      emailRules,
+      emailError,
       show,
-      passwordRules,
       password,
-      myForm
+      passwordError
     }
   }
 })
 </script>
-
-<style>
-</style>

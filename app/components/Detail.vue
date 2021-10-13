@@ -138,9 +138,11 @@ export default defineComponent({
             store.dispatch('writeLoading', false)
           }
         })
-        .catch((error) => {
+        .catch(async (error) => {
           console.log(error)
-          store.dispatch('writeLoading', false)
+          if (await confirmRef.value.open(error.message, false)) {
+            store.dispatch('writeLoading', false)
+          }
         })
     }
 
@@ -154,9 +156,11 @@ export default defineComponent({
             console.log('削除した')
             context.root.$router.push('/calendar')
           })
-          .catch((error) => {
+          .catch(async (error: any) => {
             console.log(error)
-            store.dispatch('writeLoading', false)
+            if (await confirmRef.value.open(error.message, false)) {
+              store.dispatch('writeLoading', false)
+            }
           })
       }
     }

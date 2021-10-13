@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-form v-model="valid" ref="myForm" lazy-validation>
+    <v-form lazy-validation>
       <v-container>
         <v-row>
           <v-col
@@ -10,9 +10,9 @@
           >
             <v-text-field
               v-model="email"
-              :rules="emailRules"
               label="メールアドレス"
-              required
+              :error-messages="emailError"
+              @input="emailError = ''"
             />
           </v-col>
         </v-row>
@@ -28,22 +28,17 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
+import { defineComponent, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 
 export default defineComponent({
   setup (_props, _context) {
     const store = useStore()
-    const valid: Ref<boolean> = ref(true)
-    const myForm = ref(null)
     const email: Ref<string> = ref('')
-    const emailRules = [
-      (v: any) => !!v || 'E-mail is required',
-      (v: any) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
-    ]
-    const isEditEmail: Ref<boolean> = ref(false)
+    const emailError: Ref<string> = ref('')
     const confirmRef: Ref<any> = ref()
 
+    /* パスワードリセット */
     const handleResetPassword = () => {
       store.dispatch('writeLoading', true)
       firebase.auth().sendPasswordResetEmail(email.value)
@@ -53,20 +48,14 @@ export default defineComponent({
           }
         })
         .catch((error) => {
-          console.log('リセットメールを送信失敗しました', error)
+          emailError.value = error.message
           store.dispatch('writeLoading', false)
         })
     }
 
-    onMounted(() => {
-    })
-
     return {
-      valid,
       email,
-      emailRules,
-      isEditEmail,
-      myForm,
+      emailError,
       handleResetPassword,
       confirmRef
     }

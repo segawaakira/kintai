@@ -1,22 +1,15 @@
 import { IProject, IUser } from '../interfaces/'
 
-// 状態管理したい要素に名前をつけて、stateとしてexportする
-export const state = () => ({
-  project: {
-    id: '',
-    name: ''
-  },
+const defaultState = {
+  project: null,
   dark: true,
-  user: {
-    uid: '',
-    email: ''
-  },
+  user: null,
   loading: false
-})
+}
 
-// 状態を変更する処理は mutationとしてexportする
+export const state = () => (defaultState)
+
 export const mutations = {
-  // 状態（値）を変更する処理を定義
   setProjectFromStore (state: any, value: IProject) {
     state.project = value
   },
@@ -28,41 +21,36 @@ export const mutations = {
   },
   setLoadingFromStore (state: any, value: boolean) {
     state.loading = value
+  },
+  setDefaultState (state: any) {
+    state.project = defaultState.project
+    state.dark = defaultState.dark
+    state.user = defaultState.user
+    state.loading = defaultState.loading
+    console.log(state)
   }
 }
 
-// 実際に各コンポーネントから呼び出す処理をactionとしてexportする
+// 各コンポーネントから呼び出す処理をactionとしてexport
 export const actions = {
   writeProject (context: any, value: IProject) {
-    console.log('context')
-    console.log(context)
-    console.log('value')
     console.log(value)
-    // コミットすることで状態変更が反映される
     context.commit('setProjectFromStore', value)
   },
   writeDark (context: any, value: boolean) {
-    console.log('context')
-    console.log(context)
-    console.log('value')
     console.log(value)
-    // コミットすることで状態変更が反映される
     context.commit('setDarkFromStore', value)
   },
   writeUser (context: any, value: IUser) {
-    console.log('context')
-    console.log(context)
-    console.log('value')
     console.log(value)
-    // コミットすることで状態変更が反映される
     context.commit('setUserFromStore', value)
   },
   writeLoading (context: any, value: boolean) {
-    console.log('context')
-    console.log(context)
-    console.log('value')
     console.log(value)
-    // コミットすることで状態変更が反映される
     context.commit('setLoadingFromStore', value)
+  },
+  // 全てのstateをdefaultに戻す
+  writeDefaultState (context: any) {
+    context.commit('setDefaultState')
   }
 }

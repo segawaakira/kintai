@@ -127,25 +127,25 @@ export default defineComponent({
                   }
                   console.log('Add ID: ', ref.id)
                 })
-                .catch((error: any) => {
+                .catch(async (error: any) => {
                   console.log(error)
-                  // if (await confirmRef.value.open('出勤に失敗しました', false)) {
-                  //   store.dispatch('writeLoading', false)
-                  // }
+                  if (await confirmRef.value.open('出勤に失敗しました', false)) {
+                    store.dispatch('writeLoading', false)
+                  }
                 })
             })
-            .catch((error: any) => {
+            .catch(async (error: any) => {
               console.log(error)
-              // if (await confirmRef.value.open('出勤に失敗しました', false)) {
-              //   store.dispatch('writeLoading', false)
-              // }
+              if (await confirmRef.value.open('出勤に失敗しました', false)) {
+                store.dispatch('writeLoading', false)
+              }
             })
         })
-        .catch((error: any) => {
+        .catch(async (error: any) => {
           console.log(error)
-          // if (await confirmRef.value.open('出勤に失敗しました', false)) {
-          //   store.dispatch('writeLoading', false)
-          // }
+          if (await confirmRef.value.open('出勤に失敗しました', false)) {
+            store.dispatch('writeLoading', false)
+          }
         })
     }
 
@@ -197,11 +197,11 @@ export default defineComponent({
                 }
               })
           })
-          .catch((error: any) => {
+          .catch(async (error: any) => {
             console.log(error)
-            // if (await confirmRef.value.open('退勤に失敗しました', false)) {
-            //   store.dispatch('writeLoading', false)
-            // }
+            if (await confirmRef.value.open('退勤に失敗しました', false)) {
+              store.dispatch('writeLoading', false)
+            }
           })
       })
     }
@@ -265,6 +265,12 @@ export default defineComponent({
           // 2:POSITION_UNAVAILABLE 電波状況などで位置情報が取得できなかった
           // 3:TIMEOUT 位置情報の取得に時間がかかり過ぎた…
 
+          // エラーダイアログ
+          const errorDialog = async (message: string) => {
+            await confirmRef.value.open(message, false)
+            store.dispatch('writeLoading', false)
+          }
+
           // エラー番号に対応したメッセージ
           const errorInfo = [
             '原因不明のエラーが発生しました。',
@@ -278,9 +284,7 @@ export default defineComponent({
 
           // エラーメッセージ
           const errorMessage = '[エラー番号: ' + errorNo + ']\n' + errorInfo[errorNo]
-          console.log(errorMessage)
-          // confirmRef.value.open(errorMessage, false)
-          store.dispatch('writeLoading', false)
+          errorDialog(errorMessage)
         },
 
         // [第3引数] オプション

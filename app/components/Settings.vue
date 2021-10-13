@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-form v-model="valid" ref="myForm" lazy-validation>
+    <v-form lazy-validation>
       <v-container>
         <v-row>
           <v-col
@@ -10,9 +10,9 @@
           >
             <v-text-field
               v-model="email"
-              :rules="emailRules"
               label="メールアドレス"
-              required
+              :error-messages="emailError"
+              @input="emailError = ''"
             />
           </v-col>
         </v-row>
@@ -33,6 +33,7 @@
     >
       退会する
     </v-btn>
+    <p v-if="leaveError">{{ leaveError }}</p>
     <Confirm ref="confirmRef" />
   </div>
 </template>
@@ -44,16 +45,13 @@ export default defineComponent({
   setup (_props, _context) {
     const store = useStore()
     const currentUser: Ref<any> = ref(null)
-    const valid: Ref<boolean> = ref(true)
-    const myForm = ref(null)
     const email: Ref<string> = ref('')
-    const emailRules = [
-      (v: any) => !!v || 'E-mail is required',
-      (v: any) => /.+@.+\..+/.test(v) || 'E-mail must be valid'
-    ]
+    const emailError: Ref<string> = ref('')
     const isEditEmail: Ref<boolean> = ref(false)
+    const leaveError: Ref<string> = ref('')
     const confirmRef: Ref<any> = ref()
 
+    /* 保存 */
     const handleSave = () => {
       store.dispatch('writeLoading', true)
       currentUser.value.updateEmail(email.value)
@@ -62,27 +60,28 @@ export default defineComponent({
             store.dispatch('writeLoading', false)
           }
         })
-        .catch(async (error: any) => {
+        .catch((error: any) => {
           console.log(error)
-          if (await confirmRef.value.open('メールアドレスを変更失敗しました', false)) {
-            store.dispatch('writeLoading', false)
-          }
+          emailError.value = error.message
+          store.dispatch('writeLoading', false)
         })
     }
 
+    /* 退会 */
     const handleLeave = async () => {
+      leaveError.value = ''
       if (await confirmRef.value.open('本当に退会しますか？', true)) {
         store.dispatch('writeLoading', true)
         currentUser.value.delete()
           .then(() => {
-            console.log('退会しました')
-            store.dispatch('writeLoading', false)
+            store.dispatch('writeDefaultState')
+            // Todo:userに紐づいたfirestoreのデータ全て削除
+            location.href = '/login'
           })
-          .catch(async (error: any) => {
+          .catch((error: any) => {
             console.log(error)
-            if (await confirmRef.value.open('退会失敗しました', false)) {
-              store.dispatch('writeLoading', false)
-            }
+            leaveError.value = error.message
+            store.dispatch('writeLoading', false)
           })
       }
     }
@@ -99,11 +98,10 @@ export default defineComponent({
     })
 
     return {
-      valid,
       email,
-      emailRules,
+      emailError,
       isEditEmail,
-      myForm,
+      leaveError,
       handleSave,
       handleLeave,
       currentUser,
