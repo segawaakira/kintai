@@ -62,7 +62,7 @@
 <script lang="ts">
 import { defineComponent, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
-import { IUser } from '../interfaces/'
+import { IUser, IState, IProject } from '../interfaces/'
 
 export default defineComponent({
   setup (_props, _context) {
@@ -72,6 +72,9 @@ export default defineComponent({
     const passwordError: Ref<string> = ref('')
     const show: Ref<boolean> = ref(false)
     const store = useStore()
+    const state: IState = store.state as IState
+
+    const db = firebase.firestore()
 
     /* Googleでログイン */
     const handleLoginGoogle = () => {
@@ -109,8 +112,7 @@ export default defineComponent({
             uid: user.uid
           }
           store.dispatch('writeUser', userObj)
-          location.href = '/input'
-          // context.root.$router.push('/input')
+          onCheckInAttendanceProject()
         })
         .catch((error) => {
           /**
@@ -132,6 +134,29 @@ export default defineComponent({
           }
           console.log(error)
           store.dispatch('writeLoading', false)
+        })
+    }
+
+    /* 稼働中のプロジェクト情報を取得する */
+    const onCheckInAttendanceProject = () => {
+      // in_attendance_projectから稼働中のプロジェクト情報を取得する
+      db.collection(`users/${state.user.uid}/in_attendance_project`).get()
+        .then((ref) => {
+          const inAttendanceProjectArray: IProject[] = []
+          ref.docs.forEach((doc) => {
+            inAttendanceProjectArray.push({
+              ...doc.data() as IProject
+            })
+          })
+          if (inAttendanceProjectArray.length) {
+            // 稼働中のプロジェクトがある場合、選択中のprojectに設定する
+            store.dispatch('writeProject', inAttendanceProjectArray[0])
+          }
+          location.href = '/input'
+        })
+        .catch((error) => {
+          console.log(error)
+          location.href = '/input'
         })
     }
 

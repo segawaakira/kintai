@@ -2,7 +2,7 @@
   <div>
     <!-- プロジェクト選択メニュー -->
     <v-select
-      v-if="state.user && isShowSelectedProject"
+      v-if="state.user"
       v-model="selectedProject"
       :items="projects"
       filled
@@ -13,20 +13,17 @@
       @change="handleChangeProject"
     />
     <v-alert
-      v-if="state.user && isShowSelectedProject && inAttendanceTime"
+      v-if="state.user && inAttendanceTime && inAttendanceProject"
       dense
       type="info"
     >
       {{ inAttendanceProject.name }}で{{ inAttendanceTime }}〜稼働中。
-      <nuxt-link v-if="isShowInputLink" to="/input">
-        退勤はこちらから
-      </nuxt-link>
     </v-alert>
     <Confirm ref="confirmRef" />
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, Ref, ref, watch, useStore } from '@nuxtjs/composition-api'
+import { defineComponent, onMounted, Ref, ref, useStore } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 import dayjs from 'dayjs'
 import { IProject, IProjectItem, IState } from '../../interfaces/'
@@ -36,15 +33,13 @@ export default defineComponent({
   components: {
     Confirm
   },
-  setup (_props, context) {
+  setup (_props, _context) {
     const store = useStore()
     const state: IState = store.state as IState
     const projects: Ref<IProject[]> = ref([])
     const inAttendanceTime: Ref<string> = ref('')
     const inAttendanceProject: Ref<IProject | null> = ref(null)
     const selectedProject: Ref<IProject | null> = ref(null)
-    const isShowSelectedProject: Ref<boolean> = ref(true)
-    const isShowInputLink: Ref<boolean> = ref(true)
 
     const db = firebase.firestore()
 
@@ -77,6 +72,9 @@ export default defineComponent({
 
     /* 稼働中の情報を取得する */
     const onCheckInAttendance = () => {
+      if (!state.project) {
+        return
+      }
       // in_attendanceから稼働情報を取得する
       db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`).onSnapshot((docs) => {
         const inAttendanceArray: IProjectItem[] = []
@@ -90,7 +88,6 @@ export default defineComponent({
         if (inAttendanceArray.length) {
           const start = new Date(inAttendanceArray[0].start.seconds * 1000)
           inAttendanceTime.value = dayjs(start).format('MM月DD日 HH:MM')
-          isShowInputLink.value = false
         }
       })
     }
@@ -115,23 +112,6 @@ export default defineComponent({
       })
     })
 
-    /* 画面によって要素の出しわけ */
-    watch(
-      () => context.root.$route.path,
-      (n, _) => {
-        if (n === '/settings') {
-          isShowSelectedProject.value = false
-        } else {
-          isShowSelectedProject.value = true
-        }
-        if (n === '/input') {
-          isShowInputLink.value = false
-        } else {
-          isShowInputLink.value = true
-        }
-      }
-    )
-
     return {
       state,
       selectedProject,
@@ -139,8 +119,6 @@ export default defineComponent({
       inAttendanceTime,
       inAttendanceProject,
       handleChangeProject,
-      isShowSelectedProject,
-      isShowInputLink,
       dayjs
     }
   }

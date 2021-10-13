@@ -133,8 +133,7 @@ export default defineComponent({
       store.dispatch('writeLoading', true)
       firebase.auth().signOut().then(() => {
         console.log('ログアウトしました')
-        store.dispatch('writeUser', null)
-        store.dispatch('writeProject', null)
+        store.dispatch('writeDefaultState')
         location.href = '/login'
         // context.root.$router.push('/login')
       }).catch((error) => {
