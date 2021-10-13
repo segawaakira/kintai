@@ -12,7 +12,6 @@
               v-model="email"
               label="メールアドレス"
               required
-              autocomplete="off"
               :error-messages="emailError"
               @input="emailError = ''"
             />
