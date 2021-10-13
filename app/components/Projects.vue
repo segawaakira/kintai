@@ -10,14 +10,15 @@
           >
             <v-text-field
               v-model="projectName"
-              :rules="projectNameRules"
               label="プロジェクト名"
               required
+              :error-messages="projectNameError"
             />
           </v-col>
         </v-row>
         <v-btn
           type="button"
+          :disabled="!projectName"
           @click="handleCreateProject()"
         >
           handleCreateProject
@@ -34,9 +35,19 @@
           class="timeline"
         >
           <div v-if="editProjectId === item.id">
-            <v-text-field v-model="item.name" />
+            <v-text-field
+              v-model="item.name"
+              :error-messages="editProjectError"
+            />
             <v-btn
               type="button"
+              @click="editProjectId = null"
+            >
+              CANCEL
+            </v-btn>
+            <v-btn
+              type="button"
+              :disabled="!item.name"
               @click="handleSaveProject(item.id, item.name)"
             >
               handleSaveProject
@@ -74,10 +85,10 @@ export default defineComponent({
     const state: IState = store.state as IState
     const projects: Ref<IProject[]> = ref([])
     const db = firebase.firestore()
-    const projectNameRules = [
-      (v: any) => !!v || 'projectName is required'
-    ]
     const projectName: Ref<string> = ref('')
+    const projectNameError: Ref<string> = ref('')
+    const editProjectId: Ref<string | null> = ref(null)
+    const editProjectError: Ref<string> = ref('')
     const confirmRef: Ref<any> = ref()
 
     /* プロジェクト作成 */
@@ -93,6 +104,7 @@ export default defineComponent({
         })
         .catch((error) => {
           console.log(error)
+          projectNameError.value = error.message
           store.dispatch('writeLoading', false)
         })
     }
@@ -117,7 +129,6 @@ export default defineComponent({
       }
     }
 
-    const editProjectId: Ref<string | null> = ref(null)
     /**
      * プロジェクト編集
      * @param  {string} id  編集するプロジェクトid
@@ -146,6 +157,7 @@ export default defineComponent({
         })
         .catch((error) => {
           console.log(error)
+          editProjectError.value = error.message
           store.dispatch('writeLoading', false)
         })
     }
@@ -176,9 +188,10 @@ export default defineComponent({
       handleEditProject,
       handleSaveProject,
       editProjectId,
+      editProjectError,
       projects,
       projectName,
-      projectNameRules,
+      projectNameError,
       confirmRef
     }
   }
