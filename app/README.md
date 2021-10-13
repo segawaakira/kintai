@@ -16,7 +16,7 @@ $ yarn start
 # generate static project
 $ yarn generate
 
-# deploy project（yarn generateでdistに保存されたファイルを、publicディレクトリに入れてから）
+# deploy project（yarn generateでpublicに入れてから）
 $ firebase deploy
 ```
 

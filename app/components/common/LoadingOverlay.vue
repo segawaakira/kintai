@@ -14,7 +14,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, useStore } from '@nuxtjs/composition-api'
-import { IState } from '../interfaces/'
+import { IState } from '../../interfaces/'
 
 export default defineComponent({
   setup (_props, _context) {
