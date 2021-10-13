@@ -33,13 +33,14 @@ export default defineComponent({
   components: {
     Confirm
   },
-  setup (_props, _context) {
+  setup (_props, context) {
     const store = useStore()
     const state: IState = store.state as IState
     const projects: Ref<IProject[]> = ref([])
     const inAttendanceTime: Ref<string> = ref('')
     const inAttendanceProject: Ref<IProject | null> = ref(null)
     const selectedProject: Ref<IProject | null> = ref(null)
+    const confirmRef: Ref<any> = ref()
 
     const db = firebase.firestore()
 
@@ -92,6 +93,13 @@ export default defineComponent({
       })
     }
 
+    // プロジェクトが1個も登録されていない場合、/projectsに遷移させる。
+    const noProject = async () => {
+      if (await confirmRef.value.open('プロジェクトが未だ登録されていませんので、プロジェクト画面より作成してください。', false)) {
+        context.root.$router.push('/projects')
+      }
+    }
+
     onMounted(() => {
       selectedProject.value = state.project
       firebase.auth().onAuthStateChanged((data) => {
@@ -103,6 +111,10 @@ export default defineComponent({
                 id: doc.id
               })
             })
+            // プロジェクトが1個も登録されていない場合
+            if (projects.value.length === 0) {
+              noProject()
+            }
           })
           onCheckInAttendanceProject()
           onCheckInAttendance()
@@ -119,7 +131,8 @@ export default defineComponent({
       inAttendanceTime,
       inAttendanceProject,
       handleChangeProject,
-      dayjs
+      dayjs,
+      confirmRef
     }
   }
 })
