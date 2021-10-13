@@ -95,7 +95,7 @@ export default defineComponent({
 
     // プロジェクトが1個も登録されていない場合、/projectsに遷移させる。
     const noProject = async () => {
-      if (await confirmRef.value.open('プロジェクトが未だ登録されていませんので、プロジェクト画面より作成してください。', false)) {
+      if (await confirmRef.value.open('プロジェクトが未だ登録されていませんので、まずプロジェクトを作成してください。', false)) {
         context.root.$router.push('/projects')
       }
     }

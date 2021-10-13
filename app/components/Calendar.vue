@@ -207,6 +207,9 @@ export default defineComponent({
 
     /* 表示中の年月の稼働状況を取得する */
     const getItems = () => {
+      if (!state.project) {
+        return
+      }
       db.collection(`users/${state.user.uid}/projects/${state.project.id}/items`).onSnapshot((docs) => {
         store.dispatch('writeLoading', true)
         items.value = []
