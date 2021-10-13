@@ -1,39 +1,41 @@
 <template>
-  <div>
+  <div class="mt-16" style="max-width: 480px;margin: 0 auto;">
     <v-form lazy-validation>
       <v-container>
-        <v-row>
-          <v-col
-            cols="12"
-            sm="12"
-            md="12"
+        <h1 class="headline mb-12">
+          設定
+        </h1>
+        <v-text-field
+          v-model="email"
+          label="メールアドレス"
+          :error-messages="emailError"
+          @input="emailError = ''"
+        />
+        <div class="mt-4">
+          <v-btn
+            depressed
+            type="button"
+            color="primary"
+            @click="handleSave()"
           >
-            <v-text-field
-              v-model="email"
-              label="メールアドレス"
-              :error-messages="emailError"
-              @input="emailError = ''"
-            />
-          </v-col>
-        </v-row>
-        <v-btn
-          type="button"
-          @click="handleSave()"
-        >
-          handleSave
-        </v-btn>
+            保存する
+          </v-btn>
+        </div>
+        <hr class="mt-8">
+        <div class="mt-8">
+          <v-btn
+            depressed
+            type="button"
+            @click="handleLeave()"
+          >
+            退会する
+          </v-btn>
+          <p v-if="leaveError">
+            {{ leaveError }}
+          </p>
+        </div>
       </v-container>
     </v-form>
-
-    <hr>
-
-    <v-btn
-      type="button"
-      @click="handleLeave()"
-    >
-      退会する
-    </v-btn>
-    <p v-if="leaveError">{{ leaveError }}</p>
     <Confirm ref="confirmRef" />
   </div>
 </template>

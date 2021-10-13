@@ -1,64 +1,63 @@
 <template>
-  <div>
+  <div class="my-16">
+    <h1 class="headline mb-12">
+      出退勤入力
+    </h1>
     <ProjectSelect />
-    <div v-if="state.project">
-      <v-btn
-        type="button"
-        :disabled="isInAttendance"
-        @click="handleAttendance()"
-      >
-        出勤
-      </v-btn>
-      <v-btn
-        type="button"
-        :disabled="!isInAttendance"
-        @click="handleDeparture()"
-      >
-        退勤
-      </v-btn>
+    <div v-if="state.project" class="mt-8">
+      <!-- TODO:時計表示する。 -->
+      <div class="mb-8">
+        <v-btn
+          x-large
+          depressed
+          type="button"
+          color="primary"
+          :disabled="isInAttendance"
+          @click="handleAttendance()"
+        >
+          出勤
+        </v-btn>
+        <v-btn
+          x-large
+          depressed
+          type="button"
+          color="primary"
+          :disabled="!isInAttendance"
+          @click="handleDeparture()"
+        >
+          退勤
+        </v-btn>
+      </div>
 
-      <hr>
-
-      <v-form ref="myForm" lazy-validation>
-        <v-container>
-          <v-row>
-            <v-col
-              cols="12"
-              sm="12"
-              md="12"
-            >
-              <v-text-field
-                v-model="description"
-                label="やること・やったことなど"
-                required
-              />
-            </v-col>
-          </v-row>
-        </v-container>
+      <v-form lazy-validation>
+        <v-text-field
+          v-model="description"
+          label="やること・やったことなど"
+          required
+        />
       </v-form>
     </div>
-    <div v-else>
+
+    <div v-else class="mt-8">
       稼働するプロジェクトを選択してください。
     </div>
 
-    <hr>
+    <hr class="mt-8">
 
+    <!-- 現在地のGoogle Map -->
     <div>
       <v-btn
+        class="my-8"
         type="button"
         @click="getLocation()"
       >
         現在地を取得し直す
       </v-btn>
-      <hr>
-      <dl id="result" />
-      <hr>
-      <div id="address" />
-      <hr>
       <div class="map-wrapper">
         <div id="map-canvas" />
       </div>
     </div>
+
     <Confirm ref="confirmRef" />
   </div>
 </template>

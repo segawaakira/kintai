@@ -6,7 +6,7 @@
       v-model="selectedProject"
       :items="projects"
       filled
-      label="Select project"
+      label="プロジェクト選択"
       item-text="name"
       item-value="id"
       return-object

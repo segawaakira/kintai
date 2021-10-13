@@ -1,76 +1,83 @@
 <template>
-  <div>
-    <v-form ref="myForm" lazy-validation>
-      <v-container>
-        <v-row>
-          <v-col
-            cols="12"
-            sm="12"
-            md="12"
-          >
-            <v-text-field
-              v-model="projectName"
-              label="プロジェクト名"
-              required
-              :error-messages="projectNameError"
-            />
-          </v-col>
-        </v-row>
-        <v-btn
-          type="button"
-          :disabled="!projectName"
-          @click="handleCreateProject()"
-        >
-          handleCreateProject
-        </v-btn>
-      </v-container>
-    </v-form>
+  <div class="my-16">
+    <h1 class="headline mb-12">
+      プロジェクト
+    </h1>
 
-    <hr>
-
-    <v-list three-line>
+    <v-list two-line class="mb-8">
       <template v-for="(item, index) in projects">
         <v-list-item
           :key="index"
-          class="timeline"
+          class="timeline d-flex justify-space-between align-center"
         >
-          <div v-if="editProjectId === item.id">
+          <div v-if="editProjectId === item.id" class="timeline-inner d-flex justify-space-between align-center">
             <v-text-field
               v-model="item.name"
               :error-messages="editProjectError"
             />
-            <v-btn
-              type="button"
-              @click="editProjectId = null"
-            >
-              CANCEL
-            </v-btn>
-            <v-btn
-              type="button"
-              :disabled="!item.name"
-              @click="handleSaveProject(item.id, item.name)"
-            >
-              handleSaveProject
-            </v-btn>
+            <div class="ml-16">
+              <v-btn
+                depressed
+                type="button"
+                @click="editProjectId = null"
+              >
+                キャンセル
+              </v-btn>
+              <v-btn
+                depressed
+                type="button"
+                color="primary"
+                :disabled="!item.name"
+                @click="handleSaveProject(item.id, item.name)"
+              >
+                保存
+              </v-btn>
+            </div>
           </div>
-          <div v-else>
-            {{ item.name }}
-            <v-btn
-              type="button"
-              @click="handleEditProject(item.id)"
-            >
-              handleEditProject
-            </v-btn>
-            <v-btn
-              type="button"
-              @click="handleDeleteProject(item.id)"
-            >
-              handleDeleteProject
-            </v-btn>
+          <div v-else class="timeline-inner d-flex justify-space-between align-center">
+            <div>
+              {{ item.name }}
+            </div>
+            <div class="ml-16">
+              <v-btn
+                depressed
+                type="button"
+                @click="handleEditProject(item.id)"
+              >
+                編集
+              </v-btn>
+              <v-btn
+                depressed
+                type="button"
+                @click="handleDeleteProject(item.id)"
+              >
+                削除
+              </v-btn>
+            </div>
           </div>
         </v-list-item>
       </template>
     </v-list>
+
+    <v-form lazy-validation>
+      <v-text-field
+        v-model="projectName"
+        label="プロジェクト名"
+        required
+        :error-messages="projectNameError"
+      />
+      <div class="mb-8">
+        <v-btn
+          depressed
+          type="button"
+          color="primary"
+          :disabled="!projectName"
+          @click="handleCreateProject()"
+        >
+          追加する
+        </v-btn>
+      </div>
+    </v-form>
     <Confirm ref="confirmRef" />
   </div>
 </template>
@@ -203,4 +210,7 @@ export default defineComponent({
 </script>
 
 <style>
+.timeline-inner {
+  width: 100%;
+}
 </style>

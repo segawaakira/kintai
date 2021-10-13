@@ -1,15 +1,24 @@
 <template>
-  <div>
+  <div class="my-16">
+    <h1 class="headline mb-12">
+      カレンダー
+    </h1>
+
     <ProjectSelect />
-    <v-flex>
-      <p>{{ currentYear }}年{{ currentMonth }}月</p>
+
+    <div class="d-flex justify-space-between align-center mb-4">
       <v-btn type="button" @click="handlePrev">
-        前
+        <v-icon>
+          chevron_left
+        </v-icon>
       </v-btn>
+      <div class="title">{{ currentYear }}年{{ currentMonth }}月</div>
       <v-btn type="button" @click="handleNext">
-        次
+        <v-icon>
+          chevron_right
+        </v-icon>
       </v-btn>
-    </v-flex>
+    </div>
 
     <v-list three-line class="calendar">
       <v-list-item>
@@ -59,9 +68,15 @@
     <!-- ▽ 月別稼働合計時間 ▽ -->
     <div>{{ totalWorkedHourOfMonth }}</div>
     <v-btn
+      depressed
+      type="button"
+      color="primary"
       @click="handleDownloadExcel"
     >
-      handleDownloadExcel
+      <v-icon class="mr-2">
+        file_download
+      </v-icon>
+      エクセルでダウンロード
     </v-btn>
   </div>
 </template>

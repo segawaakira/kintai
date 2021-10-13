@@ -91,6 +91,7 @@
     <v-app-bar
       fixed
       app
+      flat
     >
       <v-app-bar-nav-icon v-if="!isPC" @click.stop="drawer = !drawer" />
       <v-toolbar-title v-text="title" />
