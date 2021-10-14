@@ -20,57 +20,87 @@
       </v-btn>
     </div>
 
-    <v-list three-line class="calendar">
-      <v-list-item>
-        <v-list-item-content class="d-flex flex-column">
-          稼働時間
-        </v-list-item-content>
-      </v-list-item>
-      <template v-for="(item, index) in lastDay">
-        <v-list-item
+    <v-simple-table>
+      <thead>
+        <tr>
+          <th width="10%">
+            日付
+          </th>
+          <th width="100%" class="d-flex justify-space-between pa-0 align-center timeline-header">
+            <span
+              v-for="(_i, i) in 25"
+              :key="i"
+              class="timeline-header-item"
+              :style="'left:' + i * (100 / 24) + '%;'"
+            >
+              {{ i }}
+            </span>
+          </th>
+          <th width="10%">
+            計（h）
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="(item, index) in lastDay"
           :key="index"
-          class="timeline"
         >
-          <div>{{ index + 1 }} {{ getDayOfWeek(currentYear, currentMonth, index + 1) }}</div>
-          <div
-            v-for="(data, dataIndex) in currentMonthData"
-            :key="dataIndex"
-          >
-            <div
-              v-if="data.startDate === index + 1"
-              class="timeline-item"
-              :style="calcPositionWidth(data.startTime - data.startDateTime, data.endTime - data.startDateTime)"
-              @click="handleClickDetail(data.id)"
+          <td class="text-right">{{ index + 1 }} {{ getDayOfWeek(currentYear, currentMonth, index + 1) }}</td>
+          <td class="timeline pa-0">
+            <span
+              v-for="(_i, i) in 25"
+              :key="i"
+              class="timeline-border"
+              :style="'left:' + i * (100 / 24) + '%;'"
             />
-            <!-- ▽ 日付を跨いだ時 ▽ -->
             <div
-              v-else-if="data.startDate === index && data.endDate === index + 1"
-              class="timeline-item"
-              :data-end-time="data.endTime"
-              :data-end-date-time="data.endDateTime"
-              :style="calcPositionWidth(0, data.endTime - data.endDateTime)"
-              @click="handleClickDetail(data.id)"
-            />
-            <!-- ▽ 稼働時間 ▽ -->
-            <div style="display: none;">
-              <div v-if="data.startDate === index + 1">
-                <div class="js-work-hour">{{ Math.round(data.startWorkTime / 3600000 * 10) / 10 }}</div>
-              </div>
-              <div v-else-if="data.startDate === index && data.endDate === index + 1">
-                <div class="js-work-hour">{{ Math.round(data.endWorkTime / 3600000 * 10) / 10 }}</div>
+              v-for="(data, dataIndex) in currentMonthData"
+              :key="dataIndex"
+            >
+              <div
+                v-if="data.startDate === index + 1"
+                class="timeline-item"
+                :style="calcPositionWidth(data.startTime - data.startDateTime, data.endTime - data.startDateTime)"
+                @click="handleClickDetail(data.id)"
+              />
+              <!-- ▽ 日付を跨いだ時 ▽ -->
+              <div
+                v-else-if="data.startDate === index && data.endDate === index + 1"
+                class="timeline-item"
+                :data-end-time="data.endTime"
+                :data-end-date-time="data.endDateTime"
+                :style="calcPositionWidth(0, data.endTime - data.endDateTime)"
+                @click="handleClickDetail(data.id)"
+              />
+              <!-- ▽ 稼働時間 ▽ -->
+              <div style="display: none;">
+                <div v-if="data.startDate === index + 1">
+                  <div class="js-work-hour">{{ Math.round(data.startWorkTime / 3600000 * 10) / 10 }}</div>
+                </div>
+                <div v-else-if="data.startDate === index && data.endDate === index + 1">
+                  <div class="js-work-hour">{{ Math.round(data.endWorkTime / 3600000 * 10) / 10 }}</div>
+                </div>
               </div>
             </div>
-          </div>
-          <div>{{ totalWorkedHourOfDay[index] }}</div>
-        </v-list-item>
-      </template>
-    </v-list>
-    <!-- ▽ 月別稼働合計時間 ▽ -->
-    <div>{{ totalWorkedHourOfMonth }}</div>
+          </td>
+          <td class="text-right">
+            {{ totalWorkedHourOfDay[index] }}
+          </td>
+        </tr>
+        <!-- ▽ 月別稼働合計時間 ▽ -->
+        <tr>
+          <td />
+          <td>{{ currentMonth }}月 合計</td>
+          <td class="text-right">{{ totalWorkedHourOfMonth }}</td>
+        </tr>
+      </tbody>
+    </v-simple-table>
     <v-btn
       depressed
       type="button"
       color="primary"
+      class="mt-8"
       @click="handleDownloadExcel"
     >
       <v-icon class="mr-2">
@@ -427,22 +457,38 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.calendar {
-  overflow: hidden;
-}
 .timeline {
   width: 100%;
   height: 100%;
   position: relative;
-  display: block;
-  height: 20px;
+  &-header {
+    position: relative;
+    &-item {
+      position: absolute;
+      margin-left: -0.5em;
+      @media (max-width: 768px) { // TODO:SPのブレイクポイントを定数に
+        display: none;
+        &:nth-child(2n + 1) {
+          display: block;
+        }
+      }
+    }
+  }
+  &-border {
+    width: 1px;
+    height: 48px;
+    background-color: #ddd;
+    position: absolute;
+    top: 0;
+  }
   &-item {
     position: absolute;
     top: 0;
     z-index: 1;
-    background: #CCF;
+    background: #CCF; // TODO:色は要検討
     display: block;
-    height: 20px;
+    height: 48px;
+    cursor: pointer;
   }
 }
 </style>
