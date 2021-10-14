@@ -29,7 +29,7 @@
           <th width="100%" class="d-flex justify-space-between pa-0 align-center timeline-header">
             <span
               v-for="(_i, i) in 25"
-              :key="i"
+              :key="'timeline-header-item' + i"
               class="timeline-header-item"
               :style="'left:' + i * (100 / 24) + '%;'"
             >
@@ -46,11 +46,11 @@
           v-for="(item, index) in lastDay"
           :key="index"
         >
-          <td class="text-right">{{ index + 1 }} {{ getDayOfWeek(currentYear, currentMonth, index + 1) }}</td>
+          <td>{{ index + 1 }} {{ getDayOfWeek(currentYear, currentMonth, index + 1) }}</td>
           <td class="timeline pa-0">
             <span
               v-for="(_i, i) in 25"
-              :key="i"
+              :key="'timeline-border' + i"
               class="timeline-border"
               :style="'left:' + i * (100 / 24) + '%;'"
             />
@@ -91,7 +91,7 @@
         <!-- ▽ 月別稼働合計時間 ▽ -->
         <tr>
           <td />
-          <td>{{ currentMonth }}月 合計</td>
+          <td class="text-right">{{ currentMonth }}月 合計</td>
           <td class="text-right">{{ totalWorkedHourOfMonth }}</td>
         </tr>
       </tbody>
