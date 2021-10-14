@@ -477,7 +477,6 @@ export default defineComponent({
   &-border {
     width: 1px;
     height: 48px;
-    background-color: #ddd;
     position: absolute;
     top: 0;
   }
@@ -485,10 +484,28 @@ export default defineComponent({
     position: absolute;
     top: 0;
     z-index: 1;
-    background: #CCF; // TODO:色は要検討
+    background: var(--v-info-base);
     display: block;
     height: 48px;
     cursor: pointer;
+  }
+}
+.v-application {
+  /* ダークモード */
+  &.theme--dark {
+    .timeline {
+      &-border {
+        background-color: rgba(255, 255, 255, 0.12);
+      }
+    }
+  }
+  /* ライトモード */
+  &.theme--light {
+    .timeline {
+      &-border {
+        background-color: rgba(0, 0, 0, 0.12);
+      }
+    }
   }
 }
 </style>

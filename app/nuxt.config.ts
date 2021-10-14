@@ -71,7 +71,7 @@ const nuxtConfig = {
     customVariables: ['~/assets/variables.scss'],
     theme: {
       dark: true,
-      optionsPath: '~/vuetify.options.ts'
+      optionsPath: '~/vuetify.options.ts',
       // themes: {
       //   dark: {
       //     primary: colors.blue.darken2,
@@ -83,6 +83,9 @@ const nuxtConfig = {
       //     success: colors.green.accent3
       //   }
       // }
+      options: {
+        customProperties: true
+      }
     },
     defaultAssets: {
       icons: 'md'
