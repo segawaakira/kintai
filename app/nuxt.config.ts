@@ -72,6 +72,7 @@ const nuxtConfig = {
     theme: {
       dark: true,
       optionsPath: '~/vuetify.options.ts',
+      // [ref] https://vuetifyjs.com/en/styles/colors/#material-colors
       // themes: {
       //   dark: {
       //     primary: colors.blue.darken2,

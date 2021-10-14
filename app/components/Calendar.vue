@@ -111,7 +111,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, Ref, onMounted, useStore } from '@nuxtjs/composition-api'
+import { defineComponent, ref, Ref, onMounted, useStore, watch } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 import dayjs from 'dayjs'
 import { IState, IProjectItem } from '../interfaces/'
@@ -432,6 +432,14 @@ export default defineComponent({
       a.remove()
       store.dispatch('writeLoading', false)
     }
+
+    /* プロジェクト変更時 */
+    watch(
+      () => state.project,
+      (_n, _o) => {
+        getItems()
+      }
+    )
 
     onMounted(() => {
       getItems()

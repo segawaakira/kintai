@@ -336,7 +336,7 @@ export default defineComponent({
     /* プロジェクト変更時 */
     watch(
       () => state.project,
-      (_n, _) => {
+      (_n, _o) => {
         checkInAttendance()
       }
     )
