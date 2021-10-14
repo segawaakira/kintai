@@ -246,7 +246,8 @@ export default defineComponent({
               workHourTotal += Number(workHour[j].innerHTML)
             }
             totalWorkedHourOfDay.value.push(
-              workHourTotal
+              // 小数第一位に丸めて、浮動小数点型による誤差をなくす
+              Math.round(workHourTotal * 10) / 10
             )
           }
         })
@@ -258,7 +259,8 @@ export default defineComponent({
           for (let j = 0; j < workHour.length; j++) {
             workHourTotal += Number(workHour[j].innerHTML)
           }
-          totalWorkedHourOfMonth.value += workHourTotal
+          // 小数第一位に丸めて、浮動小数点型による誤差をなくす
+          totalWorkedHourOfMonth.value += Math.round(workHourTotal * 10) / 10
         })
         store.dispatch('writeLoading', false)
       })
