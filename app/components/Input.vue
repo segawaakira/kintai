@@ -191,12 +191,26 @@ export default defineComponent({
             db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`).doc(inAttendance.id)
               .delete()
               .then(async (ref) => {
-                // TODO:in_attendance_projectも削除する。
                 console.log('del: ', ref)
-                description.value = ''
-                if (await confirmRef.value.open('退勤しました', false)) {
-                  store.dispatch('writeLoading', false)
-                }
+                // in_attendance_projectも削除する。
+                const inAttendanceProject = await db.collection(`users/${state.user.uid}/in_attendance_project`).get()
+                inAttendanceProject.forEach((doc) => {
+                  db.collection(`users/${state.user.uid}/in_attendance_project/`).doc(doc.id)
+                    .delete()
+                    .then(async (ref) => {
+                      console.log('del: ', ref)
+                      if (await confirmRef.value.open('退勤しました', false)) {
+                        store.dispatch('writeLoading', false)
+                      }
+                    })
+                    .catch(async (error: any) => {
+                      console.log(error)
+                      if (await confirmRef.value.open('退勤に失敗しました', false)) {
+                        store.dispatch('writeLoading', false)
+                      }
+                    })
+                  description.value = ''
+                })
               })
               .catch(async (error: any) => {
                 console.log(error)
