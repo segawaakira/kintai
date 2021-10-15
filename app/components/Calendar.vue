@@ -130,6 +130,7 @@ interface IItemData {
 }
 
 interface IItemDataExel {
+  start_time?: number, // 日付ソート用でExcelには表示されない
   start: string,
   end: string,
   hour: number,
@@ -360,6 +361,7 @@ export default defineComponent({
 
           itemsExcel.push(
             {
+              start_time: start.getTime(),
               start: dayjs(start).format('MM月DD日 HH:mm'),
               end: dayjs(end).format('MM月DD日 HH:mm'),
               hour,
@@ -370,6 +372,9 @@ export default defineComponent({
           )
         }
       })
+
+      // 日付順にsort
+      itemsExcel.sort((a: any, b: any) => a.start_time - b.start_time)
 
       const title = currentYear.value + '年' + currentMonth.value + '月稼働実績'
       // Workbookの作成
