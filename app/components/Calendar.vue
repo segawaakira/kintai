@@ -112,7 +112,9 @@ import { defineComponent, ref, Ref, onMounted, useStore, watch } from '@nuxtjs/c
 import firebase from 'firebase'
 import dayjs from 'dayjs'
 import { IState, IProjectItem } from '../interfaces/'
+import { DAY_OF_WEEK } from '../common/constants'
 import ProjectSelect from './parts/ProjectSelect.vue'
+
 const excelJs = require('exceljs')
 
 interface IItemData {
@@ -171,7 +173,7 @@ export default defineComponent({
     const getDayOfWeek = (year: number, month: number, day: number) => {
       const date = new Date(year, month - 1, day)
       const dayOfWeek = date.getDay()
-      return ['日', '月', '火', '水', '木', '金', '土'][dayOfWeek]
+      return DAY_OF_WEEK[dayOfWeek]
     }
 
     const lastDay: Ref<number> = ref(getLastDay(currentYear.value, currentMonth.value))

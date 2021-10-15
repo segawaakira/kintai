@@ -5,13 +5,15 @@
     </h1>
     <ProjectSelect />
     <div v-if="state.project" class="mt-8">
-      <!-- TODO:時計表示する。 -->
-      <div class="mb-8">
+      <div class="clock-upper" v-text="clockUpper" />
+      <div class="clock-lower" v-text="clockLower" />
+      <div class="my-8">
         <v-btn
           x-large
           depressed
           type="button"
           color="primary"
+          class="mr-2"
           :disabled="isInAttendance"
           @click="handleAttendance()"
         >
@@ -63,7 +65,9 @@
 <script lang="ts">
 import { defineComponent, onMounted, Ref, ref, useStore, watch } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
+import dayjs from 'dayjs'
 import { IProject, IProjectItem, IState } from '../interfaces/'
+import { DAY_OF_WEEK } from '../common/constants'
 import Confirm from './common/Confirm.vue'
 import ProjectSelect from './parts/ProjectSelect.vue'
 
@@ -81,6 +85,8 @@ export default defineComponent({
     const placeLng: Ref<number | null> = ref(null)
     const description: Ref<string> = ref('')
     const isInAttendance: Ref<boolean> = ref(false)
+    const clockUpper: Ref<string> = ref('')
+    const clockLower: Ref<string> = ref('')
     const confirmRef: Ref<any> = ref()
 
     /* 出勤 */
@@ -319,6 +325,7 @@ export default defineComponent({
       )
     }
 
+    /* 稼働中があるかを確認する */
     const checkInAttendance = () => {
       firebase.auth().onAuthStateChanged((data) => {
         if (data && state.project) {
@@ -340,7 +347,20 @@ export default defineComponent({
       })
     }
 
+    /* 時計 */
+    const clock = () => {
+      const now = new Date()
+      const ymd: string = dayjs(now).format('YYYY年MM月DD日')
+      const dayOfWeek: string = DAY_OF_WEEK[now.getDay()]
+      const time: string = dayjs(now).format('HH:mm:ss')
+      clockUpper.value = ymd + '（' + dayOfWeek + '）'
+      clockLower.value = time
+    }
+
     onMounted(() => {
+      setInterval(() => {
+        clock()
+      }, 1000)
       checkInAttendance()
       getLocation()
     })
@@ -363,13 +383,25 @@ export default defineComponent({
       description,
       isInAttendance,
       confirmRef,
+      clockUpper,
+      clockLower,
       state
     }
   }
 })
 </script>
 
-<style>
+<style lang="scss">
+.clock {
+  &-upper {
+    font-size: 1.5rem;
+    color: var(--v-secondary-lighten4);
+  }
+  &-lower {
+    font-size: 4rem;
+    color: var(--v-secondary-lighten4);
+  }
+}
 #map-canvas {
   width: 100%;
   height: 320px;
