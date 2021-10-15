@@ -386,12 +386,12 @@ export default defineComponent({
 
       // 列を定義
       worksheet.columns = [
-        { header: '開始日時', key: 'start' },
-        { header: '終了日時', key: 'end' },
-        { header: '稼働時間', key: 'hour' },
-        { header: '開始場所', key: 'start_place_name' },
-        { header: '終了場所', key: 'end_place_name' },
-        { header: '業務内容', key: 'description' }
+        { header: '開始日時', key: 'start', width: 15 },
+        { header: '終了日時', key: 'end', width: 15 },
+        { header: '稼働（h）', key: 'hour', width: 10 },
+        { header: '開始場所', key: 'start_place_name', width: 50 },
+        { header: '終了場所', key: 'end_place_name', width: 50 },
+        { header: '業務内容', key: 'description', width: 80 }
       ]
 
       // すべての行を走査
