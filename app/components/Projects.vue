@@ -4,60 +4,65 @@
       プロジェクト
     </h1>
 
-    <v-list v-if="projects.length" two-line class="mb-8">
-      <template v-for="(item, index) in projects">
-        <v-list-item
+    <v-simple-table v-if="projects.length" class="mb-8">
+      <tbody>
+        <tr
+          v-for="(item, index) in projects"
           :key="index"
-          class="timeline d-flex justify-space-between align-center"
         >
-          <div v-if="editProjectId === item.id" class="timeline-inner d-flex justify-space-between align-center">
-            <v-text-field
-              v-model="item.name"
-              :error-messages="editProjectError"
-            />
-            <div class="ml-16">
-              <v-btn
-                depressed
-                type="button"
-                @click="editProjectId = null"
-              >
-                キャンセル
-              </v-btn>
-              <v-btn
-                depressed
-                type="button"
-                color="primary"
-                :disabled="!item.name"
-                @click="handleSaveProject(item.id, item.name)"
-              >
-                保存
-              </v-btn>
+          <td class="pa-4">
+            <div v-if="editProjectId === item.id">
+              <v-text-field
+                v-model="item.name"
+                :error-messages="editProjectError"
+              />
+              <div class="mt-4 text-right">
+                <v-btn
+                  depressed
+                  type="button"
+                  @click="editProjectId = null"
+                >
+                  キャンセル
+                </v-btn>
+                <v-btn
+                  depressed
+                  type="button"
+                  color="primary"
+                  class="ml-2"
+                  :disabled="!item.name"
+                  @click="handleSaveProject(item.id, item.name)"
+                >
+                  保存
+                </v-btn>
+              </div>
             </div>
-          </div>
-          <div v-else class="timeline-inner d-flex justify-space-between align-center">
-            <div>
-              {{ item.name }}
+            <div v-else>
+              <div>
+                {{ item.name }}
+              </div>
+              <div class="mt-4 text-right">
+                <v-btn
+                  depressed
+                  type="button"
+                  color="primary"
+                  @click="handleEditProject(item.id)"
+                >
+                  編集
+                </v-btn>
+                <v-btn
+                  depressed
+                  type="button"
+                  class="ml-2"
+                  @click="handleDeleteProject(item.id)"
+                >
+                  削除
+                </v-btn>
+              </div>
             </div>
-            <div class="ml-16">
-              <v-btn
-                depressed
-                type="button"
-                @click="handleEditProject(item.id)"
-              >
-                編集
-              </v-btn>
-              <v-btn
-                depressed
-                type="button"
-                @click="handleDeleteProject(item.id)"
-              >
-                削除
-              </v-btn>
-            </div>
-          </div>
-        </v-list-item>
-      </template>
-    </v-list>
+          </td>
+        </tr>
+      </tbody>
+    </v-simple-table>
 
     <v-form lazy-validation>
       <v-text-field
@@ -211,7 +216,4 @@ export default defineComponent({
 </script>
 
 <style>
-.timeline-inner {
-  width: 100%;
-}
 </style>
