@@ -15,6 +15,7 @@
     <v-alert
       v-if="state.user && inAttendanceTime && inAttendanceProject"
       dense
+      outlined
       type="info"
     >
       {{ inAttendanceProject.name }}で{{ inAttendanceTime }}〜稼働中。
