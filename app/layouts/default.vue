@@ -31,18 +31,6 @@
           </v-list-item-content>
         </v-list-item>
         <v-list-item
-          to="/settings"
-          router
-          exact
-        >
-          <v-list-item-action>
-            <v-icon>settings</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>設定</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item
           exact
           @click="handleLogout"
         >
@@ -143,6 +131,23 @@ export default defineComponent({
       })
     }
 
+    /* ログインしないと見れないページの場合loginにリダイレクト */
+    const onCheckIsLogined = () => {
+      if (!state.user) {
+        switch (context.root.$route.path) {
+          case '/input':
+          case '/projects':
+          case '/calendar':
+          case '/detail':
+          case '/settings':
+            location.href = '/login'
+            break
+          default:
+            break
+        }
+      }
+    }
+
     /* 画面幅から、PCかSPか判定 */
     const onCheckIsPC = () => {
       if (window.innerWidth < BREAK_POINT) {
@@ -161,6 +166,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
+      onCheckIsLogined()
       theme.value = state.dark
       onCheckIsPC()
       onResize()
@@ -206,6 +212,11 @@ export default defineComponent({
           icon: 'view_list',
           title: 'プロジェクト',
           to: '/projects'
+        },
+        {
+          icon: 'settings',
+          title: '設定',
+          to: '/settings'
         }
       ],
       title: 'kintai',
