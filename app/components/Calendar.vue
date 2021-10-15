@@ -37,7 +37,7 @@
             </span>
           </th>
           <th width="10%">
-            計（h）
+            計
           </th>
         </tr>
       </thead>
@@ -82,14 +82,14 @@
               </div>
             </div>
           </td>
-          <td class="text-right">
+          <td class="text-right timeline-total">
             {{ totalWorkedHourOfDay[index] }}
           </td>
         </tr>
         <tr>
           <td />
           <td class="text-right">{{ currentMonth }}月 合計</td>
-          <td class="text-right">{{ totalWorkedHourOfMonth }}</td>
+          <td class="text-right">{{ totalWorkedHourOfMonth }}h</td>
         </tr>
       </tbody>
     </v-simple-table>
@@ -514,6 +514,9 @@ export default defineComponent({
       &-border {
         background-color: rgba(255, 255, 255, 0.12);
       }
+      &-total {
+        border-left: 1px solid rgba(255, 255, 255, 0.12);
+      }
     }
   }
   /* ライトモード */
@@ -521,6 +524,9 @@ export default defineComponent({
     .timeline {
       &-border {
         background-color: rgba(0, 0, 0, 0.12);
+      }
+      &-total {
+        border-left: 1px solid rgba(0, 0, 0, 0.12);
       }
     }
   }
