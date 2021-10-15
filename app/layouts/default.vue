@@ -169,7 +169,7 @@ export default defineComponent({
     /* ダークモードかライトモードか */
     watch(
       () => theme.value,
-      (n, _) => {
+      (n, _o) => {
         context.root.$vuetify.theme.dark = theme.value
         themeIcon.value = n ? 'dark_mode' : 'light_mode'
         store.dispatch('writeDark', n)

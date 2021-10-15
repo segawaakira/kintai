@@ -180,12 +180,12 @@ export default defineComponent({
               if (doc.exists) {
                 console.log('Document data:', doc.data())
                 const data: IProjectItem = doc.data() as IProjectItem
-                startTime.value = dayjs(new Date(data.start.seconds * 1000)).format('YYYY-MM-DDTHH:MM')
+                startTime.value = dayjs(data.start.toDate()).format('YYYY-MM-DDTHH:mm')
                 start.value = data.start
                 startPlaceName.value = data.start_place_name
                 startPlaceLat.value = data.start_place_lat
                 startPlaceLng.value = data.start_place_lng
-                endTime.value = dayjs(new Date(data.end.seconds * 1000)).format('YYYY-MM-DDTHH:MM')
+                endTime.value = dayjs(data.end.toDate()).format('YYYY-MM-DDTHH:mm')
                 end.value = data.end
                 endPlaceName.value = data.end_place_name
                 endPlaceLat.value = data.end_place_lat

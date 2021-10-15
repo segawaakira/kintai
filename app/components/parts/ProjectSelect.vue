@@ -88,7 +88,7 @@ export default defineComponent({
         })
         if (inAttendanceArray.length) {
           const start = new Date(inAttendanceArray[0].start.seconds * 1000)
-          inAttendanceTime.value = dayjs(start).format('MM月DD日 HH:MM')
+          inAttendanceTime.value = dayjs(start).format('MM月DD日 HH:mm')
         }
       })
     }

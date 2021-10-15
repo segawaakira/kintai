@@ -4,7 +4,7 @@
       プロジェクト
     </h1>
 
-    <v-list two-line class="mb-8">
+    <v-list v-if="projects.length" two-line class="mb-8">
       <template v-for="(item, index) in projects">
         <v-list-item
           :key="index"
@@ -111,6 +111,7 @@ export default defineComponent({
         })
         .then((ref) => {
           console.log('Add ID: ', ref.id)
+          projectName.value = ''
           store.dispatch('writeLoading', false)
         })
         .catch((error) => {

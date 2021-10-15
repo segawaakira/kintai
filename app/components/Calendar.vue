@@ -59,26 +59,24 @@
               :key="dataIndex"
             >
               <div
-                v-if="data.startDate === index + 1"
+                v-if="data.startDate === index + 1 && data.startMonth === currentMonth"
                 class="timeline-item"
                 :style="calcPositionWidth(data.startTime - data.startDateTime, data.endTime - data.startDateTime)"
                 @click="handleClickDetail(data.id)"
               />
-              <!-- ▽ 日付を跨いだ時 ▽ -->
+              <!-- ▽ 月 or 日を跨いだ時 ▽ -->
               <div
-                v-else-if="data.startDate === index && data.endDate === index + 1"
+                v-else-if="(data.endDate === index + 1 && data.endMonth === currentMonth) || (data.startDate === index && data.endDate === index + 1)"
                 class="timeline-item"
-                :data-end-time="data.endTime"
-                :data-end-date-time="data.endDateTime"
                 :style="calcPositionWidth(0, data.endTime - data.endDateTime)"
                 @click="handleClickDetail(data.id)"
               />
-              <!-- ▽ 稼働時間 ▽ -->
+              <!-- 稼働時間（計算のために必要で、非表示） -->
               <div style="display: none;">
-                <div v-if="data.startDate === index + 1">
+                <div v-if="data.startDate === index + 1 && data.startMonth === currentMonth">
                   <div class="js-work-hour">{{ Math.round(data.startWorkTime / 3600000 * 10) / 10 }}</div>
                 </div>
-                <div v-else-if="data.startDate === index && data.endDate === index + 1">
+                <div v-else-if="(data.endDate === index + 1 && data.endMonth === currentMonth) || (data.startDate === index && data.endDate === index + 1)">
                   <div class="js-work-hour">{{ Math.round(data.endWorkTime / 3600000 * 10) / 10 }}</div>
                 </div>
               </div>
@@ -88,7 +86,6 @@
             {{ totalWorkedHourOfDay[index] }}
           </td>
         </tr>
-        <!-- ▽ 月別稼働合計時間 ▽ -->
         <tr>
           <td />
           <td class="text-right">{{ currentMonth }}月 合計</td>
@@ -111,7 +108,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, Ref, onMounted, useStore } from '@nuxtjs/composition-api'
+import { defineComponent, ref, Ref, onMounted, useStore, watch } from '@nuxtjs/composition-api'
 import firebase from 'firebase'
 import dayjs from 'dayjs'
 import { IState, IProjectItem } from '../interfaces/'
@@ -120,9 +117,11 @@ const excelJs = require('exceljs')
 
 interface IItemData {
   startDateTime: number
+  startMonth: number
   startDate: number
   startTime: number
   endDateTime: number
+  endMonth: number
   endDate: number
   endTime: number
   startWorkTime: number
@@ -238,8 +237,10 @@ export default defineComponent({
           currentMonthData.value.push({
             startDateTime: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0).getTime(), // 開始した日の0時0分0秒のタイムスタンプ
             startDate: start.getDate(),
+            startMonth: start.getMonth() + 1,
             startTime: start.getTime(),
             endDateTime: new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0).getTime(), // 終了した日の0時0分0秒のタイムスタンプ
+            endMonth: end.getMonth() + 1,
             endDate: end.getDate(),
             endTime: end.getTime(),
             startWorkTime,
@@ -340,8 +341,8 @@ export default defineComponent({
         const end = new Date(item.end.seconds * 1000)
         itemsExcel.push(
           {
-            start: dayjs(start).format('MM月DD日 HH:MM'),
-            end: dayjs(end).format('MM月DD日 HH:MM'),
+            start: dayjs(start).format('MM月DD日 HH:mm'),
+            end: dayjs(end).format('MM月DD日 HH:mm'),
             hour: Math.round((item.end.seconds - item.start.seconds) / 3600 * 10) / 10,
             start_place_name: item.start_place_name,
             end_place_name: item.end_place_name,
@@ -433,6 +434,14 @@ export default defineComponent({
       store.dispatch('writeLoading', false)
     }
 
+    /* プロジェクト変更時 */
+    watch(
+      () => state.project,
+      (_n, _o) => {
+        getItems()
+      }
+    )
+
     onMounted(() => {
       getItems()
     })
@@ -461,6 +470,7 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   position: relative;
+  overflow: hidden;
   &-header {
     position: relative;
     &-item {
@@ -477,7 +487,6 @@ export default defineComponent({
   &-border {
     width: 1px;
     height: 48px;
-    background-color: #ddd;
     position: absolute;
     top: 0;
   }
@@ -485,10 +494,28 @@ export default defineComponent({
     position: absolute;
     top: 0;
     z-index: 1;
-    background: #CCF; // TODO:色は要検討
+    background: var(--v-info-base);
     display: block;
     height: 48px;
     cursor: pointer;
+  }
+}
+.v-application {
+  /* ダークモード */
+  &.theme--dark {
+    .timeline {
+      &-border {
+        background-color: rgba(255, 255, 255, 0.12);
+      }
+    }
+  }
+  /* ライトモード */
+  &.theme--light {
+    .timeline {
+      &-border {
+        background-color: rgba(0, 0, 0, 0.12);
+      }
+    }
   }
 }
 </style>
