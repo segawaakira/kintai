@@ -340,8 +340,8 @@ export default defineComponent({
         const end = new Date(item.end.seconds * 1000)
         itemsExcel.push(
           {
-            start: dayjs(start).format('MM月DD日 HH:MM'),
-            end: dayjs(end).format('MM月DD日 HH:MM'),
+            start: dayjs(start).format('MM月DD日 HH:mm'),
+            end: dayjs(end).format('MM月DD日 HH:mm'),
             hour: Math.round((item.end.seconds - item.start.seconds) / 3600 * 10) / 10,
             start_place_name: item.start_place_name,
             end_place_name: item.end_place_name,

@@ -42,10 +42,8 @@
       稼働するプロジェクトを選択してください。
     </div>
 
-    <hr class="mt-8">
-
     <!-- 現在地のGoogle Map -->
-    <div>
+    <div class="mt-8">
       <v-btn
         class="my-8"
         type="button"
