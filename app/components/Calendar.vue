@@ -337,18 +337,38 @@ export default defineComponent({
       store.dispatch('writeLoading', true)
       const itemsExcel: IItemDataExel[] = []
       items.value.forEach((item: IProjectItem) => {
-        const start = new Date(item.start.seconds * 1000)
-        const end = new Date(item.end.seconds * 1000)
-        itemsExcel.push(
-          {
-            start: dayjs(start).format('MM月DD日 HH:mm'),
-            end: dayjs(end).format('MM月DD日 HH:mm'),
-            hour: Math.round((item.end.seconds - item.start.seconds) / 3600 * 10) / 10,
-            start_place_name: item.start_place_name,
-            end_place_name: item.end_place_name,
-            description: item.description
+        let start = new Date(item.start.seconds * 1000)
+        let end = new Date(item.end.seconds * 1000)
+        let hour = Math.round((item.end.seconds - item.start.seconds) / 3600 * 10) / 10
+        // 現在表示している年月のものに絞り込む
+        if ((start.getMonth() + 1 === currentMonth.value && start.getFullYear() === currentYear.value) || (end.getMonth() + 1 === currentMonth.value && end.getFullYear() === currentYear.value)) {
+          // 月跨ぎの場合の処理
+          if (start.getMonth() !== end.getMonth()) {
+            // 開始した日の稼働時間は、開始〜その翌日の0時0分0秒まで
+            const startWorkTime = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1, 0, 0, 0).getTime() - start.getTime()
+            // 終了した日の稼働時間は、その日の0時0分0秒〜終了まで
+            const endWorkTime = end.getTime() - new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0).getTime()
+            // 1日 or 末日のどっちまたぎかの条件分岐
+            if (start.getMonth() + 1 === currentMonth.value) {
+              hour = Math.round(startWorkTime / 3600000 * 10) / 10
+              end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1, 0, 0, 0)
+            } else {
+              hour = Math.round(endWorkTime / 3600000 * 10) / 10
+              start = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0)
+            }
           }
-        )
+
+          itemsExcel.push(
+            {
+              start: dayjs(start).format('MM月DD日 HH:mm'),
+              end: dayjs(end).format('MM月DD日 HH:mm'),
+              hour,
+              start_place_name: item.start_place_name,
+              end_place_name: item.end_place_name,
+              description: item.description
+            }
+          )
+        }
       })
 
       const title = currentYear.value + '年' + currentMonth.value + '月稼働実績'
