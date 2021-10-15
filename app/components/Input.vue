@@ -54,8 +54,11 @@
       >
         現在地を取得し直す
       </v-btn>
+      <div v-if="placeName" id="js-address" class="mb-4">
+        現在地：{{ placeName }}
+      </div>
       <div class="map-wrapper">
-        <div id="map-canvas" />
+        <div id="js-map" />
       </div>
     </div>
 
@@ -85,8 +88,8 @@ export default defineComponent({
     const placeLng: Ref<number | null> = ref(null)
     const description: Ref<string> = ref('')
     const isInAttendance: Ref<boolean> = ref(false)
-    const clockUpper: Ref<string> = ref('')
-    const clockLower: Ref<string> = ref('')
+    const clockUpper: Ref<string> = ref('　')
+    const clockLower: Ref<string> = ref('　')
     const confirmRef: Ref<any> = ref()
 
     /* 出勤 */
@@ -253,7 +256,7 @@ export default defineComponent({
 
           // Google Mapsに書き出し
           // @ts-ignore
-          const map = new google.maps.Map(document.getElementById('map-canvas'), {
+          const map = new google.maps.Map(document.getElementById('js-map'), {
             zoom: 15, // ズーム値
             center: latlng // 中心座標 [latlng]
           })
@@ -402,7 +405,10 @@ export default defineComponent({
     color: var(--v-secondary-lighten4);
   }
 }
-#map-canvas {
+#js-address {
+  font-size: 0.8rem;
+}
+#js-map {
   width: 100%;
   height: 320px;
 }
