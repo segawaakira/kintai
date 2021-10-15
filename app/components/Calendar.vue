@@ -303,39 +303,28 @@ export default defineComponent({
       context.root.$router.push('/detail?id=' + id)
     }
 
-    /** 枠線のスタイル */
-    const borderStyle = {
-      top: { style: 'thin', color: { argb: 'FFCCCCCC' } },
-      left: { style: 'thin', color: { argb: 'FFCCCCCC' } },
-      bottom: { style: 'thin', color: { argb: 'FFCCCCCC' } },
-      right: { style: 'thin', color: { argb: 'FFCCCCCC' } }
-    }
-    /** ヘッダ行の背景色 */
-    const headerFillStyle = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFDDDDDD' }
-    }
-    /** ヘッダ行のフォント */
-    const headerFontStyle = {
-      bold: true
-    }
-    /** 偶数行の背景色 */
-    const bodyEvenFillStyle = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFF5F5F5' }
-    }
-    /** 奇数行の背景色 */
-    const bodyOddFillStyle = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFFFFFFF' }
-    }
-
     /* 表示中の年月の稼働実績を記載されたエクセルをダウンロード */
     const handleDownloadExcel = async () => {
       store.dispatch('writeLoading', true)
+
+      // ヘッダ行の背景
+      const headerFillStyle = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: '00000000' }
+      }
+      // ヘッダ行のテキスト
+      const headerFontStyle = {
+        color: { argb: 'FFFFFFFF' }
+      }
+      // セルの枠線
+      const borderStyle = {
+        top: { style: 'thin', color: { argb: '66666666' } },
+        left: { style: 'thin', color: { argb: '66666666' } },
+        bottom: { style: 'thin', color: { argb: '66666666' } },
+        right: { style: 'thin', color: { argb: '66666666' } }
+      }
+
       const itemsExcel: IItemDataExel[] = []
       items.value.forEach((item: IProjectItem) => {
         let start = new Date(item.start.seconds * 1000)
@@ -376,7 +365,7 @@ export default defineComponent({
       // 日付順にsort
       itemsExcel.sort((a: any, b: any) => a.start_time - b.start_time)
 
-      const title = currentYear.value + '年' + currentMonth.value + '月稼働実績'
+      const title = state.project.name + '_' + currentYear.value + '年' + currentMonth.value + '月稼働実績'
       // Workbookの作成
       const workbook = new excelJs.Workbook()
       // Workbookに新しいWorksheetを追加
@@ -393,28 +382,6 @@ export default defineComponent({
         { header: '終了場所', key: 'end_place_name', width: 50 },
         { header: '業務内容', key: 'description', width: 80 }
       ]
-
-      // すべての行を走査
-      worksheet.eachRow((row: any, rowNumber: number) => {
-        // すべてのセルを走査
-        row.eachCell((cell: any, _colNumber: number) => {
-          if (rowNumber === 1) {
-            // ヘッダ行のスタイルを設定
-            cell.fill = headerFillStyle
-            cell.font = headerFontStyle
-          } else if (rowNumber % 2 === 0) {
-            // ボディ行（偶数行）のスタイルを設定
-            cell.fill = bodyEvenFillStyle
-          } else {
-            // ボディ行（奇数行）のスタイルを設定
-            cell.fill = bodyOddFillStyle
-          }
-          // セルの枠線を設定
-          cell.border = borderStyle
-        })
-        // 行の設定を適用
-        row.commit()
-      })
 
       // 行を定義
       itemsExcel.forEach((item: IItemDataExel) => {
@@ -439,6 +406,21 @@ export default defineComponent({
           description: '-'
         }
       )
+
+      // すべての行を走査
+      worksheet.eachRow((row: any, rowNumber: number) => {
+        // すべてのセルを走査
+        row.eachCell((cell: any, _colNumber: number) => {
+          if (rowNumber === 1) {
+            // ヘッダ行のスタイルを設定
+            cell.fill = headerFillStyle
+            cell.font = headerFontStyle
+          }
+          cell.border = borderStyle
+        })
+        // 行の設定を適用
+        row.commit()
+      })
 
       // UInt8Arrayを生成
       const uint8Array = await workbook.xlsx.writeBuffer()
