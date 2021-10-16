@@ -240,7 +240,7 @@ export default defineComponent({
 <style lang="scss">
 @import '../assets/form.scss';
 .header-btn {
-  position: absolute;
+  position: absolute !important;
   left: 16px;
 }
 @media (max-width: $break-point) {
