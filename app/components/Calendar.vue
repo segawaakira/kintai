@@ -485,7 +485,7 @@ export default defineComponent({
     &-item {
       position: absolute;
       margin-left: -0.5em;
-      @media (max-width: 768px) { // TODO:SPのブレイクポイントを定数に
+      @media (max-width: $break-point-s) {
         display: none;
         &:nth-child(2n + 1) {
           display: block;
