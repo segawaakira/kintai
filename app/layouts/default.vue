@@ -234,7 +234,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import '../assets/form.scss';
 .header-btn {
   position: absolute;
