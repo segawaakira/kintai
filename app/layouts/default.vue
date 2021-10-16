@@ -127,7 +127,10 @@ export default defineComponent({
       firebase.auth().signOut().then(() => {
         console.log('ログアウトしました')
         store.dispatch('writeDefaultState')
-        location.href = '/login'
+        store.dispatch('writeLoading', true)
+        setTimeout(() => {
+          location.href = '/login'
+        }, 500)
         // context.root.$router.push('/login')
       }).catch((error) => {
         console.log('ログアウト失敗', error)
