@@ -1,7 +1,7 @@
 <template>
   <div class="my-16">
     <h1 class="headline mb-12">
-      出退勤入力
+      {{ pTitle }}
     </h1>
     <ProjectSelect />
     <div v-if="state.project" class="mt-8">
@@ -41,7 +41,7 @@
     </div>
 
     <div v-else class="mt-8">
-      稼働するプロジェクトを選択してください。
+      稼働する案件を選択してください。
     </div>
 
     <!-- 現在地のGoogle Map -->
@@ -52,6 +52,9 @@
         depressed
         @click="getLocation()"
       >
+        <v-icon class="mr-2">
+          location_on
+        </v-icon>
         現在地を取得し直す
       </v-btn>
       <div v-if="placeName" id="js-address" class="mb-4">
@@ -77,6 +80,12 @@ import ProjectSelect from './parts/ProjectSelect.vue'
 export default defineComponent({
   components: {
     Confirm, ProjectSelect
+  },
+  props: {
+    pTitle: {
+      type: String,
+      default: ''
+    }
   },
   setup (_props, _context) {
     const store = useStore()
@@ -130,7 +139,7 @@ export default defineComponent({
             .add(inAttendanceItem)
             .then((ref) => {
               console.log('Add ID: ', ref.id)
-              // 稼働中のプロジェクト情報をin_attendance_projectに記録する。
+              // 稼働中の案件情報をin_attendance_projectに記録する。
               const inAttendanceProject: IProject = {
                 id: state.project.id,
                 name: state.project.name
@@ -368,7 +377,7 @@ export default defineComponent({
       getLocation()
     })
 
-    /* プロジェクト変更時 */
+    /* 案件変更時 */
     watch(
       () => state.project,
       (_n, _o) => {

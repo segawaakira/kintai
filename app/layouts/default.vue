@@ -83,9 +83,9 @@
       class="header-bar"
     >
       <v-app-bar-nav-icon v-if="!isPC" class="header-btn" @click.stop="drawer = !drawer" />
-      <v-toolbar-title class="header-title pl-0">
+      <v-toolbar-title class="pl-0">
         <div class="d-flex align-center">
-          <img src="logo.svg" width="32" class="mr-2" />{{ title }}
+          <img src="logo_text.svg" height="28" class="mr-2" />
         </div>
       </v-toolbar-title>
     </v-app-bar>
@@ -127,7 +127,10 @@ export default defineComponent({
       firebase.auth().signOut().then(() => {
         console.log('ログアウトしました')
         store.dispatch('writeDefaultState')
-        location.href = '/login'
+        store.dispatch('writeLoading', true)
+        setTimeout(() => {
+          location.href = '/login'
+        }, 500)
         // context.root.$router.push('/login')
       }).catch((error) => {
         console.log('ログアウト失敗', error)
@@ -214,7 +217,7 @@ export default defineComponent({
         },
         {
           icon: 'view_list',
-          title: 'プロジェクト',
+          title: '案件一覧',
           to: '/projects'
         },
         {
@@ -223,7 +226,7 @@ export default defineComponent({
           to: '/settings'
         }
       ],
-      title: 'kintai',
+      title: 'WORKLOG',
       state,
       theme,
       themeIcon,
@@ -236,9 +239,6 @@ export default defineComponent({
 
 <style lang="scss">
 @import '../assets/form.scss';
-.header-title {
-  color: var(--v-primary-lighten2);
-}
 .header-btn {
   position: absolute;
   left: 16px;

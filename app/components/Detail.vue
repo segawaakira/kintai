@@ -1,7 +1,7 @@
 <template>
   <div class="my-16">
     <h1 class="headline mb-12">
-      稼働詳細
+      {{ pTitle }}
     </h1>
     <v-form lazy-validation>
       <v-row>
@@ -87,6 +87,9 @@
       nuxt
       to="/calendar"
     >
+      <v-icon class="mr-2">
+        chevron_left
+      </v-icon>
       カレンダーに戻る
     </v-btn>
     <Confirm ref="confirmRef" />
@@ -102,6 +105,12 @@ import Confirm from './common/Confirm.vue'
 export default defineComponent({
   components: {
     Confirm
+  },
+  props: {
+    pTitle: {
+      type: String,
+      default: ''
+    }
   },
   setup (_props, context) {
     const store = useStore()

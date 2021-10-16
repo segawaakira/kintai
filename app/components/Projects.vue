@@ -1,7 +1,7 @@
 <template>
   <div class="my-16">
     <h1 class="headline mb-12">
-      プロジェクト
+      {{ pTitle }}
     </h1>
 
     <v-simple-table v-if="projects.length" class="mb-8">
@@ -67,7 +67,7 @@
     <v-form lazy-validation>
       <v-text-field
         v-model="projectName"
-        label="プロジェクト名"
+        label="案件名"
         required
         :error-messages="projectNameError"
       />
@@ -96,6 +96,12 @@ export default defineComponent({
   components: {
     Confirm
   },
+  props: {
+    pTitle: {
+      type: String,
+      default: ''
+    }
+  },
   setup (_props, _context) {
     const store = useStore()
     const state: IState = store.state as IState
@@ -107,7 +113,7 @@ export default defineComponent({
     const editProjectError: Ref<string> = ref('')
     const confirmRef: Ref<any> = ref()
 
-    /* プロジェクト作成 */
+    /* 案件作成 */
     const handleCreateProject = () => {
       store.dispatch('writeLoading', true)
       db.collection(`users/${state.user.uid}/projects/`)
@@ -127,8 +133,8 @@ export default defineComponent({
     }
 
     /**
-     * プロジェクト削除
-     * @param  {string} id  削除するプロジェクトid
+     * 案件削除
+     * @param  {string} id  削除する案件id
      */
     const handleDeleteProject = async (id: string) => {
       if (await confirmRef.value.open('本当に削除しますか？', true)) {
@@ -147,17 +153,17 @@ export default defineComponent({
     }
 
     /**
-     * プロジェクト編集
-     * @param  {string} id  編集するプロジェクトid
+     * 案件編集
+     * @param  {string} id  編集する案件id
      */
     const handleEditProject = (id: string) => {
       editProjectId.value = id
     }
 
     /**
-     * プロジェクト更新
-     * @param  {string} id  編集するプロジェクトid
-     * @param  {string} name  編集したプロジェクト名
+     * 案件更新
+     * @param  {string} id  編集する案件id
+     * @param  {string} name  編集した案件名
      */
     const handleSaveProject = (id: string, name: string) => {
       store.dispatch('writeLoading', true)

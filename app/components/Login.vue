@@ -3,7 +3,7 @@
     <v-form lazy-validation autocomplete="off">
       <v-container>
         <h1 class="headline mb-12">
-          ログイン
+          {{ pTitle }}
         </h1>
 
         <v-text-field
@@ -61,6 +61,12 @@ import firebase from 'firebase'
 import { IUser, IState, IProject } from '../interfaces/'
 
 export default defineComponent({
+  props: {
+    pTitle: {
+      type: String,
+      default: null
+    }
+  },
   setup (_props, _context) {
     const email: Ref<string> = ref('')
     const emailError: Ref<string> = ref('')
@@ -133,9 +139,9 @@ export default defineComponent({
         })
     }
 
-    /* 稼働中のプロジェクト情報を取得する */
+    /* 稼働中の案件情報を取得する */
     const onCheckInAttendanceProject = () => {
-      // in_attendance_projectから稼働中のプロジェクト情報を取得する
+      // in_attendance_projectから稼働中の案件情報を取得する
       db.collection(`users/${state.user.uid}/in_attendance_project`).get()
         .then((ref) => {
           const inAttendanceProjectArray: IProject[] = []
@@ -145,7 +151,7 @@ export default defineComponent({
             })
           })
           if (inAttendanceProjectArray.length) {
-            // 稼働中のプロジェクトがある場合、選択中のprojectに設定する
+            // 稼働中の案件がある場合、選択中のprojectに設定する
             store.dispatch('writeProject', inAttendanceProjectArray[0])
           }
           location.href = '/input'

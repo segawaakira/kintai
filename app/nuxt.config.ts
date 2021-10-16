@@ -8,8 +8,8 @@ const nuxtConfig = {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - kintai',
-    title: 'kintai',
+    titleTemplate: '%s | WORKLOG',
+    title: 'WORKLOG',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
