@@ -3,7 +3,7 @@
     <v-form lazy-validation>
       <v-container>
         <h1 class="headline mb-12">
-          パスワードリセット
+          {{ pTitle }}
         </h1>
         <v-text-field
           v-model="email"
@@ -34,6 +34,12 @@ import Confirm from './common/Confirm.vue'
 export default defineComponent({
   components: {
     Confirm
+  },
+  props: {
+    pTitle: {
+      type: String,
+      default: ''
+    }
   },
   setup (_props, _context) {
     const store = useStore()

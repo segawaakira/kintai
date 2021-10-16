@@ -214,7 +214,7 @@ export default defineComponent({
         },
         {
           icon: 'view_list',
-          title: 'プロジェクト',
+          title: '案件一覧',
           to: '/projects'
         },
         {
@@ -234,7 +234,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '../assets/form.scss';
 .header-btn {
   position: absolute;

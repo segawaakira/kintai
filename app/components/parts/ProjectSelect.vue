@@ -1,12 +1,12 @@
 <template>
   <div>
-    <!-- プロジェクト選択メニュー -->
+    <!-- 案件選択メニュー -->
     <v-select
       v-if="state.user"
       v-model="selectedProject"
       :items="projects"
       filled
-      label="プロジェクト選択"
+      label="案件選択"
       item-text="name"
       item-value="id"
       return-object
@@ -46,8 +46,8 @@ export default defineComponent({
     const db = firebase.firestore()
 
     /**
-     * プロジェクト変更
-     * @param  {IProject} project  選択したプロジェクト
+     * 案件変更
+     * @param  {IProject} project  選択した案件
      */
     const handleChangeProject = (project: IProject) => {
       store.dispatch('writeProject', project)
@@ -55,7 +55,7 @@ export default defineComponent({
       onCheckInAttendance()
     }
 
-    /* 稼働中のプロジェクト情報を取得する */
+    /* 稼働中の案件情報を取得する */
     const onCheckInAttendanceProject = () => {
       // in_attendanceから稼働情報を取得する
       db.collection(`users/${state.user.uid}/in_attendance_project`).onSnapshot((docs) => {
@@ -94,9 +94,9 @@ export default defineComponent({
       })
     }
 
-    // プロジェクトが1個も登録されていない場合、/projectsに遷移させる。
+    // 案件が1個も登録されていない場合、/projectsに遷移させる。
     const noProject = async () => {
-      if (await confirmRef.value.open('プロジェクトが未だ登録されていませんので、まずプロジェクトを作成してください。', false)) {
+      if (await confirmRef.value.open('案件が未だ登録されていませんので、まず案件を作成してください。', false)) {
         context.root.$router.push('/projects')
       }
     }
@@ -112,7 +112,7 @@ export default defineComponent({
                 id: doc.id
               })
             })
-            // プロジェクトが1個も登録されていない場合
+            // 案件が1個も登録されていない場合
             if (projects.value.length === 0) {
               noProject()
             }

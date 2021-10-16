@@ -1,7 +1,7 @@
 <template>
   <div class="my-16">
     <h1 class="headline mb-12">
-      カレンダー
+      {{ pTitle }}
     </h1>
 
     <ProjectSelect />
@@ -143,6 +143,12 @@ interface IItemDataExel {
 
 export default defineComponent({
   components: { ProjectSelect },
+  props: {
+    pTitle: {
+      type: String,
+      default: ''
+    }
+  },
   setup (_props, context) {
     const store = useStore()
     const state: IState = store.state as IState
@@ -443,7 +449,7 @@ export default defineComponent({
       store.dispatch('writeLoading', false)
     }
 
-    /* プロジェクト変更時 */
+    /* 案件変更時 */
     watch(
       () => state.project,
       (_n, _o) => {
@@ -503,10 +509,14 @@ export default defineComponent({
     position: absolute;
     top: 0;
     z-index: 1;
-    background: var(--v-info-base);
+    background: var(--v-primary-lighten2);
+    border: 1px solid var(--v-primary-lighten3);
     display: block;
     height: 48px;
     cursor: pointer;
+    &:hover {
+      background: var(--v-primary-lighten3);
+    }
   }
 }
 .v-application {

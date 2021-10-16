@@ -3,7 +3,7 @@
     <v-form lazy-validation autocomplete="off">
       <v-container>
         <h1 class="headline mb-12">
-          会員登録
+          {{ pTitle }}
         </h1>
         <v-text-field
           v-model="email"
@@ -51,6 +51,12 @@ import firebase from 'firebase'
 import { IUser } from '../interfaces/'
 
 export default defineComponent({
+  props: {
+    pTitle: {
+      type: String,
+      default: ''
+    }
+  },
   setup (_props, _context) {
     const email: Ref<string> = ref('')
     const emailError: Ref<string> = ref('')
