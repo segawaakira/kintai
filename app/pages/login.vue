@@ -12,7 +12,7 @@ export default defineComponent({
       title
     }
   },
-  head () {
+  head (): any {
     return {
       title: this.title
     }
