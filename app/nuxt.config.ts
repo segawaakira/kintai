@@ -18,7 +18,7 @@ const nuxtConfig = {
       { name: 'robots', content: 'noindex, nofollow' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico?v=1.0' }
     ],
     script: [
       { src: `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAPS_API_KEY}` }

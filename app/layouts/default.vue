@@ -80,10 +80,14 @@
       fixed
       app
       flat
+      class="header-bar"
     >
-      <v-app-bar-nav-icon v-if="!isPC" @click.stop="drawer = !drawer" />
-      <v-toolbar-title v-text="title" />
-      <v-spacer />
+      <v-app-bar-nav-icon v-if="!isPC" class="header-btn" @click.stop="drawer = !drawer" />
+      <v-toolbar-title class="header-title pl-0">
+        <div class="d-flex align-center">
+          <img src="logo.svg" width="32" class="mr-2" />{{ title }}
+        </div>
+      </v-toolbar-title>
     </v-app-bar>
     <v-main>
       <v-container style="max-width: 960px;">
@@ -232,4 +236,18 @@ export default defineComponent({
 
 <style lang="scss">
 @import '../assets/form.scss';
+.header-title {
+  color: var(--v-primary-lighten2);
+}
+.header-btn {
+  position: absolute;
+  left: 16px;
+}
+@media (max-width: $break-point) {
+  .header-bar {
+    > .v-toolbar__content {
+      justify-content: center;
+    }
+  }
+}
 </style>
