@@ -432,7 +432,17 @@ export default defineComponent({
             if (start.getMonth() + 1 === currentMonth.value) {
               // 末日跨ぎ
               hour = Math.round(startWorkTime / 3600000 * 10) / 10
-              end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1, 0, 0, 0)
+              // 末日までの日数分、hourに24h足す
+              const lastDay = getLastDay(start.getFullYear(), start.getMonth() + 1)
+              const straddleDay = lastDay - start.getDate()
+              for (let i = 0; i < straddleDay; i++) {
+                hour += 24
+              }
+              end = new Date(start.getFullYear(), start.getMonth() + 1, 1, 0, 0, 0)
+              // 年末跨ぎの場合、endは良く年元日の0:00
+              if (start.getMonth() + 1 === 12) {
+                end = new Date(start.getFullYear() + 1, 0, 1, 0, 0, 0)
+              }
             } else {
               // 1日跨ぎ
               hour = Math.round(endWorkTime / 3600000 * 10) / 10
