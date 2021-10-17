@@ -303,7 +303,9 @@ export default defineComponent({
           new google.maps.Marker({
             map,
             position: latlng,
-            icon
+            icon,
+            // @ts-ignore
+            animation: google.maps.Animation.DROP
           })
 
           // @ts-ignore
