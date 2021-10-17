@@ -272,15 +272,38 @@ export default defineComponent({
           // Google Mapsに書き出し
           // @ts-ignore
           const map = new google.maps.Map(document.getElementById('js-map'), {
-            zoom: 15, // ズーム値
-            center: latlng // 中心座標 [latlng]
+            zoom: 16, // ズーム値
+            center: latlng, // 中心座標 [latlng]
+            styles: [
+              {
+                featureType: 'all',
+                elementType: 'all',
+                stylers: [
+                  { saturation: -100 } // 彩度に-100を指定してグレースケールに
+                ]
+              },
+              {
+                featureType: 'poi', // 観光スポット、施設、学校、公園等
+                elementType: 'all',
+                stylers: [
+                  { visibility: 'off' }
+                ]
+              }
+            ]
           })
+
+          const icon = {
+            url: '/logo.svg',
+            // @ts-ignore
+            scaledSize: new google.maps.Size(80, 80)
+          }
 
           // マーカーの新規出力
           // @ts-ignore
           new google.maps.Marker({
             map,
-            position: latlng
+            position: latlng,
+            icon
           })
 
           // @ts-ignore
