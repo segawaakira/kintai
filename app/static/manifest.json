@@ -10,7 +10,6 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/?standalone=true",
   "display": "standalone",
   "background_color": "#ffffff",
   "lang": "ja"
