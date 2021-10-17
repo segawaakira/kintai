@@ -121,7 +121,7 @@ export default defineComponent({
       db.collection(`users/${state.user.uid}/projects/${state.project.id}/items`)
         .add(attendanceItem)
         .then((ref) => {
-          console.log('Add ID: ', ref.id)
+          // console.log('Add ID: ', ref.id)
           const inAttendanceItem: IProjectItem = {
             item_id: ref.id,
             start,
@@ -137,8 +137,8 @@ export default defineComponent({
           // 稼働中の出勤情報をin_attendanceに記録する。
           db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`)
             .add(inAttendanceItem)
-            .then((ref) => {
-              console.log('Add ID: ', ref.id)
+            .then(() => {
+              // console.log('Add ID: ', ref.id)
               // 稼働中の案件情報をin_attendance_projectに記録する。
               const inAttendanceProject: IProject = {
                 id: state.project.id,
@@ -146,11 +146,11 @@ export default defineComponent({
               }
               db.collection(`users/${state.user.uid}/in_attendance_project`)
                 .add(inAttendanceProject)
-                .then(async (ref) => {
+                .then(async () => {
                   if (await confirmRef.value.open('出勤しました', false)) {
                     store.dispatch('writeLoading', false)
                   }
-                  console.log('Add ID: ', ref.id)
+                  // console.log('Add ID: ', ref.id)
                 })
                 .catch(async (error: any) => {
                   console.log(error)
@@ -186,7 +186,7 @@ export default defineComponent({
             id: doc.id
           })
         })
-        console.log(inAttendanceArray[0])
+        // console.log(inAttendanceArray[0])
 
         // 退勤情報をupdateで記録する
         const inAttendance: any = inAttendanceArray[0]
@@ -208,15 +208,15 @@ export default defineComponent({
             // in_attendanceを削除する。
             db.collection(`users/${state.user.uid}/projects/${state.project.id}/in_attendance`).doc(inAttendance.id)
               .delete()
-              .then(async (ref) => {
-                console.log('del: ', ref)
+              .then(async () => {
+                // console.log('del: ', ref)
                 // in_attendance_projectも削除する。
                 const inAttendanceProject = await db.collection(`users/${state.user.uid}/in_attendance_project`).get()
                 inAttendanceProject.forEach((doc) => {
                   db.collection(`users/${state.user.uid}/in_attendance_project/`).doc(doc.id)
                     .delete()
-                    .then(async (ref) => {
-                      console.log('del: ', ref)
+                    .then(async () => {
+                      // console.log('del: ', ref)
                       if (await confirmRef.value.open('退勤しました', false)) {
                         store.dispatch('writeLoading', false)
                       }

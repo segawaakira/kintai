@@ -120,8 +120,8 @@ export default defineComponent({
         .add({
           name: projectName.value
         })
-        .then((ref) => {
-          console.log('Add ID: ', ref.id)
+        .then(() => {
+          // console.log('Add ID: ', ref.id)
           projectName.value = ''
           store.dispatch('writeLoading', false)
         })
@@ -141,8 +141,8 @@ export default defineComponent({
         store.dispatch('writeLoading', true)
         db.collection(`users/${state.user.uid}/projects/`).doc(id)
           .delete()
-          .then((ref) => {
-            console.log('del: ', ref)
+          .then(() => {
+            // console.log('del: ', ref)
             store.dispatch('writeLoading', false)
           })
           .catch((error) => {
@@ -171,8 +171,8 @@ export default defineComponent({
         .update({
           name
         })
-        .then(async (ref) => {
-          console.log('del: ', ref)
+        .then(async () => {
+          // console.log('del: ', ref)
           editProjectId.value = null
           if (await confirmRef.value.open('保存しました', false)) {
             store.dispatch('writeLoading', false)

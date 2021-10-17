@@ -27,26 +27,26 @@ export const mutations = {
     state.dark = defaultState.dark
     state.user = defaultState.user
     state.loading = defaultState.loading
-    console.log(state)
+    // console.log(state)
   }
 }
 
 // 各コンポーネントから呼び出す処理をactionとしてexport
 export const actions = {
   writeProject (context: any, value: IProject) {
-    console.log(value)
+    // console.log(value)
     context.commit('setProjectFromStore', value)
   },
   writeDark (context: any, value: boolean) {
-    console.log(value)
+    // console.log(value)
     context.commit('setDarkFromStore', value)
   },
   writeUser (context: any, value: IUser) {
-    console.log(value)
+    // console.log(value)
     context.commit('setUserFromStore', value)
   },
   writeLoading (context: any, value: boolean) {
-    console.log(value)
+    // console.log(value)
     context.commit('setLoadingFromStore', value)
   },
   // 全てのstateをdefaultに戻す

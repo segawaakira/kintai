@@ -71,8 +71,8 @@ export default defineComponent({
       const provider = new firebase.auth.GoogleAuthProvider()
       firebase.auth().signInWithPopup(provider)
         .then((res) => {
-          console.log('ログインしました!')
-          console.log(res)
+          // console.log('ログインしました!')
+          // console.log(res)
           const user = res.user as IUser
           const userObj: IUser = {
             email: user.email,
@@ -93,8 +93,8 @@ export default defineComponent({
       store.dispatch('writeLoading', true)
       firebase.auth().createUserWithEmailAndPassword(email.value, password.value)
         .then((res) => {
-          console.log('作成しました')
-          console.log(res)
+          // console.log('作成しました')
+          // console.log(res)
           const user = res.user as IUser
           const userObj: IUser = {
             email: user.email,

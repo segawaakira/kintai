@@ -167,7 +167,7 @@ export default defineComponent({
         db.collection(`users/${state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string)
           .delete()
           .then(() => {
-            console.log('削除した')
+            // console.log('削除した')
             context.root.$router.push('/calendar')
           })
           .catch(async (error: any) => {
@@ -187,7 +187,7 @@ export default defineComponent({
           db.collection(`users/${state.user.uid}/projects/${currentProject.value.id}/items`).doc(context.root.$route.query.id as string).get()
             .then((doc) => {
               if (doc.exists) {
-                console.log('Document data:', doc.data())
+                // console.log('Document data:', doc.data())
                 const data: IProjectItem = doc.data() as IProjectItem
                 startTime.value = dayjs(data.start.toDate()).format('YYYY-MM-DDTHH:mm')
                 start.value = data.start

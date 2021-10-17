@@ -125,7 +125,7 @@ export default defineComponent({
     const handleLogout = () => {
       store.dispatch('writeLoading', true)
       firebase.auth().signOut().then(() => {
-        console.log('ログアウトしました')
+        // console.log('ログアウトしました')
         store.dispatch('writeDefaultState')
         store.dispatch('writeLoading', true)
         setTimeout(() => {
