@@ -98,7 +98,7 @@
       :absolute="!fixed"
       app
     >
-      <span>&copy; {{ new Date().getFullYear() }}</span>
+      <span>&copy; {{ new Date().getFullYear() }} WORKLOG</span>
     </v-footer>
     <LoadingOverlay />
   </v-app>

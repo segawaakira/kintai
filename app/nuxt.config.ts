@@ -18,7 +18,9 @@ const nuxtConfig = {
       { name: 'robots', content: 'noindex, nofollow' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico?v=1.0' }
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico?v=1.0.0' },
+      { rel: 'shortcut icon', hid: 'shortcut-icon', href: '/icon.png?v=1.0.0' },
+      { rel: 'apple-touch-icon', hid: 'apple-touch-icon', href: '/icon.png?v=1.0.0' }
     ],
     script: [
       { src: `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAPS_API_KEY}` }
