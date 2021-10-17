@@ -40,9 +40,15 @@
       </v-form>
     </div>
 
-    <div v-else class="mt-8">
+    <v-alert
+      v-else
+      dense
+      outlined
+      type="warning"
+      class="mt-8"
+    >
       稼働する案件を選択してください。
-    </div>
+    </v-alert>
 
     <!-- 現在地のGoogle Map -->
     <div class="mt-8">
