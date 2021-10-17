@@ -12,7 +12,9 @@
           chevron_left
         </v-icon>
       </v-btn>
-      <div class="title">{{ currentYear }}年{{ currentMonth }}月</div>
+      <div class="title">
+        {{ currentYear }}年{{ currentMonth }}月
+      </div>
       <v-btn type="button" depressed @click="handleNext">
         <v-icon>
           chevron_right
@@ -74,10 +76,14 @@
               <!-- 稼働時間（計算のために必要で、非表示） -->
               <div style="display: none;">
                 <div v-if="data.startDate === index + 1 && data.startMonth === currentMonth">
-                  <div class="js-work-hour">{{ Math.round(data.startWorkTime / 3600000 * 10) / 10 }}</div>
+                  <div class="js-work-hour">
+                    {{ Math.round(data.startWorkTime / 3600000 * 10) / 10 }}
+                  </div>
                 </div>
                 <div v-else-if="(data.endDate === index + 1 && data.endMonth === currentMonth) || (data.startDate === index && data.endDate === index + 1)">
-                  <div class="js-work-hour">{{ Math.round(data.endWorkTime / 3600000 * 10) / 10 }}</div>
+                  <div class="js-work-hour">
+                    {{ Math.round(data.endWorkTime / 3600000 * 10) / 10 }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -88,8 +94,12 @@
         </tr>
         <tr>
           <td />
-          <td class="text-right">{{ currentMonth }}月 合計</td>
-          <td class="text-right">{{ totalWorkedHourOfMonth }}h</td>
+          <td class="text-right">
+            {{ currentMonth }}月 合計
+          </td>
+          <td class="text-right">
+            {{ totalWorkedHourOfMonth }}h
+          </td>
         </tr>
       </tbody>
     </v-simple-table>

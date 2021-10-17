@@ -85,7 +85,7 @@
       <v-app-bar-nav-icon v-if="!isPC" class="header-btn" @click.stop="drawer = !drawer" />
       <v-toolbar-title class="pl-0">
         <div class="d-flex align-center">
-          <img src="/logo_text.svg" height="28" class="mr-2" />
+          <img src="/logo_text.svg" height="28" class="mr-2">
         </div>
       </v-toolbar-title>
     </v-app-bar>
